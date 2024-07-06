@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-
+import 'package:hand_held_shell/services/services.exports.files.dart';
+import 'package:hand_held_shell/views/entities/models/user.model.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:hand_held_shell/views/screens/users/users.exports.files.dart';
 
@@ -13,15 +15,18 @@ class UserScreen extends StatefulWidget {
 class _UserScreenState extends State<UserScreen> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-  final users = [];
+  final List<UserModel> users = [];
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+    final usuario = authService.usuario;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'User Screen',
-          style: TextStyle(color: Colors.black87),
+        title: Text(
+          usuario?.firstName ?? 'Usuario',
+          style: const TextStyle(color: Colors.black87),
         ),
         elevation: 1,
         backgroundColor: Colors.white,
@@ -30,7 +35,12 @@ class _UserScreenState extends State<UserScreen> {
             Icons.exit_to_app,
             color: Colors.black87,
           ),
-          onPressed: () {},
+          onPressed: () {
+            //TODO:  desconectar del soket server
+
+            AuthService.deleteToken();
+            Navigator.pushReplacementNamed(context, 'login');
+          },
         ),
         actions: <Widget>[
           Container(

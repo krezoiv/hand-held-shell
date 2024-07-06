@@ -1,4 +1,8 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
+import 'package:hand_held_shell/views/screens/screens.exports.files.dart';
+import 'package:hand_held_shell/views/screens/users/users.exports.files.dart';
 import 'package:provider/provider.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 
@@ -18,9 +22,25 @@ class LoadingScreen extends StatelessWidget {
       ),
     );
   }
-}
 
-Future checkLoginState(BuildContext context) async {
-  final authService = Provider.of<AuthService>(context, listen: false);
-  //final authenticated = await authService.isUserLoggedIn();
+  Future checkLoginState(BuildContext context) async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+
+    final autenticado = await authService.isLoggedIn();
+
+    if (autenticado) {
+      // Navigator.pushReplacementNamed(context, 'usuarios');
+      Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+              pageBuilder: (_, __, ___) => const UserScreen(),
+              transitionDuration: const Duration(seconds: 5)));
+    } else {
+      Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+              pageBuilder: (_, __, ___) => const LoginScreen(),
+              transitionDuration: const Duration(milliseconds: 0)));
+    }
+  }
 }

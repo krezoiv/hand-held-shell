@@ -36,7 +36,7 @@ class _FormLoginState extends State<FormLogin> {
               isPassword: true),
           CustomButton(
             text: 'Ingresar',
-            onPressed: authService.authenticating
+            onPressed: authService.autenticando
                 ? null
                 : () async {
                     FocusScope.of(context).unfocus();
