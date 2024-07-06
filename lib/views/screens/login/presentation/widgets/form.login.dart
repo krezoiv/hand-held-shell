@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hand_held_shell/shared/widgets.exports.files.dart';
+import 'package:provider/provider.dart';
+import 'package:hand_held_shell/shared/helpers/show.alert.dart';
+import 'package:hand_held_shell/services/auth/auth.service.dart';
+import 'package:hand_held_shell/shared/shared.exports.files.dart';
 
 class FormLogin extends StatefulWidget {
   const FormLogin({super.key});
@@ -14,26 +17,43 @@ class _FormLoginState extends State<FormLogin> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
       margin: const EdgeInsets.only(top: 40),
       padding: const EdgeInsets.symmetric(horizontal: 50),
       child: Column(
         children: <Widget>[
           CustomInput(
-            icon: Icons.mail_outline,
-            placeholder: 'Email',
-            keyboardType: TextInputType.emailAddress,
-            textController: emailController,
-          ),
+              icon: Icons.mail_outline,
+              placeholder: 'Email',
+              keyboardType: TextInputType.emailAddress,
+              textController: emailController),
           CustomInput(
-            icon: Icons.lock_outline,
-            placeholder: 'Contraseña',
-            textController: passwordController,
-            isPassword: true,
-          ),
+              icon: Icons.lock_outline,
+              placeholder: 'Contraseña',
+              textController: passwordController,
+              isPassword: true),
           CustomButton(
             text: 'Ingresar',
-            onPressed: () {},
+            onPressed: authService.authenticating
+                ? null
+                : () async {
+                    FocusScope.of(context).unfocus();
+                    final correctLogin = await authService.login(
+                        emailController.text.trim(),
+                        passwordController.text.trim());
+
+                    if (correctLogin) {
+                      //todo: conecto to socket server
+                      //todo:navegar a otra ruta
+                      Navigator.pushReplacementNamed(context, 'users');
+                    } else {
+                      //todo:mostrar mensaje de error
+                      showAlert(context, 'Login incorrecto',
+                          'Revise sus credenciales');
+                    }
+                  },
           )
         ],
       ),

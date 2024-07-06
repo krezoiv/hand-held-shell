@@ -9,12 +9,12 @@ class UserListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(user.name ?? ''),
+      title: Text(user.firstName ?? ''),
       subtitle: Text(user.email ?? ''),
       leading: CircleAvatar(
         backgroundColor: Colors.blue[400],
         child: Text(
-          user.name?.substring(0, 2) ?? '',
+          user.firstName?.substring(0, 2) ?? '',
           style: const TextStyle(color: Colors.white),
         ),
       ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
+
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:hand_held_shell/views/screens/users/users.exports.files.dart';
 
@@ -13,22 +13,7 @@ class UserScreen extends StatefulWidget {
 class _UserScreenState extends State<UserScreen> {
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-  final users = [
-    UserModel(
-        userId: '1',
-        name: 'Kreiby',
-        email: 'usuario1@gmail.com',
-        online: false),
-    UserModel(
-        userId: '2', name: 'Zoe', email: 'usuario2@gmail.com', online: true),
-    UserModel(
-        userId: '3',
-        name: 'Ivanna',
-        email: 'usuario3@gmail.com',
-        online: false),
-    UserModel(
-        userId: '4', name: 'Amanda', email: 'usuario4@gmail.com', online: true),
-  ];
+  final users = [];
 
   @override
   Widget build(BuildContext context) {
