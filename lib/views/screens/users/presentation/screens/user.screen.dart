@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hand_held_shell/services/services.exports.files.dart';
-import 'package:hand_held_shell/views/entities/models/user.model.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:hand_held_shell/services/services.exports.files.dart';
+import 'package:hand_held_shell/views/entities/models/user.model.dart';
 import 'package:hand_held_shell/views/screens/users/users.exports.files.dart';
 
 class UserScreen extends StatefulWidget {
@@ -20,6 +20,7 @@ class _UserScreenState extends State<UserScreen> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>(context);
     final usuario = authService.usuario;
 
     return Scaffold(
@@ -36,7 +37,7 @@ class _UserScreenState extends State<UserScreen> {
             color: Colors.black87,
           ),
           onPressed: () {
-            //TODO:  desconectar del soket server
+            socketService.disconnect();
 
             AuthService.deleteToken();
             Navigator.pushReplacementNamed(context, 'login');
@@ -45,7 +46,9 @@ class _UserScreenState extends State<UserScreen> {
         actions: <Widget>[
           Container(
             margin: const EdgeInsets.only(right: 10),
-            child: Icon(Icons.check_circle, color: Colors.blue[400]),
+            child: (socketService.serverStatus == ServerStatus.Online)
+                ? Icon(Icons.check_circle, color: Colors.green)
+                : Icon(Icons.check_circle, color: Colors.red[700]),
           )
         ],
       ),

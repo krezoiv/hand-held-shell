@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:hand_held_shell/shared/helpers/show.alert.dart';
-import 'package:hand_held_shell/services/auth/auth.service.dart';
 import 'package:hand_held_shell/shared/shared.exports.files.dart';
 
 class FormLogin extends StatefulWidget {
@@ -18,6 +18,7 @@ class _FormLoginState extends State<FormLogin> {
   @override
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context);
+    final socketService = Provider.of<SocketService>(context);
 
     return Container(
       margin: const EdgeInsets.only(top: 40),
@@ -45,8 +46,8 @@ class _FormLoginState extends State<FormLogin> {
                         passwordController.text.trim());
 
                     if (correctLogin) {
-                      //todo: conecto to socket server
-                      //todo:navegar a otra ruta
+                      socketService.connect();
+
                       Navigator.pushReplacementNamed(context, 'users');
                     } else {
                       //todo:mostrar mensaje de error
