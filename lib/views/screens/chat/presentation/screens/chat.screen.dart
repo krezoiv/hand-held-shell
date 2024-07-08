@@ -1,8 +1,10 @@
 import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hand_held_shell/views/screens/chat/presentation/widgets/chat.message.dart';
+import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:hand_held_shell/views/screens/chat/chat.exports.files.dart';
+import 'package:hand_held_shell/services/services.exports.files.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -12,17 +14,57 @@ class ChatScreen extends StatefulWidget {
 }
 
 class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
+  ChatService? chatService;
+  late SocketService socketService;
+  AuthService? authService;
   final _textController = TextEditingController();
   final _focusNode = FocusNode();
-  final List<ChatMessanger> _messages = [
-    // const ChatMessanger(text: 'Hola Mundo', userId: '123'),
-    // const ChatMessanger(text: 'Hola Mundo', userId: '456')
-  ];
-
   bool _isWritting = false;
+  final List<ChatMessanger> _messages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    chatService = Provider.of<ChatService>(context, listen: false);
+    socketService = Provider.of<SocketService>(context, listen: false);
+    authService = Provider.of<AuthService>(context, listen: false);
+    socketService.socket.on('message-one-to-one', _listeningMessage);
+    _historyChatLoad(chatService!.toUser!.userId!);
+  }
+
+  void _historyChatLoad(String userId) async {
+    List<Message> chat = await chatService!.getChat(userId);
+
+    final histotyChat = chat.map((msg) => ChatMessanger(
+        text: msg.message,
+        userId: msg.from,
+        animtationController: AnimationController(
+            vsync: this, duration: Duration(milliseconds: 0))
+          ..forward()));
+
+    setState(() {
+      _messages.insertAll(0, histotyChat);
+    });
+  }
+
+  void _listeningMessage(dynamic payload) {
+    ChatMessanger message = ChatMessanger(
+      text: payload['message'],
+      userId: payload['from'],
+      animtationController: AnimationController(
+          vsync: this, duration: Duration(milliseconds: 300)),
+    );
+    setState(() {
+      _messages.insert(0, message);
+    });
+
+    message.animtationController.forward();
+  }
 
   @override
   Widget build(BuildContext context) {
+    //final chatServices = Provider.of<ChatService>(context);
+    final toUser = chatService!.toUser;
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.white,
@@ -31,10 +73,12 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
               CircleAvatar(
                 backgroundColor: Colors.blue[100],
                 maxRadius: 14,
-                child: const Text('EG', style: TextStyle(fontSize: 12)),
+                child: Text(
+                    '${toUser!.firstName.substring(0, 1)}${toUser.lastName.substring(0, 1)}',
+                    style: TextStyle(fontSize: 12)),
               ),
               const SizedBox(height: 3),
-              const Text('Erick Garcia',
+              Text('${toUser.firstName} ${toUser.lastName}',
                   style: TextStyle(color: Colors.black87, fontSize: 12)),
             ],
           ),
@@ -121,7 +165,7 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
 
     final newMessage = ChatMessanger(
       text: text,
-      userId: '123',
+      userId: authService!.usuario!.userId!,
       animtationController: AnimationController(
           vsync: this, duration: const Duration(milliseconds: 400)),
     );
@@ -132,15 +176,20 @@ class _ChatScreenState extends State<ChatScreen> with TickerProviderStateMixin {
     setState(() {
       _isWritting = false;
     });
+    socketService.emit('message-one-to-one', {
+      'from': authService?.usuario?.userId,
+      'to': chatService?.toUser?.userId,
+      'message': text
+    });
   }
 
   @override
   void dispose() {
-    // todo: off del socket
-
     for (ChatMessanger message in _messages) {
       message.animtationController.dispose();
     }
+
+    socketService.socket.off('message-one-to-one');
     super.dispose();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hand_held_shell/services/auth/users.service.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
@@ -13,9 +14,18 @@ class UserScreen extends StatefulWidget {
 }
 
 class _UserScreenState extends State<UserScreen> {
+  final userService = UserService();
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
-  final List<UserModel> users = [];
+  //final List<UserModel> users = [];
+
+  List<UserModel> users = [];
+
+  @override
+  void initState() {
+    _userLoad();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,9 +56,12 @@ class _UserScreenState extends State<UserScreen> {
         actions: <Widget>[
           Container(
             margin: const EdgeInsets.only(right: 10),
-            child: (socketService.serverStatus == ServerStatus.Online)
-                ? Icon(Icons.check_circle, color: Colors.green)
-                : Icon(Icons.check_circle, color: Colors.red[700]),
+            child: Icon(
+              Icons.check_circle,
+              color: socketService.serverStatus == ServerStatus.Online
+                  ? Colors.green[700] // Online
+                  : Colors.red, // Offline
+            ),
           )
         ],
       ),
@@ -78,7 +91,11 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   _userLoad() async {
-    await Future.delayed(const Duration(milliseconds: 800));
+    users = await userService.getUsers();
+
+    if (users.isEmpty) {
+    } else {}
+    setState(() {});
     _refreshController.refreshCompleted();
   }
 }

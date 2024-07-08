@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
+import 'package:provider/provider.dart';
 
 class UserListTile extends StatelessWidget {
   final UserModel user;
@@ -9,12 +11,12 @@ class UserListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(user.firstName ?? ''),
-      subtitle: Text(user.email ?? ''),
+      title: Text(user.firstName),
+      subtitle: Text(user.email),
       leading: CircleAvatar(
         backgroundColor: Colors.blue[400],
         child: Text(
-          user.firstName?.substring(0, 2) ?? '',
+          user.firstName.substring(0, 2),
           style: const TextStyle(color: Colors.white),
         ),
       ),
@@ -26,6 +28,11 @@ class UserListTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(100),
         ),
       ),
+      onTap: () {
+        final chatService = Provider.of<ChatService>(context, listen: false);
+        chatService.toUser = user;
+        Navigator.pushNamed(context, 'chat');
+      },
     );
   }
 }

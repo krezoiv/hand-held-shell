@@ -15,37 +15,48 @@ class SocketService with ChangeNotifier {
 
   ServerStatus get serverStatus => _serverStatus;
 
+  SocketService() {
+    _initConfig();
+  }
+
   io.Socket get socket => _socket;
   Function get emit => _socket.emit;
 
-  SocketService() {
-    connect();
+  void _initConfig() async {
+    await connect();
   }
 
-  void connect() async {
-    final token = await AuthService
-        .getToken(); // Asegúrate de esperar a que se resuelva el Future
-    _socket = io.io(Environment.socketUrl, {
-      'transports': ['websocket'],
-      'autoConnect': true,
-      'forceNew': true,
-      'extraHeaders': {'x-token': token}
-    });
+  Future<void> connect() async {
+    final token = await AuthService.getToken();
 
-    _socket.on('connect', (_) {
-      _serverStatus = ServerStatus.Online;
-      notifyListeners();
-    });
+    try {
+      _socket = io.io(Environment.socketUrl, {
+        'transports': ['websocket'],
+        'autoConnect': true,
+        'forceNew': true,
+        'extraHeaders': {'x-token': token}
+      });
 
-    _socket.on('disconnect', (_) {
+      _socket.onConnect((_) {
+        _serverStatus = ServerStatus.Online;
+        notifyListeners();
+      });
+
+      _socket.onDisconnect((_) {
+        _serverStatus = ServerStatus.Offline;
+        notifyListeners();
+      });
+
+      _socket.onConnectError((err) {
+        _serverStatus = ServerStatus.Offline;
+        notifyListeners();
+      });
+
+      _socket.connect(); // Espera a que se conecte
+    } catch (e) {
       _serverStatus = ServerStatus.Offline;
       notifyListeners();
-    });
-
-    _socket.on('connect_error', (error) {
-      _serverStatus = ServerStatus.Offline;
-      notifyListeners();
-    });
+    }
   }
 
   void disconnect() {

@@ -9,37 +9,35 @@ UserModel userModelFromJson(String str) => UserModel.fromJson(json.decode(str));
 String userModelToJson(UserModel data) => json.encode(data.toJson());
 
 class UserModel {
-  String? firstName;
-  String? lastName;
-  String? email;
-  String? roleId;
-  String? statusId;
+  String firstName;
+  String lastName;
+  String email;
+  String roleId;
+  String statusId;
   bool online;
-  int? workShift;
-  int? v;
+  int? workShift; // Cambiado a nullable
   String? userId;
 
   UserModel({
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.roleId,
-    this.statusId,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.roleId,
+    required this.statusId,
     this.online = false,
-    this.workShift,
-    this.v,
+    this.workShift, // Ahora es opcional
     this.userId,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-        firstName: json["firstName"],
-        lastName: json["lastName"],
-        email: json["email"],
-        roleId: json["roleId"],
-        statusId: json["statusId"],
-        online: json["online"],
-        workShift: json["workShift"],
-        v: json["__v"],
+        firstName: json["firstName"] ?? '',
+        lastName: json["lastName"] ?? '',
+        email: json["email"] ?? '',
+        roleId: json["roleId"] ?? '',
+        statusId: json["statusId"] ?? '',
+        online: json["online"] ?? false,
+        workShift:
+            json["workShift"] as int?, // Usa 'as int?' para manejar nulos
         userId: json["userId"],
       );
 
@@ -51,7 +49,6 @@ class UserModel {
         "statusId": statusId,
         "online": online,
         "workShift": workShift,
-        "__v": v,
         "userId": userId,
       };
 }
