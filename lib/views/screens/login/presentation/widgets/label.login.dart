@@ -9,7 +9,7 @@ class LabelLogin extends StatelessWidget {
     return Column(
       children: <Widget>[
         const Text(
-          'KZI Technologies',
+          'KZI Technologies Systems',
           style: TextStyle(
               color: Colors.black54, fontSize: 15, fontWeight: FontWeight.w300),
         ),

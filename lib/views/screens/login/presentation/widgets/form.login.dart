@@ -27,7 +27,7 @@ class _FormLoginState extends State<FormLogin> {
         children: <Widget>[
           CustomInput(
               icon: Icons.mail_outline,
-              placeholder: 'Email',
+              placeholder: 'Emailsss',
               keyboardType: TextInputType.emailAddress,
               textController: emailController),
           CustomInput(
