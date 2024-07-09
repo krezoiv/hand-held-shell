@@ -1,4 +1,4 @@
-import 'package:hand_held_shell/global/environment.dart';
+import 'package:hand_held_shell/config/global/environment.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:hand_held_shell/views/entities/mappers/users.response.dart';
 import 'package:http/http.dart' as http;

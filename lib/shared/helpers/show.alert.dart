@@ -5,7 +5,7 @@ import 'package:flutter/cupertino.dart';
 
 showAlert(BuildContext context, String title, String subTitle) {
   if (Platform.isAndroid) {
-    showDialog(
+    return showDialog(
         context: context,
         builder: (_) => AlertDialog(
               title: Text(title),
@@ -18,17 +18,18 @@ showAlert(BuildContext context, String title, String subTitle) {
                     child: const Text('Ok'))
               ],
             ));
+  } else if (Platform.isIOS) {
+    return showCupertinoDialog(
+        context: context,
+        builder: (_) => CupertinoAlertDialog(
+                title: Text(title),
+                content: Text(subTitle),
+                actions: <Widget>[
+                  CupertinoDialogAction(
+                    isDefaultAction: true,
+                    child: const Text('Ok'),
+                    onPressed: () => Navigator.pop(context),
+                  )
+                ]));
   }
-  showCupertinoDialog(
-      context: context,
-      builder: (_) => CupertinoAlertDialog(
-              title: Text(title),
-              content: Text(subTitle),
-              actions: <Widget>[
-                CupertinoDialogAction(
-                  isDefaultAction: true,
-                  child: const Text('Ok'),
-                  onPressed: () => Navigator.pop(context),
-                )
-              ]));
 }

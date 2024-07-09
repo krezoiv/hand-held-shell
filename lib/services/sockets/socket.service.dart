@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hand_held_shell/global/environment.dart';
+import 'package:hand_held_shell/config/global/environment.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 

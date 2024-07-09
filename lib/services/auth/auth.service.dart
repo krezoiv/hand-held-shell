@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hand_held_shell/global/environment.dart';
+import 'package:hand_held_shell/config/global/environment.dart';
 import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
 import 'package:hand_held_shell/views/entities/mappers/login.response.dart';
 import 'package:hand_held_shell/views/entities/models/user.model.dart';
