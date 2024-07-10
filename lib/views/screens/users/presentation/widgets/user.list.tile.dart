@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hand_held_shell/controllers/user.controller.dart';
 
-import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
-import 'package:hand_held_shell/views/screens/users/users.exports.files.dart';
+import 'package:hand_held_shell/views/entities/models/user.model.dart';
 
 class UserListTile extends GetWidget<UserController> {
   final UserModel user;

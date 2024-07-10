@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:hand_held_shell/controllers/chat.controller.dart';
 import 'package:hand_held_shell/controllers/login.controller.dart';
+import 'package:hand_held_shell/controllers/user.controller.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:hand_held_shell/views/screens/screens.exports.files.dart';
 import 'package:hand_held_shell/views/screens/users/users.exports.files.dart';

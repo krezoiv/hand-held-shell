@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hand_held_shell/services/auth/users.service.dart';
+import 'package:hand_held_shell/controllers/user.controller.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:hand_held_shell/services/services.exports.files.dart';
-import 'package:hand_held_shell/views/entities/models/user.model.dart';
+
 import 'package:hand_held_shell/views/screens/users/users.exports.files.dart';
+import 'package:hand_held_shell/services/services.exports.files.dart';
 
 class UserScreen extends GetView<UserController> {
-  const UserScreen({Key? key}) : super(key: key);
+  const UserScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,20 +41,30 @@ class UserScreen extends GetView<UserController> {
           )
         ],
       ),
-      body: SmartRefresher(
-        controller: controller.refreshController,
-        enablePullDown: true,
-        onRefresh: controller.userLoad,
-        header: WaterDropHeader(
-          complete: Icon(Icons.check, color: Colors.blue[400]),
-          waterDropColor: Colors.blue,
+      body: GetBuilder<UserController>(
+        builder: (controller) => SmartRefresher(
+          controller: controller.refreshController,
+          enablePullDown: true,
+          onRefresh: controller.userLoad,
+          header: WaterDropHeader(
+            complete: Icon(Icons.check, color: Colors.blue[400]),
+            waterDropColor: Colors.blue,
+          ),
+          child: Obx(() {
+            if (controller.isLoading) {
+              return Center(child: CircularProgressIndicator());
+            } else if (controller.error.isNotEmpty) {
+              return Center(child: Text(controller.error));
+            } else {
+              return _listViewUser(controller);
+            }
+          }),
         ),
-        child: Obx(() => _listViewUser()),
       ),
     );
   }
 
-  Widget _listViewUser() {
+  Widget _listViewUser(UserController controller) {
     return ListView.separated(
       physics: const BouncingScrollPhysics(),
       itemBuilder: (_, i) {
@@ -66,62 +76,6 @@ class UserScreen extends GetView<UserController> {
     );
   }
 }
-
-class UserController extends GetxController {
-  final UserService userService = Get.find<UserService>();
-  final AuthService authService = Get.find<AuthService>();
-  final SocketService socketService = Get.find<SocketService>();
-  final ChatService chatService = Get.find<ChatService>(); // Añade esta línea
-  final RefreshController refreshController =
-      RefreshController(initialRefresh: false);
-  final RxList<UserModel> users = <UserModel>[].obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    userLoad();
-    // Escuchar cambios en el estado de los usuarios
-    socketService.on('user-status-changed', _handleUserStatusChange);
-  }
-
-  void navigateToChat(UserModel user) {
-    chatService.toUser.value = user;
-    Get.toNamed('/chat');
-  }
-
-  void userLoad() async {
-    try {
-      final loadedUsers = await userService.getUsers();
-      users.assignAll(loadedUsers);
-      refreshController.refreshCompleted();
-    } catch (e) {
-      print('Error loading users: $e');
-      refreshController.refreshFailed();
-    }
-  }
-
-  void _handleUserStatusChange(dynamic data) {
-    final userId = data['userId'] as String;
-    final isOnline = data['online'] as bool;
-    final index = users.indexWhere((user) => user.userId == userId);
-    if (index != -1) {
-      users[index] = users[index].copyWith(online: isOnline);
-    }
-  }
-
-  void logout() {
-    socketService.disconnect();
-    AuthService.deleteToken();
-    Get.offAllNamed('login');
-  }
-
-  @override
-  void onClose() {
-    socketService.socket.off('user-status-changed');
-    super.onClose();
-  }
-}
-
 // import 'package:flutter/material.dart';
 // import 'package:hand_held_shell/services/auth/users.service.dart';
 // import 'package:provider/provider.dart';
