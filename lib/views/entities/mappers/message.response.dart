@@ -1,35 +1,32 @@
-// To parse this JSON data, do
-//
-//     final messageResponse = messageResponseFromJson(jsonString);
-
 import 'dart:convert';
 
 import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
 
-MessageResponse messageResponseFromJson(String str) =>
-    MessageResponse.fromJson(json.decode(str));
-
-String messageResponseToJson(MessageResponse data) =>
-    json.encode(data.toJson());
-
 class MessageResponse {
-  bool? ok;
-  List<Message>? messages;
+  final bool ok;
+  final List<Message> messages;
 
   MessageResponse({
-    this.ok,
-    this.messages,
+    required this.ok,
+    required this.messages,
   });
 
   factory MessageResponse.fromJson(Map<String, dynamic> json) =>
       MessageResponse(
-        ok: json["ok"],
-        messages: List<Message>.from(
-            json["messages"].map((x) => Message.fromJson(x))),
+        ok: json["ok"] ?? false,
+        messages: (json["messages"] as List<dynamic>?)
+                ?.map((x) => Message.fromJson(x))
+                .toList() ??
+            [],
       );
 
   Map<String, dynamic> toJson() => {
         "ok": ok,
-        "messages": List<dynamic>.from(messages!.map((x) => x.toJson())),
+        "messages": messages.map((x) => x.toJson()).toList(),
       };
+
+  static MessageResponse fromJsonString(String str) =>
+      MessageResponse.fromJson(json.decode(str));
+
+  String toJsonString() => json.encode(toJson());
 }
