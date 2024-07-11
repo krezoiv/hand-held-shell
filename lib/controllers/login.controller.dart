@@ -1,7 +1,8 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-
+import 'package:hand_held_shell/config/global/routes.path.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
+import 'package:hand_held_shell/shared/helpers/show.alert.dart';
 
 class LoginController extends GetxController {
   final AuthService authService = Get.find<AuthService>();
@@ -21,8 +22,10 @@ class LoginController extends GetxController {
 
   void login() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
-      Get.snackbar('Error', 'Por favor, complete todos los campos',
-          snackPosition: SnackPosition.BOTTOM);
+      showAlert(
+        title: 'Error',
+        message: 'Por favor, complete todos los campos',
+      );
       return;
     }
 
@@ -36,16 +39,26 @@ class LoginController extends GetxController {
 
       if (loginSuccess) {
         socketService.connect();
-        Get.offNamed('users');
+        Get.offNamed(RoutesPaths.mainHome);
       } else {
-        Get.snackbar('Error', 'Credenciales incorrectas',
-            snackPosition: SnackPosition.BOTTOM);
+        showAlert(
+          title: 'Error',
+          message: 'Credenciales incorrectas',
+        );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Ocurrió un error inesperado',
-          snackPosition: SnackPosition.BOTTOM);
+      showAlert(
+        title: 'Error',
+        message: 'Ocurrió un error inesperado',
+      );
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void logout() {
+    socketService.disconnect();
+    AuthService.deleteToken();
+    Get.offAllNamed(RoutesPaths.loginHome);
   }
 }

@@ -1,11 +1,13 @@
 import 'dart:convert';
+import 'package:hand_held_shell/config/database/database.exports.files.dart';
+import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:hand_held_shell/views/entities/mappers/login.response.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hand_held_shell/config/global/environment.dart';
+
 import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
 import 'package:hand_held_shell/views/entities/models/user.model.dart';
+// Asegúrate de importar la clase AuthApi
 
 class AuthService extends GetxController {
   final Rxn<UserModel> _usuario = Rxn<UserModel>();
@@ -35,7 +37,7 @@ class AuthService extends GetxController {
 
     final data = {'email': email, 'password': password};
 
-    final uri = Uri.parse('${Environment.apiUrl}/login');
+    final uri = Uri.parse(AuthApi.login());
     final resp = await http.post(uri,
         body: jsonEncode(data), headers: {'Content-Type': 'application/json'});
 
@@ -58,7 +60,7 @@ class AuthService extends GetxController {
   Future<bool> isLoggedIn() async {
     final token = await _storage.read(key: 'token') ?? '';
 
-    final uri = Uri.parse('${Environment.apiUrl}/login/renew');
+    final uri = Uri.parse(AuthApi.renewToken());
     final resp = await http.get(uri,
         headers: {'Content-Type': 'application/json', 'x-token': token});
 

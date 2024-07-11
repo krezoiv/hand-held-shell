@@ -6,8 +6,8 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:hand_held_shell/views/screens/users/users.exports.files.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 
-class UserScreen extends GetView<UserController> {
-  const UserScreen({super.key});
+class UserHomeScreen extends GetView<UserController> {
+  const UserHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,15 +19,6 @@ class UserScreen extends GetView<UserController> {
             )),
         elevation: 1,
         backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.exit_to_app,
-            color: Colors.black87,
-          ),
-          onPressed: () {
-            controller.logout();
-          },
-        ),
         actions: <Widget>[
           Container(
             margin: const EdgeInsets.only(right: 10),

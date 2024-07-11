@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hand_held_shell/controllers/login.controller.dart';
+
 import 'package:hand_held_shell/services/auth/users.service.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:hand_held_shell/config/routes/routes.dart';
@@ -19,6 +21,9 @@ void main() async {
   // Conecta el socket después de inicializar los servicios
   final socketService = Get.find<SocketService>();
   await socketService.connect();
+
+  // Ahora que el socket está conectado, inicializa el UserController
+  Get.put(LoginController());
 
   runApp(const MyApp());
 }

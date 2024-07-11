@@ -30,7 +30,7 @@ class LoadingScreen extends StatelessWidget {
 
     if (autenticado) {
       socketService.connect();
-      Get.offNamed('/users');
+      Get.offNamed('/home');
     } else {
       Get.offNamed('/login');
     }

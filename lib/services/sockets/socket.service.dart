@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:hand_held_shell/config/global/environment.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
-import 'package:socket_io_client/socket_io_client.dart' as io;
 
 enum ServerStatus {
   Online,

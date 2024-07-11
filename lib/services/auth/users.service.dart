@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
-import 'package:hand_held_shell/config/global/environment.dart';
+import 'package:http/http.dart' as http;
+import 'package:hand_held_shell/config/database/database.exports.files.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:hand_held_shell/views/entities/mappers/users.response.dart';
-import 'package:http/http.dart' as http;
 import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
 
 class UserService extends GetxService {
@@ -21,7 +21,7 @@ class UserService extends GetxService {
       if (token == null) throw Exception('Token is null');
 
       final resp = await http.get(
-        Uri.parse('${Environment.apiUrl}/user'),
+        Uri.parse(UserApi.getUser()),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
