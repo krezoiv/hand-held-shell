@@ -109,7 +109,7 @@ class AppRoutes {
 
     GetPage(
       name: RoutesPaths.changeThemeScreen,
-      page: () => const ChangeThemeScreen(),
+      page: () => ChangeThemeScreen(),
     ),
 
     GetPage(

@@ -1,48 +1,43 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hand_held_shell/config/theme/app.theme.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 
 class ChangeThemeScreen extends StatelessWidget {
-  const ChangeThemeScreen({super.key});
+  final ThemeController themeController = Get.put(ThemeController());
+
+  ChangeThemeScreen({super.key}); // Agregar Key aquí
 
   @override
   Widget build(BuildContext context) {
-    final themeController = Get.put(ThemeController());
-
-    return Obx(() {
-      final isDarkmode = themeController.appTheme.value.isDarkmode;
-
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Theme changer'),
-          actions: [
-            IconButton(
-              icon: Icon(isDarkmode
-                  ? Icons.dark_mode_outlined
-                  : Icons.light_mode_outlined),
-              onPressed: () {
-                themeController.toggleDarkmode();
-              },
-            ),
-          ],
-        ),
-        body: const _ThemeChangerView(),
-      );
-    });
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Theme changer'),
+        actions: [
+          Obx(() => IconButton(
+                icon: Icon(themeController.isDarkMode
+                    ? Icons.dark_mode_outlined
+                    : Icons.light_mode_outlined),
+                onPressed: () {
+                  themeController.toggleDarkMode();
+                },
+              )),
+        ],
+      ),
+      body: const _ThemeChangerView(),
+    );
   }
 }
 
 class _ThemeChangerView extends StatelessWidget {
-  const _ThemeChangerView();
+  const _ThemeChangerView(); // Agregar Key aquí
 
   @override
   Widget build(BuildContext context) {
-    final themeController = Get.find<ThemeController>();
+    final ThemeController themeController = Get.find();
 
     return Obx(() {
-      const colors = colorList;
-      final selectedColor = themeController.appTheme.value.selectedColor;
+      final List<Color> colors = themeController.colorList;
+      final int selectedColor = themeController.selectedColorIndex;
 
       return ListView.builder(
         itemCount: colors.length,
