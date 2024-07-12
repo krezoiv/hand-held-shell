@@ -25,3 +25,7 @@ class Environment {
     throw UnsupportedError('Plataforma no soportada');
   }
 }
+
+
+//192.168.1.148
+//192.168.0.104

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:hand_held_shell/config/global/routes.path.dart';
 import 'package:hand_held_shell/services/auth/users.service.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
@@ -43,7 +44,7 @@ class UserController extends GetxController {
 
   void navigateToChat(UserModel user) {
     chatService.toUser.value = user;
-    Get.toNamed('/chat');
+    Get.toNamed(RoutesPaths.chatHome);
   }
 
   void logout() {

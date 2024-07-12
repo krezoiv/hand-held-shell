@@ -2,56 +2,62 @@ class RoutesPaths {
 //home
   static const String homeView = '/home-view';
 
-  //dispensers
-  static const String dispenserView = '/dispensers-view';
-  static const String newRegisterDispensers = 'new-register-dispensers-view';
-  static const String modifyRegisterDispensers =
-      'modify-register-dispensers-view';
-  static const String deleteRegisterDispensers =
-      'delete-register-dispensers-view';
-  static const String deleteAllRegisterDispensers =
-      'delete-all-register-dispensers-view';
-
   //sales
   static const String salesView = '/sales-view';
-  static const String newSalesView = 'new-sale-view';
-  static const String modifySalesView = 'modify-sale-view';
-  static const String deleteSalesView = 'delete-sale-view';
-  static const String searchSalesView = 'search-sale-view';
 
   //shops
-  static const String shopView = '/shop-view';
-  static const String deleteOrderShopView = 'delete-order-shop-view';
-  static const String modifyOrderShopView = 'modify-order-shop-view';
-  static const String newOrderShopView = 'new-order-shop-view';
-  static const String deleteShopView = 'delete-shop-view';
-  static const String modifyShopView = 'modify-shop-view';
-  static const String newShopView = 'new-shop-view';
-
-  //lubricants
-  static const String lubricantsView = '/lubricants-view';
-  static const String newShopLubricantsView = 'new-shop-lubricants-view';
-  static const String modifyShopLubricantsView = 'modify-shop-lubricants-view';
-  static const String searchShopLubricantsView = 'search-shop-lubricants-view';
-  static const String deleteShopLubricantsView = 'delete-shop-lubricants-view';
+  static const String shopsHome = '/shops';
+  static const String deleteOrderShopScreen = '/delete-order-shop';
+  static const String modifyOrderShopScreen = '/modify-order-shop';
+  static const String newOrderShopScreen = '/new-order-shop';
+  static const String deleteShopScreen = '/delete-shop';
+  static const String modifyShopScreen = '/modify-shop';
+  static const String newShopScreen = '/new-shop';
 
   //setting
-  static const String settingsView = '/settings-view';
-  static const String changePassView = 'change-pass-view';
-  static const String changePriceView = 'change-price-view';
-  static const String changeThemeView = 'change-theme-view';
-  static const String licenceView = 'licence-view';
+  static const String settingsHome = '/settings';
+  static const String changePassScreen = '/change-pass';
+  static const String changePriceScreen = '/change-price';
+  static const String changeThemeScreen = '/change-theme';
+  //static const String licenceScreen = '/licences';
 
   //users
-
   static const String userHome = '/users';
+  static const String chatHome = '/chat';
+
+  //dispensers
   static const String dispensersHome = '/dispensers';
-  static const String licencesHome = '/licences';
-  static const String loadingHome = '/loading';
+  static const String newRegisterDispenserScreen = '/new-register-dispenser';
+  static const String modifyRegisterDispenserScreen =
+      '/modify-register-dispenser';
+  static const String deleteRegisterDispenserScreen =
+      '/delete-register-dispenser';
+  static const String deleteAllRegisterDispenserScreen =
+      '/delete-all-regiserter-dispenser';
+
+//sales
   static const String salesHome = '/sales';
-  static const String settingsHome = '/settings';
-  static const String shopsHome = '/shops';
+  static const String newSales = '/new-sale';
+  static const String modifySales = '/modify-sale';
+  static const String deleteSales = '/delete-sale';
+  static const String searchSales = '/search-sale';
+
+//licences
+  static const String licencesHome = '/licences';
+
+  //loading
+  static const String loadingHome = '/loading';
+
+//login
   static const String loginHome = '/login';
+
+  //home
   static const String mainHome = '/home';
+
+  //lubricants
   static const String lubricantsHome = '/lubricants';
+  static const String newShopLubricants = '/new-shop-lubricants';
+  static const String modifyShopLubricant = '/modify-shop-lubricants';
+  static const String searchShopLubricant = '/search-shop-lubricants';
+  static const String deleteShopLubricant = '/delete-shop-lubricants';
 }

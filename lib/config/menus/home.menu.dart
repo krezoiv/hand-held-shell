@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart'; // Importa CupertinoIcons
 import 'package:hand_held_shell/config/global/routes.path.dart';
 
 class MenuItem {
@@ -40,7 +41,7 @@ const appMenuItems = <MenuItem>[
       title: 'Chat',
       subTitle: "mensajeria",
       link: RoutesPaths.userHome,
-      icon: Icons.chat_outlined),
+      icon: CupertinoIcons.chat_bubble_2),
   MenuItem(
       title: 'Ajustes',
       subTitle: "módulo de ajustes globales",

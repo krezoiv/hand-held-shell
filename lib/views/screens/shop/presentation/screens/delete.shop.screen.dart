@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
-import 'package:hand_held_shell/views/screens/lubricants/presentation/widgets/side.menu.lubricant.dart';
+import 'package:hand_held_shell/views/screens/shop/presentation/widgets/side.menu.shop.dart';
 
-class LubricantsHomeScreen extends StatelessWidget {
-  const LubricantsHomeScreen({super.key});
+class DeleteShopsScreen extends StatelessWidget {
+  const DeleteShopsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final scaffoldKey = GlobalKey<ScaffoldState>();
     return Scaffold(
-      key: scaffoldKey,
       appBar: AppBar(
-        title: const Text('Lubricantes'),
+        key: scaffoldKey,
+        title: const Text('Eliminar Compra'),
       ),
-      drawer: SideMenuLubricant(scaffoldKey: scaffoldKey),
+      drawer: SideMenuShop(scaffoldKey: scaffoldKey),
       bottomNavigationBar: const CustomBottomNavigation(),
     );
   }
