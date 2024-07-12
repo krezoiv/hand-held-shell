@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/controllers/login.controller.dart';
-
+import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/services/auth/users.service.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:hand_held_shell/config/routes/routes.dart';
@@ -25,7 +25,10 @@ void main() async {
   // Ahora que el socket está conectado, inicializa el UserController
   Get.put(LoginController());
 
-  runApp(const MyApp());
+  // Inicializa el ThemeController
+  Get.put(ThemeController());
+
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -33,16 +36,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Material App',
-      initialRoute: AppRoutes.initialRoute,
-      getPages: AppRoutes.routes,
-      // Si necesitas alguna configuración global, puedes agregarla aquí
-      // Por ejemplo:
-      // theme: ThemeData(...),
-      // translations: MyTranslations(),
-      // locale: Locale('en', 'US'),
-    );
+    // Obtiene el ThemeController
+    final themeController = Get.find<ThemeController>();
+
+    return Obx(() {
+      // Utiliza el tema actual del ThemeController
+      return GetMaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'Material App',
+        initialRoute: AppRoutes.initialRoute,
+        getPages: AppRoutes.routes,
+        theme: themeController.appTheme.value.getTheme(),
+      );
+    });
   }
 }
