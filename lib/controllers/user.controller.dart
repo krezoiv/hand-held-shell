@@ -3,7 +3,7 @@ import 'package:hand_held_shell/config/global/routes.path.dart';
 import 'package:hand_held_shell/services/auth/users.service.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
-import 'package:hand_held_shell/views/entities/models/user.model.dart';
+import 'package:hand_held_shell/models/models/user.model.dart';
 
 class UserController extends GetxController {
   final UserService userService = Get.find<UserService>();

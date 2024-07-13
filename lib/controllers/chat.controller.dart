@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
-import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:hand_held_shell/views/screens/chat/chat.exports.files.dart';
 
 class ChatController extends GetxController with GetTickerProviderStateMixin {

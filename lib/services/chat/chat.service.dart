@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import 'package:hand_held_shell/config/global/environment.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
-import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
 
 class ChatService extends GetxController {
   Rx<UserModel?> toUser = Rx<UserModel?>(null);

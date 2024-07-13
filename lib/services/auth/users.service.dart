@@ -2,8 +2,8 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:hand_held_shell/config/database/database.exports.files.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
-import 'package:hand_held_shell/views/entities/mappers/users.response.dart';
-import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
+import 'package:hand_held_shell/models/mappers/users.response.dart';
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
 
 class UserService extends GetxService {
   final RxList<UserModel> users = <UserModel>[].obs;

@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'package:hand_held_shell/config/database/database.exports.files.dart';
 import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
-import 'package:hand_held_shell/views/entities/mappers/login.response.dart';
+import 'package:hand_held_shell/models/mappers/login.response.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-import 'package:hand_held_shell/views/entities/enteties.exports.files.dart';
-import 'package:hand_held_shell/views/entities/models/user.model.dart';
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
+import 'package:hand_held_shell/models/models/user.model.dart';
 // Asegúrate de importar la clase AuthApi
 
 class AuthService extends GetxController {

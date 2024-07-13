@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:hand_held_shell/config/global/routes.path.dart';
-import 'package:hand_held_shell/views/screens/screens.exports.files.dart';
+import 'package:hand_held_shell/views/screens.exports.files.dart';
 
 class DispensersRoutes {
   static final routes = [
