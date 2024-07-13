@@ -11,7 +11,7 @@ class ChatScreen extends GetView<ChatController> {
     final toUser = controller.chatService.toUser.value;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white,
         title: Column(
           children: <Widget>[
             CircleAvatar(
@@ -23,7 +23,10 @@ class ChatScreen extends GetView<ChatController> {
             ),
             const SizedBox(height: 3),
             Text('${toUser.firstName} ${toUser.lastName}',
-                style: TextStyle(color: Colors.black87, fontSize: 12)),
+                style: TextStyle(
+                  // color: Colors.black87,
+                  fontSize: 20,
+                )),
           ],
         ),
         centerTitle: true,
@@ -62,9 +65,14 @@ class ChatScreen extends GetView<ChatController> {
                 onChanged: (String text) {
                   controller.isWriting.value = text.trim().isNotEmpty;
                 },
-                decoration:
-                    const InputDecoration.collapsed(hintText: 'Enviar mensaje'),
+                decoration: InputDecoration.collapsed(
+                  hintText: 'Enviar mensaje',
+                  // Establece el estilo del texto del input
+                  hintStyle: TextStyle(color: Colors.black),
+                ),
                 focusNode: controller.focusNode,
+                style: TextStyle(
+                    color: Colors.black), // Color del texto del TextField
               ),
             ),
             Container(

@@ -35,14 +35,3 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-
-
-// leading: IconButton(
-        //   icon: const Icon(
-        //     Icons.logout,
-        //     color: Colors.black87,
-        //   ),
-        //   onPressed: () {
-        //     controller.logout();
-        //   },
-        // ),

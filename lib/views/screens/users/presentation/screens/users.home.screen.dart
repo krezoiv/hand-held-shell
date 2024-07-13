@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/controllers/user.controller.dart';
+import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 import 'package:hand_held_shell/views/screens/users/users.exports.files.dart';
@@ -15,10 +16,10 @@ class UserHomeScreen extends GetView<UserController> {
       appBar: AppBar(
         title: Obx(() => Text(
               controller.authService.usuario?.firstName ?? 'Usuario',
-              style: const TextStyle(color: Colors.black87),
+              // style: const TextStyle(color: Colors.black87),
             )),
         elevation: 1,
-        backgroundColor: Colors.white,
+        // backgroundColor: Colors.white,
         actions: <Widget>[
           Container(
             margin: const EdgeInsets.only(right: 10),
@@ -32,6 +33,7 @@ class UserHomeScreen extends GetView<UserController> {
           )
         ],
       ),
+      bottomNavigationBar: const CustomBottomNavigation(),
       body: GetBuilder<UserController>(
         builder: (controller) => SmartRefresher(
           controller: controller.refreshController,

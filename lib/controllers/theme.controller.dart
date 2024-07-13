@@ -13,6 +13,7 @@ const List<Color> predefinedColorList = <Color>[
   Colors.orange,
   Colors.pink,
   Colors.pinkAccent,
+  Colors.black
 ];
 
 class ThemeController extends GetxController {
