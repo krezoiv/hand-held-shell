@@ -10,7 +10,7 @@ class DispensersRoutes {
     ),
     GetPage(
       name: RoutesPaths.newRegisterDispenserScreen,
-      page: () => const NewRegisterDispenserScreen(),
+      page: () => NewRegisterDispenserScreen(),
     ),
     GetPage(
       name: RoutesPaths.modifyRegisterDispenserScreen,
