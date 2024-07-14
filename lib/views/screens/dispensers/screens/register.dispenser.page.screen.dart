@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:hand_held_shell/controllers/register.controller.dart';
+import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/calculator.button.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/side.menu.dispenser.dart';
@@ -10,57 +11,51 @@ class RegisterDispenserPage extends StatefulWidget {
   final int pageIndex;
   final dynamic dispenserReader;
   final int totalPages;
+  final PageController mainPageController;
 
   const RegisterDispenserPage({
-    super.key,
+    Key? key,
     required this.pageIndex,
     required this.dispenserReader,
     required this.totalPages,
-    required PageController pageController,
-  });
+    required this.mainPageController,
+  }) : super(key: key);
 
   @override
   _RegisterDispenserPageState createState() => _RegisterDispenserPageState();
 }
 
 class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
-  late PageController pageController;
+  late PageController cardPageController;
+  final themeController = Get.find<ThemeController>();
 
   @override
   void initState() {
     super.initState();
-    pageController = PageController();
+    cardPageController = PageController();
   }
 
   @override
   void dispose() {
-    pageController.dispose();
+    cardPageController.dispose();
     super.dispose();
+  }
+
+  String capitalizeFirstLetterOfEachWord(String text) {
+    if (text.isEmpty) return text;
+    List<String> words = text.split(' ');
+    return words
+        .map((word) => word.isEmpty
+            ? ''
+            : '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}')
+        .join(' ');
   }
 
   @override
   Widget build(BuildContext context) {
-    String capitalizeFirstLetterOfEachWord(String text) {
-      if (text.isEmpty) return text;
-
-      List<String> words = text.split(' ');
-      List<String> capitalizedWords = [];
-
-      for (String word in words) {
-        if (word.isNotEmpty) {
-          String capitalizedWord = word.substring(0, 1).toUpperCase() +
-              word.substring(1).toLowerCase();
-          capitalizedWords.add(capitalizedWord);
-        }
-      }
-
-      return capitalizedWords.join(' ');
-    }
-
     final scaffoldKey = GlobalKey<ScaffoldState>();
     final calculatorCtrl = Get.put(RegisterButtonsController());
 
-    // Obtener los datos necesarios del JSON
     final String fuelName = widget.dispenserReader['assignmentHoseId']['hoseId']
         ['fuelId']['fuelName'];
     final String sideName =
@@ -68,287 +63,316 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
     final String dispenserCode = widget.dispenserReader['assignmentHoseId']
         ['assignmentId']['dispenserId']['dispenserCode'];
 
-    // Asegurarse de que actualNoMechanic es un String
-    final String actualNoMechanic =
-        widget.dispenserReader['actualNoMechanic'].toString();
-
-    // Controlador para el TextField
-    final TextEditingController actualNoMechanicController =
-        TextEditingController(text: actualNoMechanic);
-
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Obx(() => Scaffold(
+          key: scaffoldKey,
+          appBar: AppBar(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(Icons.local_gas_station), // Icono para fuelName
-                    SizedBox(width: 5), // Espacio entre el icono y el texto
-                    Text(
-                      capitalizeFirstLetterOfEachWord(fuelName),
-                      style: TextStyle(
-                        fontSize: 14.0,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.local_gas_station),
+                          SizedBox(width: 5),
+                          Expanded(
+                            child: Text(
+                              capitalizeFirstLetterOfEachWord(fuelName),
+                              style: TextStyle(fontSize: 14.0),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Text(
-                      capitalizeFirstLetterOfEachWord(dispenserCode),
-                      style: TextStyle(
-                        fontSize: 14.0,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              capitalizeFirstLetterOfEachWord(dispenserCode),
+                              style: TextStyle(fontSize: 14.0),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          Icon(Icons.arrow_forward),
+                          Expanded(
+                            child: Text(
+                              capitalizeFirstLetterOfEachWord(sideName),
+                              style: TextStyle(fontSize: 14.0),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    Icon(Icons.arrow_forward), // Icono de flecha hacia adelante
-                    Text(
-                      capitalizeFirstLetterOfEachWord(sideName),
-                      style: TextStyle(
-                        fontSize: 14.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'Numeración: < ${widget.pageIndex + 1} / ${widget.totalPages}>',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic, // Texto en cursiva
+                    ],
                   ),
                 ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      'Numeración: < ${widget.pageIndex + 1} / ${widget.totalPages}>',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
-          ],
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(0),
-          child: Container(),
-        ),
-      ),
-      body: SingleChildScrollView(
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(height: 10),
+                  SizedBox(
+                    height: 220,
+                    child: PageView(
+                      controller: cardPageController,
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _buildCard(
+                          'Galones',
+                          widget.dispenserReader['actualNoGallons'].toString(),
+                          titleColor: Colors.blue[900],
+                        ),
+                        _buildCard(
+                          'Mecánica',
+                          widget.dispenserReader['actualNoMechanic'].toString(),
+                          titleColor: Colors.blue[900],
+                        ),
+                        _buildCard(
+                          'Dinero',
+                          widget.dispenserReader['actualNoMoney'].toString(),
+                          titleColor: Colors.blue[900],
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  _buildNavigationButtons(),
+                  SizedBox(height: 20),
+                  _buildCalculatorButtons(calculatorCtrl),
+                ],
+              ),
+            ),
+          ),
+          drawer: SideMenuDispenser(scaffoldKey: scaffoldKey),
+          bottomNavigationBar: const CustomBottomNavigation(),
+        ));
+  }
+
+  Widget _buildCard(String title, String value, {Color? titleColor}) {
+    String formatNumber(String number) {
+      if (number.isEmpty) return '0';
+
+      List<String> parts = number.split('.');
+      String integerPart = parts[0];
+      String decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
+
+      String formattedInteger = '';
+      for (int i = integerPart.length - 1; i >= 0; i--) {
+        if ((integerPart.length - 1 - i) % 3 == 0 &&
+            i != integerPart.length - 1) {
+          formattedInteger = ',$formattedInteger';
+        }
+        formattedInteger = integerPart[i] + formattedInteger;
+      }
+
+      return formattedInteger + decimalPart;
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Card(
+        elevation: 5,
+        color: themeController.isDarkMode ? null : Colors.white70,
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.0),
+          padding: const EdgeInsets.all(5.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              SizedBox(
-                height: 200, // Altura máxima del contenedor de los Cards
-                child: PageView(
-                  controller: pageController,
-                  scrollDirection: Axis.horizontal,
-                  children: List.generate(3, (index) {
-                    return Card(
-                      elevation: 5,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            TextField(
-                              controller: actualNoMechanicController,
-                              readOnly: true, // Configurar como de solo lectura
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                              ),
-                              style: TextStyle(
-                                fontSize: 20.0,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: 10),
-                            TextField(
-                              keyboardType: TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                hintText: 'Ingrese numeración de la bomba',
-                              ),
-                            ),
-                            SizedBox(height: 20),
-                            // Otros widgets necesarios dentro del Card
-                          ],
-                        ),
-                      ),
-                    );
-                  }),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: titleColor ??
+                      (themeController.isDarkMode
+                          ? Colors.white
+                          : Colors.black87),
                 ),
+                textAlign: TextAlign.center,
               ),
               SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Flexible(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (pageController.page != null &&
-                            pageController.page! > 0) {
-                          pageController.previousPage(
-                            duration: Duration(milliseconds: 300),
-                            curve: Curves.ease,
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.deepPurpleAccent,
-                        elevation: 5,
-                        shadowColor: Colors.deepPurpleAccent.withOpacity(0.5),
-                      ),
-                      child: Center(
-                        child: Icon(CupertinoIcons.arrowshape_turn_up_left),
-                      ),
-                    ),
+              TextField(
+                controller: TextEditingController(text: formatNumber(value)),
+                readOnly: true,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  fillColor: themeController.isDarkMode
+                      ? Colors.grey[800]
+                      : Colors.white,
+                  filled: true,
+                ),
+                style: TextStyle(
+                  fontSize: 20.0,
+                  fontWeight: FontWeight.w700,
+                  color: themeController.isDarkMode
+                      ? Colors.white
+                      : Colors.black87,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 10),
+              TextField(
+                readOnly: true,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Ingrese numeración de la bomba',
+                  fillColor: themeController.isDarkMode
+                      ? Colors.grey[800]
+                      : Colors.white,
+                  filled: true,
+                  hintStyle: TextStyle(
+                    color: themeController.isDarkMode
+                        ? Colors.grey[400]
+                        : Colors.grey[600],
                   ),
-                  SizedBox(width: 10),
-                  Flexible(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Acción cuando se presiona el botón Clear
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.red[400],
-                        elevation: 5,
-                        shadowColor: Colors.red[400]!.withOpacity(0.5),
-                      ),
-                      child: Center(
-                        child: Icon(Icons.clear),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Flexible(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Acción cuando se presiona el botón Thumb Up
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.green[600],
-                        elevation: 5,
-                        shadowColor: Colors.green[600]!.withOpacity(0.5),
-                      ),
-                      child: Center(
-                        child: Icon(CupertinoIcons.hand_thumbsup),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10),
-                  Flexible(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (pageController.page != null &&
-                            pageController.page! < 2) {
-                          pageController.nextPage(
-                            duration: Duration(milliseconds: 300),
-                            curve: Curves.ease,
-                          );
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.white,
-                        backgroundColor: Colors.deepPurpleAccent,
-                        elevation: 5,
-                        shadowColor: Colors.deepPurpleAccent.withOpacity(0.5),
-                      ),
-                      child: Center(
-                        child: Icon(CupertinoIcons.arrowshape_turn_up_right),
-                      ),
-                    ),
-                  )
-                ],
+                ),
+                style: TextStyle(
+                  color: themeController.isDarkMode
+                      ? Colors.white
+                      : Colors.black87,
+                ),
+                onTap: () {
+                  // Aquí puedes añadir lógica para manejar el tap si es necesario
+                },
               ),
             ],
           ),
         ),
       ),
-      drawer: SideMenuDispenser(scaffoldKey: scaffoldKey),
-      bottomNavigationBar: const CustomBottomNavigation(),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CalculatorButton(
-                text: '7',
-                onPressed: () => calculatorCtrl.addNumber('7'),
-              ),
-              CalculatorButton(
-                text: '8',
-                onPressed: () => calculatorCtrl.addNumber('8'),
-              ),
-              CalculatorButton(
-                text: '9',
-                onPressed: () => calculatorCtrl.addNumber('9'),
-              ),
-            ],
+    );
+  }
+
+  Widget _buildNavigationButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Expanded(
+          child: _buildNavigationButton(
+            icon: CupertinoIcons.arrowshape_turn_up_left,
+            onPressed: () {
+              if (widget.pageIndex > 0) {
+                widget.mainPageController.previousPage(
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.ease,
+                );
+              }
+            },
           ),
-          SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CalculatorButton(
-                text: '4',
-                onPressed: () => calculatorCtrl.addNumber('4'),
-              ),
-              CalculatorButton(
-                text: '5',
-                onPressed: () => calculatorCtrl.addNumber('5'),
-              ),
-              CalculatorButton(
-                text: '6',
-                onPressed: () => calculatorCtrl.addNumber('6'),
-              ),
-            ],
+        ),
+        SizedBox(width: 10),
+        Expanded(
+          child: _buildNavigationButton(
+            icon: Icons.clear,
+            backgroundColor: Colors.red[400]!,
+            onPressed: () {
+              // Acción cuando se presiona el botón Clear
+            },
           ),
-          SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CalculatorButton(
-                text: '1',
-                onPressed: () => calculatorCtrl.addNumber('1'),
-              ),
-              CalculatorButton(
-                text: '2',
-                onPressed: () => calculatorCtrl.addNumber('2'),
-              ),
-              CalculatorButton(
-                text: '3',
-                onPressed: () => calculatorCtrl.addNumber('3'),
-              ),
-            ],
+        ),
+        SizedBox(width: 10),
+        Expanded(
+          child: _buildNavigationButton(
+            icon: CupertinoIcons.hand_thumbsup,
+            backgroundColor: Colors.green[600]!,
+            onPressed: () {
+              // Acción cuando se presiona el botón Thumb Up
+            },
           ),
-          SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CalculatorButton(
-                text: '0',
-                big: true,
-                onPressed: () => calculatorCtrl.addNumber('0'),
-              ),
-              CalculatorButton(
-                text: '.',
-                onPressed: () => calculatorCtrl.addDecimalPoint(),
-              ),
-            ],
+        ),
+        SizedBox(width: 10),
+        Expanded(
+          child: _buildNavigationButton(
+            icon: CupertinoIcons.arrowshape_turn_up_right,
+            onPressed: () {
+              if (widget.pageIndex < widget.totalPages - 1) {
+                widget.mainPageController.nextPage(
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.ease,
+                );
+              }
+            },
           ),
-        ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNavigationButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+    Color backgroundColor = Colors.deepPurpleAccent,
+  }) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: backgroundColor,
+        elevation: 5,
+        shadowColor: backgroundColor.withOpacity(0.5),
       ),
+      child: Center(
+        child: Icon(icon),
+      ),
+    );
+  }
+
+  Widget _buildCalculatorButtons(RegisterButtonsController calculatorCtrl) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        _buildCalculatorRow(['7', '8', '9'], calculatorCtrl),
+        SizedBox(height: 10),
+        _buildCalculatorRow(['4', '5', '6'], calculatorCtrl),
+        SizedBox(height: 10),
+        _buildCalculatorRow(['1', '2', '3'], calculatorCtrl),
+        SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CalculatorButton(
+              text: '0',
+              big: true,
+              onPressed: () => calculatorCtrl.addNumber('0'),
+            ),
+            CalculatorButton(
+              text: '.',
+              onPressed: () => calculatorCtrl.addDecimalPoint(),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCalculatorRow(
+      List<String> numbers, RegisterButtonsController calculatorCtrl) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: numbers
+          .map((number) => CalculatorButton(
+                text: number,
+                onPressed: () => calculatorCtrl.addNumber(number),
+              ))
+          .toList(),
     );
   }
 }

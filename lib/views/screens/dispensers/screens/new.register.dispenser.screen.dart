@@ -4,11 +4,10 @@ import 'package:hand_held_shell/controllers/dispensers.controller.dart';
 import 'package:hand_held_shell/views/screens/dispensers/screens/register.dispenser.page.screen.dart';
 
 class NewRegisterDispenserScreen extends StatelessWidget {
-  const NewRegisterDispenserScreen({Key? key});
+  const NewRegisterDispenserScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Asegúrate de que el controlador esté inicializado
     Get.put(DispenserController());
 
     return Scaffold(
@@ -18,14 +17,13 @@ class NewRegisterDispenserScreen extends StatelessWidget {
 }
 
 class DispenserPageView extends StatelessWidget {
-  const DispenserPageView({Key? key});
+  const DispenserPageView({super.key});
 
   @override
   Widget build(BuildContext context) {
     final PageController pageController = PageController();
 
     return GetBuilder<DispenserController>(
-      init: DispenserController(),
       builder: (controller) {
         return Scaffold(
           body: Obx(() {
@@ -38,10 +36,9 @@ class DispenserPageView extends StatelessWidget {
                 itemBuilder: (context, index) {
                   return RegisterDispenserPage(
                     pageIndex: index,
-                    pageController: pageController,
+                    mainPageController: pageController,
                     dispenserReader: controller.dispenserReaders[index],
-                    totalPages: controller.dispenserReaders
-                        .length, // Usar el tamaño de la lista como totalPages
+                    totalPages: controller.dispenserReaders.length,
                   );
                 },
               );

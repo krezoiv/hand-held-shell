@@ -6,7 +6,7 @@ class DispenserReaderService {
     try {
       final response = await http.get(
         Uri.parse(
-            'http://localhost:3000/api/dispenser-Reader/lastReaderNumeration'),
+            'http://192.168.0.104:3000/api/dispenser-Reader/lastReaderNumeration'),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
@@ -18,10 +18,12 @@ class DispenserReaderService {
         return data['dispenserReaders'];
       } else {
         throw Exception(
-            'Failed to load dispenser readers - ${response.statusCode}');
+            'Failed to load dispenser readers - StatusCode: ${response.statusCode}, Body: ${response.body}');
       }
     } catch (e) {
-      throw Exception('Failed to load dispenser readers');
+      throw Exception('Failed to load dispenser readers: $e');
     }
   }
 }
+
+//192.168.0.104
