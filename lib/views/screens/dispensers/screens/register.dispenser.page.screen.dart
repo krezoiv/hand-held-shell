@@ -1,24 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:hand_held_shell/controllers/register.controller.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/calculator.button.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/side.menu.dispenser.dart';
 
-class RegisterDispenserPage extends StatelessWidget {
+class RegisterDispenserPage extends StatefulWidget {
   final int pageIndex;
-  final PageController pageController;
   final dynamic dispenserReader;
   final int totalPages;
 
   const RegisterDispenserPage({
-    Key? key,
+    super.key,
     required this.pageIndex,
-    required this.pageController,
     required this.dispenserReader,
     required this.totalPages,
-  }) : super(key: key);
+    required PageController pageController,
+  });
+
+  @override
+  _RegisterDispenserPageState createState() => _RegisterDispenserPageState();
+}
+
+class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
+  late PageController pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,16 +61,16 @@ class RegisterDispenserPage extends StatelessWidget {
     final calculatorCtrl = Get.put(RegisterButtonsController());
 
     // Obtener los datos necesarios del JSON
-    final String fuelName =
-        dispenserReader['assignmentHoseId']['hoseId']['fuelId']['fuelName'];
+    final String fuelName = widget.dispenserReader['assignmentHoseId']['hoseId']
+        ['fuelId']['fuelName'];
     final String sideName =
-        dispenserReader['assignmentHoseId']['sideId']['sideName'];
-    final String dispenserCode = dispenserReader['assignmentHoseId']
+        widget.dispenserReader['assignmentHoseId']['sideId']['sideName'];
+    final String dispenserCode = widget.dispenserReader['assignmentHoseId']
         ['assignmentId']['dispenserId']['dispenserCode'];
 
     // Asegurarse de que actualNoMechanic es un String
     final String actualNoMechanic =
-        dispenserReader['actualNoMechanic'].toString();
+        widget.dispenserReader['actualNoMechanic'].toString();
 
     // Controlador para el TextField
     final TextEditingController actualNoMechanicController =
@@ -102,7 +120,7 @@ class RegisterDispenserPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  'Numeración: < ${pageIndex + 1} / $totalPages>',
+                  'Numeración: < ${widget.pageIndex + 1} / ${widget.totalPages}>',
                   style: TextStyle(
                     fontSize: 13,
                     fontStyle: FontStyle.italic, // Texto en cursiva
@@ -123,8 +141,49 @@ class RegisterDispenserPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              CardWithScrollableFields(
-                controller: actualNoMechanicController,
+              SizedBox(
+                height: 200, // Altura máxima del contenedor de los Cards
+                child: PageView(
+                  controller: pageController,
+                  scrollDirection: Axis.horizontal,
+                  children: List.generate(3, (index) {
+                    return Card(
+                      elevation: 5,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            TextField(
+                              controller: actualNoMechanicController,
+                              readOnly: true, // Configurar como de solo lectura
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                              ),
+                              style: TextStyle(
+                                fontSize: 20.0,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 10),
+                            TextField(
+                              keyboardType: TextInputType.numberWithOptions(
+                                decimal: true,
+                              ),
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Ingrese numeración de la bomba',
+                              ),
+                            ),
+                            SizedBox(height: 20),
+                            // Otros widgets necesarios dentro del Card
+                          ],
+                        ),
+                      ),
+                    );
+                  }),
+                ),
               ),
               SizedBox(height: 10),
               Row(
@@ -133,7 +192,8 @@ class RegisterDispenserPage extends StatelessWidget {
                   Flexible(
                     child: ElevatedButton(
                       onPressed: () {
-                        if (pageIndex > 0) {
+                        if (pageController.page != null &&
+                            pageController.page! > 0) {
                           pageController.previousPage(
                             duration: Duration(milliseconds: 300),
                             curve: Curves.ease,
@@ -155,7 +215,7 @@ class RegisterDispenserPage extends StatelessWidget {
                   Flexible(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Acción cuando se presiona el botón
+                        // Acción cuando se presiona el botón Clear
                       },
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white,
@@ -172,7 +232,7 @@ class RegisterDispenserPage extends StatelessWidget {
                   Flexible(
                     child: ElevatedButton(
                       onPressed: () {
-                        // Acción cuando se presiona el botón
+                        // Acción cuando se presiona el botón Thumb Up
                       },
                       style: ElevatedButton.styleFrom(
                         foregroundColor: Colors.white,
@@ -189,7 +249,8 @@ class RegisterDispenserPage extends StatelessWidget {
                   Flexible(
                     child: ElevatedButton(
                       onPressed: () {
-                        if (pageIndex < 7) {
+                        if (pageController.page != null &&
+                            pageController.page! < 2) {
                           pageController.nextPage(
                             duration: Duration(milliseconds: 300),
                             curve: Curves.ease,
@@ -206,7 +267,7 @@ class RegisterDispenserPage extends StatelessWidget {
                         child: Icon(CupertinoIcons.arrowshape_turn_up_right),
                       ),
                     ),
-                  ),
+                  )
                 ],
               ),
             ],
@@ -287,54 +348,6 @@ class RegisterDispenserPage extends StatelessWidget {
             ],
           ),
         ],
-      ),
-    );
-  }
-}
-
-class CardWithScrollableFields extends StatelessWidget {
-  final TextEditingController controller;
-
-  const CardWithScrollableFields({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 5,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                controller: controller,
-                readOnly: true,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                ),
-                style: TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.w700,
-                  height: 0.5,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 10),
-              TextField(
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: 'Ingrese numeración de la bomba',
-                ),
-              ),
-              SizedBox(height: 20),
-            ],
-          ),
-        ),
       ),
     );
   }

@@ -4,7 +4,7 @@ import 'package:hand_held_shell/controllers/dispensers.controller.dart';
 import 'package:hand_held_shell/views/screens/dispensers/screens/register.dispenser.page.screen.dart';
 
 class NewRegisterDispenserScreen extends StatelessWidget {
-  const NewRegisterDispenserScreen({super.key});
+  const NewRegisterDispenserScreen({Key? key});
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +18,7 @@ class NewRegisterDispenserScreen extends StatelessWidget {
 }
 
 class DispenserPageView extends StatelessWidget {
-  const DispenserPageView({super.key});
+  const DispenserPageView({Key? key});
 
   @override
   Widget build(BuildContext context) {
