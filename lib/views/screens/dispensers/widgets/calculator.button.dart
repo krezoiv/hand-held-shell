@@ -6,15 +6,16 @@ class CalculatorButton extends StatelessWidget {
   final Color bgColor;
   final bool big;
   final String text;
-  final Function onPressed;
+  final VoidCallback onPressed;
 
   const CalculatorButton({
-    super.key,
-    bgColor,
+    Key? key,
+    Color? bgColor,
     this.big = false,
     required this.text,
     required this.onPressed,
-  }) : bgColor = bgColor ?? const Color(0xff333333);
+  })  : bgColor = bgColor ?? const Color(0xff333333),
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +36,7 @@ class CalculatorButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(30),
         child: TextButton(
           style: buttonStyle,
+          onPressed: onPressed,
           child: SizedBox(
             width: big ? 150 : 65,
             height: 75,
@@ -45,7 +47,6 @@ class CalculatorButton extends StatelessWidget {
               ),
             ),
           ),
-          onPressed: () => onPressed(),
         ),
       ),
     );

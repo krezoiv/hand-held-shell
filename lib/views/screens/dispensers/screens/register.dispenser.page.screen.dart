@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:hand_held_shell/controllers/register.controller.dart';
+
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/calculator.button.dart';
@@ -28,6 +28,8 @@ class RegisterDispenserPage extends StatefulWidget {
 class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   late PageController cardPageController;
   final themeController = Get.find<ThemeController>();
+  final TextEditingController secondTextFieldController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -38,6 +40,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   @override
   void dispose() {
     cardPageController.dispose();
+    secondTextFieldController.dispose();
     super.dispose();
   }
 
@@ -55,6 +58,8 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   Widget build(BuildContext context) {
     final scaffoldKey = GlobalKey<ScaffoldState>();
     final calculatorCtrl = Get.put(RegisterButtonsController());
+    calculatorCtrl.setTextController(
+        secondTextFieldController); // Set the controller in RegisterButtonsController
 
     final String fuelName = widget.dispenserReader['assignmentHoseId']['hoseId']
         ['fuelId']['fuelName'];
@@ -231,6 +236,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
               ),
               SizedBox(height: 10),
               TextField(
+                controller: secondTextFieldController,
                 readOnly: true,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(),
@@ -344,21 +350,8 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
         _buildCalculatorRow(['4', '5', '6'], calculatorCtrl),
         SizedBox(height: 10),
         _buildCalculatorRow(['1', '2', '3'], calculatorCtrl),
+        _buildCalculatorRow(['0', '.', 'C'], calculatorCtrl),
         SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CalculatorButton(
-              text: '0',
-              big: true,
-              onPressed: () => calculatorCtrl.addNumber('0'),
-            ),
-            CalculatorButton(
-              text: '.',
-              onPressed: () => calculatorCtrl.addDecimalPoint(),
-            ),
-          ],
-        ),
       ],
     );
   }
@@ -374,5 +367,22 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
               ))
           .toList(),
     );
+  }
+}
+
+// Controlador
+class RegisterButtonsController extends GetxController {
+  late TextEditingController textController;
+
+  void setTextController(TextEditingController controller) {
+    textController = controller;
+  }
+
+  void addNumber(String number) {
+    if (number == 'C') {
+      textController.clear();
+    } else {
+      textController.text += number;
+    }
   }
 }
