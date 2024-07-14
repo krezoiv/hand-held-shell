@@ -58,8 +58,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   Widget build(BuildContext context) {
     final scaffoldKey = GlobalKey<ScaffoldState>();
     final calculatorCtrl = Get.put(RegisterButtonsController());
-    calculatorCtrl.setTextController(
-        secondTextFieldController); // Set the controller in RegisterButtonsController
+    calculatorCtrl.setTextController(secondTextFieldController);
 
     final String fuelName = widget.dispenserReader['assignmentHoseId']['hoseId']
         ['fuelId']['fuelName'];
@@ -246,16 +245,20 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       : Colors.white,
                   filled: true,
                   hintStyle: TextStyle(
+                    fontSize: 15,
                     color: themeController.isDarkMode
                         ? Colors.grey[400]
                         : Colors.grey[600],
                   ),
                 ),
                 style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20.0,
                   color: themeController.isDarkMode
                       ? Colors.white
                       : Colors.black87,
                 ),
+                textAlign: TextAlign.center,
                 onTap: () {
                   // Aquí puedes añadir lógica para manejar el tap si es necesario
                 },
@@ -381,8 +384,52 @@ class RegisterButtonsController extends GetxController {
   void addNumber(String number) {
     if (number == 'C') {
       textController.clear();
-    } else {
-      textController.text += number;
+      return;
     }
+
+    String currentText = textController.text;
+
+    if (number == '.' && currentText.contains('.')) {
+      return;
+    }
+
+    if (currentText.isEmpty && number == '0') {
+      return;
+    }
+
+    if (currentText.contains('.') && currentText.split('.')[1].length >= 3) {
+      return;
+    }
+
+    textController.text += number;
+    textController.text = formatNumberForDisplay(textController.text);
+  }
+
+  String formatNumberForDisplay(String number) {
+    if (number.isEmpty) return '';
+
+    List<String> parts = number.split('.');
+    String integerPart = parts[0];
+    String decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
+
+    // Eliminar cualquier coma existente para evitar duplicados
+    integerPart = integerPart.replaceAll(',', '');
+
+    // Revertir la parte entera para facilitar la inserción de comas
+    String reversedIntegerPart = integerPart.split('').reversed.join();
+
+    // Construir la parte entera con comas cada tres dígitos
+    String formattedInteger = '';
+    for (int i = 0; i < reversedIntegerPart.length; i++) {
+      if (i != 0 && i % 3 == 0) {
+        formattedInteger += ',';
+      }
+      formattedInteger += reversedIntegerPart[i];
+    }
+
+    // Revertir nuevamente para obtener el orden correcto
+    formattedInteger = formattedInteger.split('').reversed.join();
+
+    return formattedInteger + decimalPart;
   }
 }
