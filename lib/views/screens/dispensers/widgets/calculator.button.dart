@@ -23,11 +23,11 @@ class CalculatorButton extends StatelessWidget {
     final buttonStyle = TextButton.styleFrom(
       foregroundColor: Colors.white,
       backgroundColor: themeController.isDarkMode ? bgColor : Colors.blue[900],
-      shape: StadiumBorder(),
+      shape: const StadiumBorder(),
     );
 
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
       child: PhysicalModel(
         color: Colors.transparent,
         shadowColor: Colors.black,
@@ -43,7 +43,8 @@ class CalculatorButton extends StatelessWidget {
             child: Center(
               child: Text(
                 text,
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
+                style:
+                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
               ),
             ),
           ),
