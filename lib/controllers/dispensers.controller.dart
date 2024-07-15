@@ -31,8 +31,6 @@ class DispenserController extends GetxController {
           (index) => List.generate(3, (_) => TextEditingController()),
         ),
       );
-    } catch (e) {
-      print('Error fetching dispenser readers: $e');
     } finally {
       isLoading.value = false;
     }
@@ -59,7 +57,7 @@ class DispenserController extends GetxController {
       }
       await DispenserReaderService.saveDispenserReadings(dataToSave);
     } catch (e) {
-      print('Error saving dispenser readings: $e');
+      //
     }
   }
 }

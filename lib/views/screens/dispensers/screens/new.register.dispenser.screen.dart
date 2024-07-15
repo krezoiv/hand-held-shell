@@ -4,10 +4,11 @@ import 'package:hand_held_shell/controllers/dispensers.controller.dart';
 import 'package:hand_held_shell/views/screens/dispensers/screens/register.dispenser.page.screen.dart';
 
 class NewRegisterDispenserScreen extends StatelessWidget {
-  const NewRegisterDispenserScreen({Key? key}) : super(key: key);
+  const NewRegisterDispenserScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable
     final dispenserController = Get.put(DispenserController());
 
     return Scaffold(
@@ -26,7 +27,7 @@ class NewRegisterDispenserScreen extends StatelessWidget {
 }
 
 class DispenserPageView extends StatelessWidget {
-  const DispenserPageView({Key? key}) : super(key: key);
+  const DispenserPageView({super.key});
 
   @override
   Widget build(BuildContext context) {

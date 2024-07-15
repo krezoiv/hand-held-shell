@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:hand_held_shell/config/helpers/text.helpers.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/controllers/dispensers.controller.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/calculator.button.dart';
+import 'package:hand_held_shell/views/screens/dispensers/widgets/navigation.buttons.dart';
 
 class RegisterDispenserPage extends StatefulWidget {
   final int pageIndex;
@@ -21,6 +22,7 @@ class RegisterDispenserPage extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _RegisterDispenserPageState createState() => _RegisterDispenserPageState();
 }
 
@@ -42,16 +44,6 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   void dispose() {
     verticalPageController.dispose();
     super.dispose();
-  }
-
-  String capitalizeFirstLetterOfEachWord(String text) {
-    if (text.isEmpty) return text;
-    List<String> words = text.split(' ');
-    return words
-        .map((word) => word.isEmpty
-            ? ''
-            : '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}')
-        .join(' ');
   }
 
   @override
@@ -77,7 +69,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                 SizedBox(width: 5),
                 Expanded(
                     child: Text(
-                        '${capitalizeFirstLetterOfEachWord(fuelName)} | ${capitalizeFirstLetterOfEachWord(dispenserCode)} -> ${capitalizeFirstLetterOfEachWord(sideName)}',
+                        '${(fuelName)} | ${TextHelpers.capitalizeFirstLetterOfEachWord(dispenserCode)} -> ${TextHelpers.capitalizeFirstLetterOfEachWord((sideName))}',
                         style: TextStyle(fontSize: 14.0),
                         overflow: TextOverflow.ellipsis)),
                 Text('${widget.pageIndex + 1}/${widget.totalPages}',
@@ -120,7 +112,14 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       ],
                     ),
                   ),
-                  _buildNavigationButtons(),
+                  NavigationButtons(
+                    mainPageController: widget.mainPageController,
+                    pageIndex: widget.pageIndex,
+                    totalPages: widget.totalPages,
+                    clearTextField: calculatorCtrl.clearTextField,
+                    currentCardIndex:
+                        calculatorCtrl.currentCardIndex, // Sin .value
+                  ),
                   _buildCalculatorButtons(calculatorCtrl),
                 ],
               ),
@@ -195,7 +194,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       filled: true,
                     ),
                     style: TextStyle(
-                      fontSize: 16.0, // Reducido de 20 a 16
+                      fontSize: 25.0, // Reducido de 20 a 16
                       fontWeight: FontWeight.w700,
                       color: themeController.isDarkMode
                           ? Colors.white
@@ -225,7 +224,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                           : Colors.white,
                       filled: true,
                       hintStyle: TextStyle(
-                        fontSize: 13, // Reducido de 15 a 13
+                        fontSize: 16, // Reducido de 15 a 13
                         color: themeController.isDarkMode
                             ? Colors.grey[400]
                             : Colors.grey[600],
@@ -233,7 +232,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                     ),
                     style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      fontSize: 16.0, // Reducido de 20 a 16
+                      fontSize: 25.0, // Reducido de 20 a 16
                       color: themeController.isDarkMode
                           ? Colors.white
                           : Colors.black87,
@@ -245,85 +244,6 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildNavigationButtons() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Expanded(
-            child: _buildNavigationButton(
-              icon: CupertinoIcons.arrowshape_turn_up_left,
-              onPressed: () {
-                if (widget.pageIndex > 0) {
-                  widget.mainPageController.previousPage(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.ease,
-                  );
-                }
-              },
-            ),
-          ),
-          SizedBox(width: 25),
-          Expanded(
-            child: _buildNavigationButton(
-              icon: Icons.update,
-              backgroundColor: Colors.yellow.shade900,
-              onPressed: () {
-                calculatorCtrl.clearTextField(
-                    widget.pageIndex, calculatorCtrl.currentCardIndex);
-              },
-            ),
-          ),
-          SizedBox(width: 25),
-          Expanded(
-            child: _buildNavigationButton(
-              icon: CupertinoIcons.hand_thumbsup,
-              backgroundColor: Colors.green[600]!,
-              onPressed: () {
-                // Acción cuando se presiona el botón Thumb Up
-              },
-            ),
-          ),
-          SizedBox(width: 25),
-          Expanded(
-            child: _buildNavigationButton(
-              icon: CupertinoIcons.arrowshape_turn_up_right,
-              onPressed: () {
-                if (widget.pageIndex < widget.totalPages - 1) {
-                  widget.mainPageController.nextPage(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.ease,
-                  );
-                }
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavigationButton({
-    required IconData icon,
-    required VoidCallback onPressed,
-    Color backgroundColor = Colors.deepPurpleAccent,
-  }) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor: backgroundColor,
-        elevation: 5,
-        shadowColor: backgroundColor.withOpacity(0.5),
-        padding: EdgeInsets.all(8),
-      ),
-      child: Center(
-        child: Icon(icon, size: 20),
       ),
     );
   }
@@ -401,35 +321,11 @@ class RegisterButtonsController extends GetxController {
     }
 
     String newText = currentText + number;
-    newText = formatNumberForDisplay(newText);
+    newText = TextHelpers.formatNumberForDisplay(newText);
     dispenserController.updateTextField(pageIndex, cardIndex, newText);
   }
 
   void clearTextField(int pageIndex, int cardIndex) {
     dispenserController.updateTextField(pageIndex, cardIndex, '');
-  }
-
-  String formatNumberForDisplay(String number) {
-    if (number.isEmpty) return '';
-
-    List<String> parts = number.split('.');
-    String integerPart = parts[0];
-    String decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
-
-    integerPart = integerPart.replaceAll(',', '');
-
-    String reversedIntegerPart = integerPart.split('').reversed.join();
-
-    String formattedInteger = '';
-    for (int i = 0; i < reversedIntegerPart.length; i++) {
-      if (i != 0 && i % 3 == 0) {
-        formattedInteger += ',';
-      }
-      formattedInteger += reversedIntegerPart[i];
-    }
-
-    formattedInteger = formattedInteger.split('').reversed.join();
-
-    return formattedInteger + decimalPart;
   }
 }

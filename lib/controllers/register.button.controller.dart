@@ -1,62 +1,36 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hand_held_shell/controllers/dispensers.controller.dart';
 
 class RegisterButtonsController extends GetxController {
-  late TextEditingController textController;
+  late DispenserController
+      dispenserController; // Cambia a late para inicializar después
+  RxInt currentCardIndex = 0.obs;
 
-  void setTextController(TextEditingController controller) {
-    textController = controller;
+  void setDispenserController(DispenserController controller) {
+    dispenserController = controller;
   }
 
-  void addNumber(String number) {
+  //var currentCardIndex = 0.obs;
+
+  void setCurrentCardIndex(int index) {
+    currentCardIndex.value = index;
+  }
+
+  void addNumber(String number, int pageIndex, int cardIndex) {
+    final textController =
+        dispenserController.textControllers[pageIndex][cardIndex];
+    final currentText = textController.text;
+
     if (number == 'C') {
       textController.clear();
-      return;
+    } else {
+      textController.text = currentText + number;
     }
-
-    String currentText = textController.text;
-
-    if (number == '.' && currentText.contains('.')) {
-      return;
-    }
-
-    if (currentText.isEmpty && number == '0') {
-      return;
-    }
-
-    if (currentText.contains('.') && currentText.split('.')[1].length >= 3) {
-      return;
-    }
-
-    textController.text += number;
-    textController.text = formatNumberForDisplay(textController.text);
   }
 
-  String formatNumberForDisplay(String number) {
-    if (number.isEmpty) return '';
-
-    List<String> parts = number.split('.');
-    String integerPart = parts[0];
-    String decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
-
-    // Eliminar cualquier coma existente para evitar duplicados
-    integerPart = integerPart.replaceAll(',', '');
-
-    // Revertir la parte entera para facilitar la inserción de comas
-    String reversedIntegerPart = integerPart.split('').reversed.join();
-
-    // Construir la parte entera con comas cada tres dígitos
-    String formattedInteger = '';
-    for (int i = 0; i < reversedIntegerPart.length; i++) {
-      if (i != 0 && i % 3 == 0) {
-        formattedInteger += ',';
-      }
-      formattedInteger += reversedIntegerPart[i];
-    }
-
-    // Revertir nuevamente para obtener el orden correcto
-    formattedInteger = formattedInteger.split('').reversed.join();
-
-    return formattedInteger + decimalPart;
+  void clearTextField(int pageIndex, int cardIndex) {
+    final textController =
+        dispenserController.textControllers[pageIndex][cardIndex];
+    textController.clear();
   }
 }

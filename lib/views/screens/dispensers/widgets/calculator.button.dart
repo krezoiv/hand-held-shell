@@ -9,13 +9,12 @@ class CalculatorButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   const CalculatorButton({
-    Key? key,
+    super.key,
     Color? bgColor,
     this.big = false,
     required this.text,
     required this.onPressed,
-  })  : bgColor = bgColor ?? const Color(0xff333333),
-        super(key: key);
+  }) : bgColor = bgColor ?? const Color(0xff333333);
 
   @override
   Widget build(BuildContext context) {
