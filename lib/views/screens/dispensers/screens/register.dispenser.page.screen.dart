@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/config/helpers/text.helpers.dart';
+import 'package:hand_held_shell/controllers/register.button.controller.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/controllers/dispensers.controller.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
-import 'package:hand_held_shell/views/screens/dispensers/widgets/calculator.button.dart';
+import 'package:hand_held_shell/views/screens/dispensers/widgets/build.calcutator.buttons.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/navigation.buttons.dart';
 
 class RegisterDispenserPage extends StatefulWidget {
@@ -118,14 +119,15 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                     totalPages: widget.totalPages,
                     clearTextField: calculatorCtrl.clearTextField,
                     currentCardIndex:
-                        calculatorCtrl.currentCardIndex, // Sin .value
+                        calculatorCtrl.currentCardIndex.value, // Sin .value
                   ),
-                  _buildCalculatorButtons(calculatorCtrl),
+                  BuildCalculatorButtons(
+                    pageIndex: widget.pageIndex,
+                  ),
                 ],
               ),
             ),
           ),
-          // drawer: SideMenuDispenser(scaffoldKey: scaffoldKey),
           bottomNavigationBar: const CustomBottomNavigation(),
         ));
   }
@@ -246,86 +248,5 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
         ),
       ),
     );
-  }
-
-  Widget _buildCalculatorButtons(RegisterButtonsController calculatorCtrl) {
-    return Padding(
-      padding: const EdgeInsets.all(5.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildCalculatorRow(['7', '8', '9'], calculatorCtrl),
-          SizedBox(height: 5),
-          _buildCalculatorRow(['4', '5', '6'], calculatorCtrl),
-          SizedBox(height: 5),
-          _buildCalculatorRow(['1', '2', '3'], calculatorCtrl),
-          _buildCalculatorRow(['0', '.', 'C'], calculatorCtrl),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalculatorRow(
-      List<String> numbers, RegisterButtonsController calculatorCtrl) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: numbers
-          .map((number) => Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(2.0),
-                  child: CalculatorButton(
-                    text: number,
-                    onPressed: () {
-                      calculatorCtrl.addNumber(number, widget.pageIndex,
-                          calculatorCtrl.currentCardIndex);
-                    },
-                  ),
-                ),
-              ))
-          .toList(),
-    );
-  }
-}
-
-class RegisterButtonsController extends GetxController {
-  late DispenserController dispenserController;
-  int currentCardIndex = 0;
-
-  void setDispenserController(DispenserController controller) {
-    dispenserController = controller;
-  }
-
-  void setCurrentCardIndex(int index) {
-    currentCardIndex = index;
-  }
-
-  void addNumber(String number, int pageIndex, int cardIndex) {
-    String currentText =
-        dispenserController.textControllers[pageIndex][cardIndex].text;
-
-    if (number == 'C') {
-      clearTextField(pageIndex, cardIndex);
-      return;
-    }
-
-    if (number == '.' && currentText.contains('.')) {
-      return;
-    }
-
-    if (currentText.isEmpty && number == '0') {
-      return;
-    }
-
-    if (currentText.contains('.') && currentText.split('.')[1].length >= 3) {
-      return;
-    }
-
-    String newText = currentText + number;
-    newText = TextHelpers.formatNumberForDisplay(newText);
-    dispenserController.updateTextField(pageIndex, cardIndex, newText);
-  }
-
-  void clearTextField(int pageIndex, int cardIndex) {
-    dispenserController.updateTextField(pageIndex, cardIndex, '');
   }
 }

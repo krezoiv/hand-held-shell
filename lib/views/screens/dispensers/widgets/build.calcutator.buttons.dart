@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:hand_held_shell/controllers/register.button.controller.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/calculator.button.dart';
 
-class BuildCalculatorButtons extends StatelessWidget {
-  final RegisterButtonsController calculatorCtrl;
+class BuildCalculatorButtons extends GetView<RegisterButtonsController> {
   final int pageIndex;
-  final int currentCardIndex;
 
   const BuildCalculatorButtons({
-    required this.calculatorCtrl,
     required this.pageIndex,
-    required this.currentCardIndex,
     super.key,
   });
 
@@ -21,19 +18,18 @@ class BuildCalculatorButtons extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildCalculatorRow(['7', '8', '9'], calculatorCtrl),
+          _buildCalculatorRow(['7', '8', '9']),
           SizedBox(height: 5),
-          _buildCalculatorRow(['4', '5', '6'], calculatorCtrl),
+          _buildCalculatorRow(['4', '5', '6']),
           SizedBox(height: 5),
-          _buildCalculatorRow(['1', '2', '3'], calculatorCtrl),
-          _buildCalculatorRow(['0', '.', 'C'], calculatorCtrl),
+          _buildCalculatorRow(['1', '2', '3']),
+          _buildCalculatorRow(['0', '.', 'C']),
         ],
       ),
     );
   }
 
-  Widget _buildCalculatorRow(
-      List<String> numbers, RegisterButtonsController calculatorCtrl) {
+  Widget _buildCalculatorRow(List<String> numbers) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: numbers
@@ -43,8 +39,8 @@ class BuildCalculatorButtons extends StatelessWidget {
                   child: CalculatorButton(
                     text: number,
                     onPressed: () {
-                      calculatorCtrl.addNumber(
-                          number, pageIndex, currentCardIndex);
+                      controller.addNumber(
+                          number, pageIndex, controller.currentCardIndex.value);
                     },
                   ),
                 ),
