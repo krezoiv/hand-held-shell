@@ -51,7 +51,7 @@ class NavigationButtons extends StatelessWidget {
           SizedBox(width: 25),
           Expanded(
             child: _buildNavigationButton(
-              icon: CupertinoIcons.hand_thumbsup,
+              icon: Icons.save_outlined,
               backgroundColor: Colors.green[600]!,
               onPressed: () {
                 // Acción cuando se presiona el botón Thumb Up

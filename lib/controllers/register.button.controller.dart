@@ -20,7 +20,7 @@ class RegisterButtonsController extends GetxController {
         dispenserController.textControllers[pageIndex][cardIndex].text;
 
     if (number == 'C') {
-      clearTextField(pageIndex, cardIndex);
+      backspaceTextField(pageIndex, cardIndex);
       return;
     }
 
@@ -39,6 +39,16 @@ class RegisterButtonsController extends GetxController {
     String newText = currentText + number;
     newText = TextHelpers.formatNumberForDisplay(newText);
     dispenserController.updateTextField(pageIndex, cardIndex, newText);
+  }
+
+  void backspaceTextField(int pageIndex, int cardIndex) {
+    String currentText =
+        dispenserController.textControllers[pageIndex][cardIndex].text;
+
+    if (currentText.isNotEmpty) {
+      currentText = currentText.substring(0, currentText.length - 1);
+      dispenserController.updateTextField(pageIndex, cardIndex, currentText);
+    }
   }
 
   void clearTextField(int pageIndex, int cardIndex) {

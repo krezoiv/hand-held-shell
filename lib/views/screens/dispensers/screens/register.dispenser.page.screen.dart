@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/config/helpers/text.helpers.dart';
@@ -66,16 +67,16 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(Icons.local_gas_station),
-                SizedBox(width: 5),
+                const Icon(Icons.local_gas_station),
+                const SizedBox(width: 5),
                 Expanded(
                     child: Text(
                         '${(fuelName)} | ${TextHelpers.capitalizeFirstLetterOfEachWord(dispenserCode)} -> ${TextHelpers.capitalizeFirstLetterOfEachWord((sideName))}',
-                        style: TextStyle(fontSize: 14.0),
+                        style: const TextStyle(fontSize: 14.0),
                         overflow: TextOverflow.ellipsis)),
                 Text('${widget.pageIndex + 1}/${widget.totalPages}',
-                    style:
-                        TextStyle(fontSize: 12, fontStyle: FontStyle.italic)),
+                    style: const TextStyle(
+                        fontSize: 12, fontStyle: FontStyle.italic)),
               ],
             ),
           ),
@@ -167,7 +168,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 16, // Reducido de 18 a 16
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: titleColor ??
                       (themeController.isDarkMode
@@ -176,72 +177,97 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 1),
-              Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width *
-                      0.85, // Ajusta el ancho al 70% del ancho de la pantalla
-                  child: TextField(
-                    controller:
-                        TextEditingController(text: formatNumber(value)),
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
-                          vertical: 8,
-                          horizontal: 8), // Reduce el padding interno
-                      fillColor: themeController.isDarkMode
-                          ? Colors.grey[800]
-                          : Colors.white,
-                      filled: true,
+              const SizedBox(height: 1),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 4,
+                    child: Column(
+                      children: [
+                        TextField(
+                          controller:
+                              TextEditingController(text: formatNumber(value)),
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 8),
+                            fillColor: themeController.isDarkMode
+                                ? Colors.grey[800]
+                                : Colors.white,
+                            filled: true,
+                          ),
+                          style: TextStyle(
+                            fontSize: 25.0,
+                            fontWeight: FontWeight.w700,
+                            color: themeController.isDarkMode
+                                ? Colors.white
+                                : Colors.black87,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 5),
+                        TextField(
+                          controller: dispenserController
+                              .textControllers[widget.pageIndex][cardIndex],
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 10),
+                            hintText: 'Ingrese numeración de la bomba',
+                            fillColor: themeController.isDarkMode
+                                ? Colors.grey[800]
+                                : Colors.white,
+                            filled: true,
+                            hintStyle: TextStyle(
+                              fontSize: 16,
+                              color: themeController.isDarkMode
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 25.0,
+                            color: themeController.isDarkMode
+                                ? Colors.white
+                                : Colors.black87,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
                     ),
-                    style: TextStyle(
-                      fontSize: 25.0, // Reducido de 20 a 16
-                      fontWeight: FontWeight.w700,
-                      color: themeController.isDarkMode
-                          ? Colors.white
-                          : Colors.black87,
-                    ),
-                    textAlign: TextAlign.center,
                   ),
-                ),
-              ),
-              SizedBox(height: 5),
-              Center(
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width *
-                      0.85, // Ajusta el ancho al 70% del ancho de la pantalla
-                  child: TextField(
-                    controller: dispenserController
-                        .textControllers[widget.pageIndex][cardIndex],
-                    readOnly: true,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      contentPadding: EdgeInsets.symmetric(
-                          vertical: 10,
-                          horizontal: 10), // Reduce el padding interno
-                      hintText: 'Ingrese numeración de la bomba',
-                      fillColor: themeController.isDarkMode
-                          ? Colors.grey[800]
-                          : Colors.white,
-                      filled: true,
-                      hintStyle: TextStyle(
-                        fontSize: 16, // Reducido de 15 a 13
-                        color: themeController.isDarkMode
-                            ? Colors.grey[400]
-                            : Colors.grey[600],
-                      ),
-                    ),
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 25.0, // Reducido de 20 a 16
-                      color: themeController.isDarkMode
-                          ? Colors.white
-                          : Colors.black87,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                      flex: 1,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Aquí puedes agregar la lógica para guardar
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.purple[800],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        child: const SizedBox(
+                          height: 120, // Ajusta esta altura según sea necesario
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(CupertinoIcons.hand_thumbsup,
+                                    color: Colors.white), // Icono
+                                // Espacio entre el icono y el texto
+                              ],
+                            ),
+                          ),
+                        ),
+                      ))
+                ],
               ),
             ],
           ),
