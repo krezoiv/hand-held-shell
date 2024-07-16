@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:hand_held_shell/config/helpers/text.helpers.dart';
+import 'package:hand_held_shell/shared/helpers/text.helpers.dart';
 import 'package:hand_held_shell/controllers/dispensers.controller.dart';
 
 class RegisterButtonsController extends GetxController {

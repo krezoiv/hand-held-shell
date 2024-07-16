@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class DispenserReaderService {
-  static const String baseUrl = 'http://192.168.0.104:3000/api';
+  static const String baseUrl = 'http://192.168.1.148:3000/api';
 
   static Future<List<dynamic>> fetchDispenserReaders(String token) async {
     try {
@@ -48,6 +48,55 @@ class DispenserReaderService {
       }
     } catch (e) {
       throw Exception('Failed to save dispenser readings: $e');
+    }
+  }
+
+  static Future<void> createGeneralDispenserReader() async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) throw Exception('Token is null');
+
+      final response = await http.post(
+        Uri.parse(
+            '$baseUrl/generalDispenserReader/creatGeneralDispenserReader'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+        body: json.encode({
+          // Aquí puedes agregar cualquier otro dato necesario
+        }),
+      );
+
+      if (response.statusCode != 201) {
+        throw Exception(
+            'Failed to create GeneralDispenserReader - StatusCode: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Failed to create GeneralDispenserReader: $e');
+    }
+  }
+
+  static Future<void> deleteLastGeneralDispenserReader() async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) throw Exception('Token is null');
+
+      final response = await http.delete(
+        Uri.parse(
+            '$baseUrl/generalDispenserReader/general-dispenser-reader/last'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+            'Failed to delete last GeneralDispenserReader - StatusCode: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Failed to delete last GeneralDispenserReader: $e');
     }
   }
 }

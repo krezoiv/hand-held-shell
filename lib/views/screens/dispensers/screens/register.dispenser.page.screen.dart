@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hand_held_shell/config/helpers/text.helpers.dart';
+import 'package:hand_held_shell/shared/helpers/text.helpers.dart';
 import 'package:hand_held_shell/controllers/register.button.controller.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/controllers/dispensers.controller.dart';
@@ -14,6 +14,7 @@ class RegisterDispenserPage extends StatefulWidget {
   final dynamic dispenserReader;
   final int totalPages;
   final PageController mainPageController;
+  final RxBool showCalculatorButtons;
 
   const RegisterDispenserPage({
     super.key,
@@ -21,10 +22,10 @@ class RegisterDispenserPage extends StatefulWidget {
     required this.dispenserReader,
     required this.totalPages,
     required this.mainPageController,
+    required this.showCalculatorButtons,
   });
 
   @override
-  // ignore: library_private_types_in_public_api
   _RegisterDispenserPageState createState() => _RegisterDispenserPageState();
 }
 
@@ -119,12 +120,12 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                     pageIndex: widget.pageIndex,
                     totalPages: widget.totalPages,
                     clearTextField: calculatorCtrl.clearTextField,
-                    currentCardIndex:
-                        calculatorCtrl.currentCardIndex.value, // Sin .value
+                    currentCardIndex: calculatorCtrl.currentCardIndex.value,
                   ),
-                  BuildCalculatorButtons(
-                    pageIndex: widget.pageIndex,
-                  ),
+                  if (widget.showCalculatorButtons.value)
+                    BuildCalculatorButtons(
+                      pageIndex: widget.pageIndex,
+                    ),
                 ],
               ),
             ),
@@ -240,33 +241,39 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 5),
                   Expanded(
-                      flex: 1,
+                    flex: 1,
+                    child: SizedBox(
+                      width: double.infinity,
+                      height: 120,
                       child: ElevatedButton(
                         onPressed: () {
                           // Aquí puedes agregar la lógica para guardar
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.purple[800],
+                          padding: const EdgeInsets.symmetric(
+                              vertical:
+                                  16), // Ajusta el padding según sea necesario
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                        child: const SizedBox(
-                          height: 120, // Ajusta esta altura según sea necesario
-                          child: Center(
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(CupertinoIcons.hand_thumbsup,
-                                    color: Colors.white), // Icono
-                                // Espacio entre el icono y el texto
-                              ],
-                            ),
+                        child: const FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(CupertinoIcons.hand_thumbsup,
+                                  color: Colors.white),
+                              // Espacio entre el icono y el texto
+                            ],
                           ),
                         ),
-                      ))
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ],
