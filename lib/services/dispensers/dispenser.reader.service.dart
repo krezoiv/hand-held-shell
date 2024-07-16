@@ -1,3 +1,4 @@
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -97,6 +98,33 @@ class DispenserReaderService {
       }
     } catch (e) {
       throw Exception('Failed to delete last GeneralDispenserReader: $e');
+    }
+  }
+
+  static Future<DispenserReader?> addDispenserReader(
+      DispenserReader reading) async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) throw Exception('Token is null');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/dispenser-Reader/addDispenserReader'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+        body: json.encode(reading.toJson()),
+      );
+
+      if (response.statusCode == 201) {
+        return DispenserReader.fromJson(
+            json.decode(response.body)['newDispenserReader']);
+      } else {
+        throw Exception(
+            'Failed to add dispenser reader - StatusCode: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Failed to add dispenser reader: $e');
     }
   }
 }

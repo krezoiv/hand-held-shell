@@ -10,6 +10,7 @@ class NewRegisterDispenserScreen extends StatelessWidget {
   NewRegisterDispenserScreen({super.key});
 
   final RxBool showCalculatorButtons = false.obs;
+  final RxBool buttonsEnabled = false.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -19,77 +20,78 @@ class NewRegisterDispenserScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Digitar Bombas'),
         actions: [
-          CupertinoButton(
-            child: Icon(
-              CupertinoIcons.delete,
-              color: Colors.red[900],
-            ),
-            onPressed: () {
-              showConfirmationDialog(
-                title: 'Eliminar Último Dispensador',
-                message: '¿Confirmar eliminación del último dispensador?',
-                confirmText: 'Sí',
-                cancelText: 'No',
-                onConfirm: () async {
-                  try {
-                    await DispenserReaderService
-                        .deleteLastGeneralDispenserReader();
-                    Get.back(); // Cierra el diálogo
-
-                    // Navegar a una ruta específica después de cerrar el diálogo
-                    Get.toNamed(RoutesPaths
-                        .dispensersHome); // Cambia '/ruta-especifica' por tu ruta deseada
-                  } catch (e) {
-                    // Manejo de errores
-                    print('Error: $e');
-                  }
-                },
-                onCancel: () {
-                  return; // Cierra el diálogo
-                },
-              );
-            },
-          ),
+          Obx(() => CupertinoButton(
+                onPressed: buttonsEnabled.value
+                    ? () {
+                        showConfirmationDialog(
+                          title: 'Eliminar Último Dispensador',
+                          message:
+                              '¿Confirmar eliminación del último dispensador?',
+                          confirmText: 'Sí',
+                          cancelText: 'No',
+                          onConfirm: () async {
+                            try {
+                              await DispenserReaderService
+                                  .deleteLastGeneralDispenserReader();
+                              Get.back();
+                              Get.toNamed(RoutesPaths.dispensersHome);
+                            } catch (e) {
+                              print('Error: $e');
+                            }
+                          },
+                          onCancel: () {
+                            return;
+                          },
+                        );
+                      }
+                    : null,
+                child: Icon(
+                  CupertinoIcons.delete,
+                  color: Colors.red[900],
+                ),
+              )),
         ],
       ),
       body: Stack(
         children: [
-          DispenserPageView(showCalculatorButtons: showCalculatorButtons),
+          DispenserPageView(
+            showCalculatorButtons: showCalculatorButtons,
+            buttonsEnabled: buttonsEnabled,
+          ),
           Positioned(
             right: 36,
             bottom: 150,
-            child: Obx(() => showCalculatorButtons.value
+            child: Obx(() => buttonsEnabled.value
                 ? const SizedBox.shrink()
                 : IconButton(
                     onPressed: () {
                       showConfirmationDialog(
                         title: 'APERTURA DE DÍA',
                         message: '¿Confirmar apertura de día?',
-                        cancelText: 'No',
                         confirmText: 'Sí',
+                        cancelText: 'No',
                         onConfirm: () async {
                           try {
                             await DispenserReaderService
                                 .createGeneralDispenserReader();
                             showCalculatorButtons.value = true;
-                            Get.back(); // Cierra el diálogo
+                            buttonsEnabled.value = true;
+                            Get.back();
                           } catch (e) {
-                            // Manejo de errores
+                            print('Error: $e');
                           }
                         },
                         onCancel: () {
-                          Get.back(); // Cierra el diálogo
+                          return;
                         },
                       );
                     },
                     icon: Icon(
                       CupertinoIcons.folder_badge_plus,
-                      size:
-                          60, // Ajusta el tamaño del icono según tus preferencias
+                      size: 60,
                     ),
                     padding: EdgeInsets.zero,
-                    constraints:
-                        BoxConstraints(), // Elimina las restricciones de tamaño mínimo
+                    constraints: BoxConstraints(),
                   )),
           ),
         ],
@@ -105,22 +107,53 @@ class NewRegisterDispenserScreen extends StatelessWidget {
     required VoidCallback onConfirm,
     required VoidCallback onCancel,
   }) {
-    Get.defaultDialog(
-      title: title,
-      middleText: message,
-      textConfirm: confirmText,
-      textCancel: cancelText,
-      onConfirm: onConfirm,
-      onCancel: onCancel,
-      barrierDismissible: false, // No se puede cerrar tocando fuera del diálogo
-    );
+    if (GetPlatform.isIOS) {
+      Get.dialog(
+        CupertinoAlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: onCancel,
+              child: Text(cancelText),
+            ),
+            CupertinoDialogAction(
+              onPressed: onConfirm,
+              child: Text(confirmText),
+            ),
+          ],
+        ),
+        barrierDismissible: false,
+      );
+    } else {
+      Get.defaultDialog(
+        title: title,
+        middleText: message,
+        textConfirm: confirmText,
+        textCancel: cancelText,
+        onConfirm: onConfirm,
+        onCancel: onCancel,
+        barrierDismissible: false,
+        confirmTextColor: Colors.black,
+        cancelTextColor: Colors.black,
+        buttonColor: Colors.blue,
+        backgroundColor: Colors.white,
+        contentPadding: EdgeInsets.zero,
+        titlePadding: EdgeInsets.only(top: 20, bottom: 20),
+      );
+    }
   }
 }
 
 class DispenserPageView extends StatelessWidget {
   final RxBool showCalculatorButtons;
+  final RxBool buttonsEnabled;
 
-  const DispenserPageView({super.key, required this.showCalculatorButtons});
+  const DispenserPageView({
+    super.key,
+    required this.showCalculatorButtons,
+    required this.buttonsEnabled,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +174,7 @@ class DispenserPageView extends StatelessWidget {
               dispenserReader: controller.dispenserReaders[index],
               totalPages: controller.dispenserReaders.length,
               showCalculatorButtons: showCalculatorButtons,
+              buttonsEnabled: buttonsEnabled,
             );
           },
         );

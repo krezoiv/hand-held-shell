@@ -15,6 +15,7 @@ class RegisterDispenserPage extends StatefulWidget {
   final int totalPages;
   final PageController mainPageController;
   final RxBool showCalculatorButtons;
+  final RxBool buttonsEnabled;
 
   const RegisterDispenserPage({
     super.key,
@@ -23,6 +24,7 @@ class RegisterDispenserPage extends StatefulWidget {
     required this.totalPages,
     required this.mainPageController,
     required this.showCalculatorButtons,
+    required this.buttonsEnabled,
   });
 
   @override
@@ -115,14 +117,16 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       ],
                     ),
                   ),
-                  NavigationButtons(
-                    mainPageController: widget.mainPageController,
-                    pageIndex: widget.pageIndex,
-                    totalPages: widget.totalPages,
-                    clearTextField: calculatorCtrl.clearTextField,
-                    currentCardIndex: calculatorCtrl.currentCardIndex.value,
-                  ),
-                  if (widget.showCalculatorButtons.value)
+                  Obx(() => NavigationButtons(
+                        mainPageController: widget.mainPageController,
+                        pageIndex: widget.pageIndex,
+                        totalPages: widget.totalPages,
+                        clearTextField: calculatorCtrl.clearTextField,
+                        currentCardIndex: calculatorCtrl.currentCardIndex.value,
+                        enabled: widget.buttonsEnabled.value,
+                      )),
+                  if (widget.showCalculatorButtons.value &&
+                      widget.buttonsEnabled.value)
                     BuildCalculatorButtons(
                       pageIndex: widget.pageIndex,
                     ),
@@ -247,31 +251,30 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                     child: SizedBox(
                       width: double.infinity,
                       height: 120,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          // Aquí puedes agregar la lógica para guardar
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple[800],
-                          padding: const EdgeInsets.symmetric(
-                              vertical:
-                                  16), // Ajusta el padding según sea necesario
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: const FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(CupertinoIcons.hand_thumbsup,
-                                  color: Colors.white),
-                              // Espacio entre el icono y el texto
-                            ],
-                          ),
-                        ),
-                      ),
+                      child: Obx(() => ElevatedButton(
+                            onPressed: widget.buttonsEnabled.value
+                                ? () {
+                                    // Aquí puedes agregar la lógica para guardar
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.purple[800],
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(CupertinoIcons.hand_thumbsup,
+                                      color: Colors.white),
+                                ],
+                              ),
+                            ),
+                          )),
                     ),
                   ),
                 ],

@@ -1,21 +1,23 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 class NavigationButtons extends StatelessWidget {
   final PageController mainPageController;
   final int pageIndex;
   final int totalPages;
   final Function clearTextField;
-  final int currentCardIndex; // Cambia el tipo a RxInt
+  final int currentCardIndex;
+  final bool enabled;
 
   const NavigationButtons({
+    Key? key,
     required this.mainPageController,
     required this.pageIndex,
     required this.totalPages,
     required this.clearTextField,
     required this.currentCardIndex,
-    super.key,
-  });
+    required this.enabled,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -27,49 +29,53 @@ class NavigationButtons extends StatelessWidget {
           Expanded(
             child: _buildNavigationButton(
               icon: CupertinoIcons.arrowshape_turn_up_left,
-              onPressed: () {
-                if (pageIndex > 0) {
-                  mainPageController.previousPage(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.ease,
-                  );
-                }
-              },
+              onPressed: enabled && pageIndex > 0
+                  ? () {
+                      mainPageController.previousPage(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.ease,
+                      );
+                    }
+                  : null,
             ),
           ),
           SizedBox(width: 25),
           Expanded(
             child: _buildNavigationButton(
-              icon: Icons.update,
-              backgroundColor: Colors.yellow.shade900,
-              onPressed: () {
-                clearTextField(pageIndex,
-                    currentCardIndex); // Usa .value para obtener el valor entero
-              },
+              icon: Icons.clear,
+              backgroundColor: Colors.red[400]!,
+              onPressed: enabled
+                  ? () {
+                      clearTextField(pageIndex, currentCardIndex);
+                    }
+                  : null,
             ),
           ),
           SizedBox(width: 25),
           Expanded(
             child: _buildNavigationButton(
-              icon: Icons.save_outlined,
+              icon: CupertinoIcons.hand_thumbsup,
               backgroundColor: Colors.green[600]!,
-              onPressed: () {
-                // Acción cuando se presiona el botón Thumb Up
-              },
+              onPressed: enabled
+                  ? () {
+                      // Acción cuando se presiona el botón Thumb Up
+                      // Puedes agregar aquí la lógica que necesites
+                    }
+                  : null,
             ),
           ),
           SizedBox(width: 25),
           Expanded(
             child: _buildNavigationButton(
               icon: CupertinoIcons.arrowshape_turn_up_right,
-              onPressed: () {
-                if (pageIndex < totalPages - 1) {
-                  mainPageController.nextPage(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.ease,
-                  );
-                }
-              },
+              onPressed: enabled && pageIndex < totalPages - 1
+                  ? () {
+                      mainPageController.nextPage(
+                        duration: Duration(milliseconds: 300),
+                        curve: Curves.ease,
+                      );
+                    }
+                  : null,
             ),
           ),
         ],
@@ -79,16 +85,28 @@ class NavigationButtons extends StatelessWidget {
 
   Widget _buildNavigationButton({
     required IconData icon,
-    Color? backgroundColor,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
+    Color backgroundColor = Colors.deepPurpleAccent,
   }) {
     return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        shape: CircleBorder(), backgroundColor: backgroundColor ?? Colors.blue,
-        padding: EdgeInsets.all(15), // Fondo predeterminado azul
-      ),
       onPressed: onPressed,
-      child: Icon(icon, color: Colors.white),
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: backgroundColor,
+        elevation: onPressed != null ? 5 : 0,
+        shadowColor: backgroundColor.withOpacity(0.5),
+        padding: EdgeInsets.all(8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Center(
+        child: Icon(
+          icon,
+          size: 20,
+          color: onPressed != null ? Colors.white : Colors.grey[400],
+        ),
+      ),
     );
   }
 }
