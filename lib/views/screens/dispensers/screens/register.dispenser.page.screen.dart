@@ -36,7 +36,6 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   final dispenserController = Get.find<DispenserController>();
   late RegisterButtonsController calculatorCtrl;
   late PageController verticalPageController;
-  FocusNode focusNode = FocusNode();
 
   @override
   void initState() {
@@ -51,20 +50,15 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   void dispose() {
     verticalPageController.dispose();
     widget.mainPageController.removeListener(_onPageChanged);
-    focusNode.dispose();
     super.dispose();
   }
 
   void _onPageChanged() {
     if (widget.mainPageController.page == widget.pageIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(focusNode);
+        FocusScope.of(context).requestFocus(dispenserController.focusNode);
       });
     }
-  }
-
-  void _onThumbUpPressed() {
-    dispenserController.sendDataToDatabase(widget.pageIndex);
   }
 
   @override
@@ -105,19 +99,6 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    // child: Text(
-                    //   'Assignment Hose ID: $assignmentHoseId',
-                    //   style: TextStyle(
-                    //     fontSize: 16,
-                    //     fontWeight: FontWeight.bold,
-                    //     color: themeController.isDarkMode
-                    //         ? Colors.white
-                    //         : Colors.black,
-                    //   ),
-                    // ),
-                  ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.22,
                     child: PageView(
@@ -134,7 +115,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                           titleColor: Colors.blue[900],
                         ),
                         _buildCard(
-                          ' Numeración Mecánica',
+                          'Numeración Mecánica',
                           widget.dispenserReader['actualNoMechanic'].toString(),
                           1,
                           titleColor: Colors.blue[900],
@@ -157,7 +138,8 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                         },
                         currentCardIndex: calculatorCtrl.currentCardIndex.value,
                         enabled: widget.buttonsEnabled.value,
-                        onThumbUpPressed: _onThumbUpPressed,
+                        onThumbUpPressed: () => dispenserController
+                            .sendDataToDatabase(widget.pageIndex),
                       )),
                   if (widget.showCalculatorButtons.value &&
                       widget.buttonsEnabled.value)
@@ -224,10 +206,6 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                     flex: 4,
                     child: Column(
                       children: [
-                        // Text(
-                        //   'PageIndex: ${widget.pageIndex}, CardIndex: $cardIndex, Field: 0',
-                        //   style: const TextStyle(fontSize: 10),
-                        // ),
                         TextField(
                           controller:
                               TextEditingController(text: formatNumber(value)),
@@ -251,40 +229,42 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 5),
-                        // Text(
-                        //   'PageIndex: ${widget.pageIndex}, CardIndex: $cardIndex, Field: 1',
-                        //   style: const TextStyle(fontSize: 10),
-                        // ),
-                        TextField(
-                          controller: dispenserController
-                              .textControllers[widget.pageIndex][cardIndex],
-                          focusNode: cardIndex == 0 ? focusNode : null,
-                          readOnly: true,
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(
-                                vertical: 10, horizontal: 10),
-                            hintText: 'Ingrese numeración de la bomba',
-                            fillColor: themeController.isDarkMode
-                                ? Colors.grey[800]
-                                : Colors.white,
-                            filled: true,
-                            hintStyle: TextStyle(
-                              fontSize: 12,
-                              color: themeController.isDarkMode
-                                  ? Colors.grey[400]
-                                  : Colors.grey[600],
-                            ),
-                          ),
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 25.0,
-                            color: themeController.isDarkMode
-                                ? Colors.white
-                                : Colors.black87,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
+                        Obx(() => TextField(
+                              controller: dispenserController
+                                  .textControllers[widget.pageIndex][cardIndex],
+                              focusNode: dispenserController
+                                  .focusNodes[widget.pageIndex][cardIndex],
+                              readOnly: cardIndex == 2
+                                  ? true
+                                  : !dispenserController
+                                      .textFieldsEnabled[widget.pageIndex]
+                                          [cardIndex]
+                                      .value,
+                              decoration: InputDecoration(
+                                border: const OutlineInputBorder(),
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 10, horizontal: 10),
+                                hintText: 'Ingrese numeración de la bomba',
+                                fillColor: themeController.isDarkMode
+                                    ? Colors.grey[800]
+                                    : Colors.white,
+                                filled: true,
+                                hintStyle: TextStyle(
+                                  fontSize: 12,
+                                  color: themeController.isDarkMode
+                                      ? Colors.grey[400]
+                                      : Colors.grey[600],
+                                ),
+                              ),
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 25.0,
+                                color: themeController.isDarkMode
+                                    ? Colors.white
+                                    : Colors.black87,
+                              ),
+                              textAlign: TextAlign.center,
+                            )),
                       ],
                     ),
                   ),
@@ -295,8 +275,12 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       width: double.infinity,
                       height: 120,
                       child: Obx(() => ElevatedButton(
-                            onPressed: widget.buttonsEnabled.value
-                                ? _onThumbUpPressed
+                            onPressed: dispenserController
+                                    .buttonsEnabled[widget.pageIndex][cardIndex]
+                                    .value
+                                ? () => dispenserController
+                                    .validateAndDisableFields(
+                                        widget.pageIndex, cardIndex)
                                 : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.purple[800],
