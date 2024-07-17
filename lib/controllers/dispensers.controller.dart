@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:decimal/decimal.dart';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 
@@ -54,32 +55,36 @@ class DispenserController extends GetxController {
       final String assignmentHoseId =
           dispenserReader['assignmentHoseId']['_id'];
 
+      // Función auxiliar para sanitizar y convertir a Decimal
+      Decimal sanitizeAndParse(String value) {
+        String sanitized = value.replaceAll(',', '').trim();
+        return Decimal.parse(sanitized);
+      }
+
+      // Función auxiliar para realizar una resta precisa
+      String subtractPrecise(String a, String b) {
+        var numA = sanitizeAndParse(a);
+        var numB = sanitizeAndParse(b);
+        return (numA - numB).toString();
+      }
+
       // Gallons (CardIndex: 0)
-      double previousNoGallons = double.tryParse(_sanitizeTextField(
-              dispenserReader['actualNoGallons'].toString())) ??
-          0.0;
-      double actualNoGallons = double.tryParse(
-              _sanitizeTextField(textControllers[pageIndex][0].text)) ??
-          0.0;
-      double totalNoGallons = actualNoGallons - previousNoGallons;
+      String previousNoGallons = dispenserReader['actualNoGallons'].toString();
+      String actualNoGallons = textControllers[pageIndex][0].text;
+      String totalNoGallons =
+          subtractPrecise(actualNoGallons, previousNoGallons);
 
       // Mechanic (CardIndex: 1)
-      double previousNoMechanic = double.tryParse(_sanitizeTextField(
-              dispenserReader['actualNoMechanic'].toString())) ??
-          0.0;
-      double actualNoMechanic = double.tryParse(
-              _sanitizeTextField(textControllers[pageIndex][1].text)) ??
-          0.0;
-      double totalNoMechanic = actualNoMechanic - previousNoMechanic;
+      String previousNoMechanic =
+          dispenserReader['actualNoMechanic'].toString();
+      String actualNoMechanic = textControllers[pageIndex][1].text;
+      String totalNoMechanic =
+          subtractPrecise(actualNoMechanic, previousNoMechanic);
 
       // Money (CardIndex: 2)
-      double previousNoMoney = double.tryParse(_sanitizeTextField(
-              dispenserReader['actualNoMoney'].toString())) ??
-          0.0;
-      double actualNoMoney = double.tryParse(
-              _sanitizeTextField(textControllers[pageIndex][2].text)) ??
-          0.0;
-      double totalNoMoney = actualNoMoney - previousNoMoney;
+      String previousNoMoney = dispenserReader['actualNoMoney'].toString();
+      String actualNoMoney = textControllers[pageIndex][2].text;
+      String totalNoMoney = subtractPrecise(actualNoMoney, previousNoMoney);
 
       // Print the values to the console
       print('Data to be sent to the database:');
@@ -96,19 +101,19 @@ class DispenserController extends GetxController {
 
       // Uncomment the line below to send data to the database
       /*
-      await DispenserReaderService.addNewDispenserReader(
-        previousNoGallons.toInt(),
-        actualNoGallons.toInt(),
-        totalNoGallons.toInt(),
-        previousNoMechanic.toInt(),
-        actualNoMechanic.toInt(),
-        totalNoMechanic.toInt(),
-        previousNoMoney.toInt(),
-        actualNoMoney.toInt(),
-        totalNoMoney.toInt(),
-        assignmentHoseId,
-      );
-      */
+    await DispenserReaderService.addNewDispenserReader(
+      sanitizeAndParse(previousNoGallons).toInt(),
+      sanitizeAndParse(actualNoGallons).toInt(),
+      sanitizeAndParse(totalNoGallons).toInt(),
+      sanitizeAndParse(previousNoMechanic).toInt(),
+      sanitizeAndParse(actualNoMechanic).toInt(),
+      sanitizeAndParse(totalNoMechanic).toInt(),
+      sanitizeAndParse(previousNoMoney).toInt(),
+      sanitizeAndParse(actualNoMoney).toInt(),
+      sanitizeAndParse(totalNoMoney).toInt(),
+      assignmentHoseId,
+    );
+    */
     } catch (e) {
       print('Error sending data to database: $e');
     }
