@@ -51,6 +51,10 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
     super.dispose();
   }
 
+  void _onThumbUpPressed() {
+    dispenserController.sendDataToDatabase(widget.pageIndex);
+  }
+
   @override
   Widget build(BuildContext context) {
     final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -61,6 +65,8 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
         widget.dispenserReader['assignmentHoseId']['sideId']['sideName'];
     final String dispenserCode = widget.dispenserReader['assignmentHoseId']
         ['assignmentId']['dispenserId']['dispenserCode'];
+    final String assignmentHoseId =
+        widget.dispenserReader['assignmentHoseId']['_id'];
 
     return Obx(() => Scaffold(
           key: scaffoldKey,
@@ -87,6 +93,19 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      'Assignment Hose ID: $assignmentHoseId',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: themeController.isDarkMode
+                            ? Colors.white
+                            : Colors.black,
+                      ),
+                    ),
+                  ),
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.22,
                     child: PageView(
@@ -121,9 +140,12 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                         mainPageController: widget.mainPageController,
                         pageIndex: widget.pageIndex,
                         totalPages: widget.totalPages,
-                        clearTextField: calculatorCtrl.clearTextField,
+                        clearTextField: (pageIndex, cardIndex) {
+                          calculatorCtrl.clearTextField(pageIndex, cardIndex);
+                        },
                         currentCardIndex: calculatorCtrl.currentCardIndex.value,
                         enabled: widget.buttonsEnabled.value,
+                        onThumbUpPressed: _onThumbUpPressed,
                       )),
                   if (widget.showCalculatorButtons.value &&
                       widget.buttonsEnabled.value)
@@ -190,6 +212,10 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                     flex: 4,
                     child: Column(
                       children: [
+                        Text(
+                          'PageIndex: ${widget.pageIndex}, CardIndex: $cardIndex, Field: 0',
+                          style: const TextStyle(fontSize: 10),
+                        ),
                         TextField(
                           controller:
                               TextEditingController(text: formatNumber(value)),
@@ -213,6 +239,10 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 5),
+                        Text(
+                          'PageIndex: ${widget.pageIndex}, CardIndex: $cardIndex, Field: 1',
+                          style: const TextStyle(fontSize: 10),
+                        ),
                         TextField(
                           controller: dispenserController
                               .textControllers[widget.pageIndex][cardIndex],
@@ -253,9 +283,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       height: 120,
                       child: Obx(() => ElevatedButton(
                             onPressed: widget.buttonsEnabled.value
-                                ? () {
-                                    // Aquí puedes agregar la lógica para guardar
-                                  }
+                                ? _onThumbUpPressed
                                 : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.purple[800],

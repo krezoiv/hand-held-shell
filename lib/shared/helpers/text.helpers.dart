@@ -32,4 +32,14 @@ class TextHelpers {
 
     return formattedInteger + decimalPart;
   }
+
+  static double parseNumber(String value) {
+    if (value.isEmpty) {
+      return 0.0;
+    }
+    // Eliminar todas las comas
+    final cleanValue = value.replaceAll(',', '');
+    // Intentar convertir a double
+    return double.tryParse(cleanValue) ?? 0.0;
+  }
 }

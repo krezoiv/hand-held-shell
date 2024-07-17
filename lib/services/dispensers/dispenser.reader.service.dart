@@ -28,30 +28,6 @@ class DispenserReaderService {
     }
   }
 
-  static Future<void> saveDispenserReadings(
-      List<Map<String, dynamic>> readings) async {
-    try {
-      final String? token = await AuthService.getToken();
-      if (token == null) throw Exception('Token is null');
-
-      final response = await http.post(
-        Uri.parse('$baseUrl/dispenser-Reader/saveReadings'),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-token': token,
-        },
-        body: json.encode({'readings': readings}),
-      );
-
-      if (response.statusCode != 200) {
-        throw Exception(
-            'Failed to save dispenser readings - StatusCode: ${response.statusCode}, Body: ${response.body}');
-      }
-    } catch (e) {
-      throw Exception('Failed to save dispenser readings: $e');
-    }
-  }
-
   static Future<void> createGeneralDispenserReader() async {
     try {
       final String? token = await AuthService.getToken();
@@ -127,6 +103,51 @@ class DispenserReaderService {
       throw Exception('Failed to add dispenser reader: $e');
     }
   }
-}
 
-//192.168.0.104
+  static Future<AddNewReaderResponse> addNewDispenserReader(
+    int previousNoGallons,
+    int actualNoGallons,
+    int totalNoGallons,
+    int previousNoMechanic,
+    int actualNoMechanic,
+    int totalNoMechanic,
+    int previousNoMoney,
+    int actualNoMoney,
+    int totalNoMoney,
+    String assignmentHoseId,
+  ) async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) throw Exception('Token is null');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/dispenser-Reader/addDispenserReader'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+        body: json.encode({
+          'previousNoGallons': previousNoGallons,
+          'actualNoGallons': actualNoGallons,
+          'totalNoGallons': totalNoGallons,
+          'previousNoMechanic': previousNoMechanic,
+          'actualNoMechanic': actualNoMechanic,
+          'totalNoMechanic': totalNoMechanic,
+          'previousNoMoney': previousNoMoney,
+          'actualNoMoney': actualNoMoney,
+          'totalNoMoney': totalNoMoney,
+          'assignmentHoseId': assignmentHoseId,
+        }),
+      );
+
+      if (response.statusCode == 201) {
+        return AddNewReaderResponse.fromJson(json.decode(response.body));
+      } else {
+        throw Exception(
+            'Failed to add new dispenser reader - StatusCode: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Failed to add new dispenser reader: $e');
+    }
+  }
+}
