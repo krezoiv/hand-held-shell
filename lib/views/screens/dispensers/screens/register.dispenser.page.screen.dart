@@ -43,6 +43,13 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
     calculatorCtrl = Get.put(RegisterButtonsController());
     calculatorCtrl.setDispenserController(dispenserController);
     verticalPageController = PageController();
+
+    // Set initial focus
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context)
+          .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
+    });
+
     widget.mainPageController.addListener(_onPageChanged);
   }
 
@@ -56,7 +63,8 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   void _onPageChanged() {
     if (widget.mainPageController.page == widget.pageIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(dispenserController.focusNode);
+        FocusScope.of(context)
+            .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
       });
     }
   }
@@ -106,6 +114,13 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       controller: verticalPageController,
                       onPageChanged: (index) {
                         calculatorCtrl.setCurrentCardIndex(index);
+                        if (index == 0) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            FocusScope.of(context).requestFocus(
+                                dispenserController.focusNodes[widget.pageIndex]
+                                    [0]);
+                          });
+                        }
                       },
                       children: [
                         _buildCard(
@@ -234,12 +249,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                                   .textControllers[widget.pageIndex][cardIndex],
                               focusNode: dispenserController
                                   .focusNodes[widget.pageIndex][cardIndex],
-                              readOnly: cardIndex == 2
-                                  ? true
-                                  : !dispenserController
-                                      .textFieldsEnabled[widget.pageIndex]
-                                          [cardIndex]
-                                      .value,
+                              readOnly: true,
                               decoration: InputDecoration(
                                 border: const OutlineInputBorder(),
                                 contentPadding: const EdgeInsets.symmetric(
@@ -264,6 +274,9 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                                     : Colors.black87,
                               ),
                               textAlign: TextAlign.center,
+                              onTap: () {
+                                // Do nothing to prevent keyboard from showing
+                              },
                             )),
                       ],
                     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/controllers/login.controller.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
@@ -8,6 +9,12 @@ import 'package:hand_held_shell/config/routes/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Bloquear la orientación de la aplicación a portrait
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 
   // Inicializa el entorno (descomenta si es necesario)
   // await Environment.initEnvironment();
