@@ -89,6 +89,7 @@ class NewRegisterDispenserScreen extends StatelessWidget {
                     icon: Icon(
                       CupertinoIcons.folder_badge_plus,
                       size: 60,
+                      color: Colors.teal.shade600,
                     ),
                     padding: EdgeInsets.zero,
                     constraints: BoxConstraints(),
