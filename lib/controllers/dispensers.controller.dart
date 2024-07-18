@@ -14,6 +14,8 @@ class DispenserController extends GetxController {
   final showCalculatorButtons = false.obs;
   final RxList<List<RxBool>> buttonsEnabled = <List<RxBool>>[].obs;
   final RxList<List<RxBool>> textFieldsEnabled = <List<RxBool>>[].obs;
+  final RxBool sendButtonEnabled = false.obs;
+
   final FocusNode focusNode = FocusNode();
 
   @override
@@ -77,6 +79,9 @@ class DispenserController extends GetxController {
   Decimal sanitizeAndParse(String value) {
     // Sanitize the text field value before parsing to Decimal
     String sanitized = _sanitizeTextField(value);
+    if (sanitized.isEmpty) {
+      throw FormatException("Empty field");
+    }
     print('Sanitized value: $sanitized'); // Debugging
     return Decimal.parse(sanitized);
   }
@@ -84,61 +89,96 @@ class DispenserController extends GetxController {
   void validateAndDisableFields(int pageIndex, int cardIndex) {
     final dispenserReader = dispenserReaders[pageIndex];
 
-    // Gallons (CardIndex: 0)
-    if (cardIndex == 0) {
-      String previousNoGallons = dispenserReader['actualNoGallons'].toString();
-      String actualNoGallons =
-          _sanitizeTextField(textControllers[pageIndex][0].text);
+    try {
+      // Gallons (CardIndex: 0)
+      if (cardIndex == 0) {
+        String previousNoGallons =
+            dispenserReader['actualNoGallons'].toString();
+        String actualNoGallons =
+            _sanitizeTextField(textControllers[pageIndex][0].text);
 
-      if (sanitizeAndParse(actualNoGallons) <
-          sanitizeAndParse(previousNoGallons)) {
-        showValidationAlert(
-            pageIndex, cardIndex, "El campo no puede ser menor al anterior");
-        return;
+        if (actualNoGallons.isEmpty) {
+          showValidationAlert(
+              pageIndex, cardIndex, "El campo no puede estar vacío");
+          return;
+        }
+
+        if (sanitizeAndParse(actualNoGallons) <
+            sanitizeAndParse(previousNoGallons)) {
+          showValidationAlert(
+              pageIndex, cardIndex, "El campo no puede ser menor al anterior");
+          return;
+        }
+
+        buttonsEnabled[pageIndex][cardIndex].value = false;
+        textFieldsEnabled[pageIndex][0].value = false;
+        textFieldsEnabled[pageIndex][1].value = false;
+        focusNextField(pageIndex, 1);
       }
 
-      buttonsEnabled[pageIndex][cardIndex].value = false;
-      textFieldsEnabled[pageIndex][0].value = false;
-      textFieldsEnabled[pageIndex][1].value = false;
-      focusNextField(pageIndex, 1);
-    }
+      // Mechanic (CardIndex: 1)
+      if (cardIndex == 1) {
+        String previousNoMechanic =
+            dispenserReader['actualNoMechanic'].toString();
+        String actualNoMechanic =
+            _sanitizeTextField(textControllers[pageIndex][1].text);
 
-    // Mechanic (CardIndex: 1)
-    if (cardIndex == 1) {
-      String previousNoMechanic =
-          dispenserReader['actualNoMechanic'].toString();
-      String actualNoMechanic =
-          _sanitizeTextField(textControllers[pageIndex][1].text);
+        if (actualNoMechanic.isEmpty) {
+          showValidationAlert(
+              pageIndex, cardIndex, "El campo no puede estar vacío");
+          return;
+        }
 
-      if (sanitizeAndParse(actualNoMechanic) <
-          sanitizeAndParse(previousNoMechanic)) {
-        showValidationAlert(
-            pageIndex, cardIndex, "El campo no puede ser menor al anterior");
-        return;
+        if (sanitizeAndParse(actualNoMechanic) <
+            sanitizeAndParse(previousNoMechanic)) {
+          showValidationAlert(
+              pageIndex, cardIndex, "El campo no puede ser menor al anterior");
+          return;
+        }
+
+        buttonsEnabled[pageIndex][cardIndex].value = false;
+        textFieldsEnabled[pageIndex][0].value = false;
+        textFieldsEnabled[pageIndex][1].value = false;
+        focusNextField(pageIndex, 2);
       }
 
-      buttonsEnabled[pageIndex][cardIndex].value = false;
-      textFieldsEnabled[pageIndex][0].value = false;
-      textFieldsEnabled[pageIndex][1].value = false;
-      focusNextField(pageIndex, 2);
-    }
+      // Money (CardIndex: 2)
+      if (cardIndex == 2) {
+        String previousNoMoney = dispenserReader['actualNoMoney'].toString();
+        String actualNoMoney =
+            _sanitizeTextField(textControllers[pageIndex][2].text);
 
-    // Money (CardIndex: 2)
-    if (cardIndex == 2) {
-      String previousNoMoney = dispenserReader['actualNoMoney'].toString();
-      String actualNoMoney =
-          _sanitizeTextField(textControllers[pageIndex][2].text);
+        if (actualNoMoney.isEmpty) {
+          showValidationAlert(
+              pageIndex, cardIndex, "El campo no puede estar vacío");
+          return;
+        }
 
-      if (sanitizeAndParse(actualNoMoney) < sanitizeAndParse(previousNoMoney)) {
-        showValidationAlert(
-            pageIndex, cardIndex, "El campo no puede ser menor al anterior");
-        return;
+        if (sanitizeAndParse(actualNoMoney) <
+            sanitizeAndParse(previousNoMoney)) {
+          showValidationAlert(
+              pageIndex, cardIndex, "El campo no puede ser menor al anterior");
+          return;
+        }
+
+        buttonsEnabled[pageIndex][cardIndex].value = false;
+        textFieldsEnabled[pageIndex][0].value = false;
+        textFieldsEnabled[pageIndex][1].value = false;
       }
 
-      buttonsEnabled[pageIndex][cardIndex].value = false;
-      textFieldsEnabled[pageIndex][0].value = false;
-      textFieldsEnabled[pageIndex][1].value = false;
+      // Verificar si todos los botones están deshabilitados
+      checkAllButtonsDisabled(pageIndex);
+    } catch (e) {
+      print('Error in validation: $e');
+      showValidationAlert(
+          pageIndex, cardIndex, "El campo no puede estar vacío");
     }
+  }
+
+  void checkAllButtonsDisabled(int pageIndex) {
+    bool allDisabled =
+        buttonsEnabled[pageIndex].every((button) => !button.value);
+    sendButtonEnabled.value = allDisabled;
   }
 
   Future<void> sendDataToDatabase(int pageIndex) async {

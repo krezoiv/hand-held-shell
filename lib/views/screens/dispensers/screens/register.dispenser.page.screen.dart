@@ -153,8 +153,14 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                         },
                         currentCardIndex: calculatorCtrl.currentCardIndex.value,
                         enabled: widget.buttonsEnabled.value,
-                        onThumbUpPressed: () => dispenserController
-                            .sendDataToDatabase(widget.pageIndex),
+                        onThumbUpPressed: () {
+                          if (dispenserController.sendButtonEnabled.value) {
+                            dispenserController
+                                .sendDataToDatabase(widget.pageIndex);
+                          } else {
+                            _showMissingDataDialog();
+                          }
+                        },
                       )),
                   if (widget.showCalculatorButtons.value &&
                       widget.buttonsEnabled.value)
@@ -320,6 +326,27 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _showMissingDataDialog() {
+    Get.dialog(
+      AlertDialog(
+        title: const Text("Falta de datos"),
+        content: const Text("Faltan datos por ingresar."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back();
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                FocusScope.of(context).requestFocus(
+                    dispenserController.focusNodes[widget.pageIndex][0]);
+              });
+            },
+            child: const Text("OK"),
+          ),
+        ],
       ),
     );
   }
