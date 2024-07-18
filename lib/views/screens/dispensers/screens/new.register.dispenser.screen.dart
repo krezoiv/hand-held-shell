@@ -6,16 +6,36 @@ import 'package:hand_held_shell/controllers/dispensers.controller.dart';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
 import 'package:hand_held_shell/views/screens/dispensers/screens/register.dispenser.page.screen.dart';
 
-class NewRegisterDispenserScreen extends StatelessWidget {
-  NewRegisterDispenserScreen({super.key});
+class NewRegisterDispenserScreen extends StatefulWidget {
+  NewRegisterDispenserScreen({Key? key}) : super(key: key);
 
+  @override
+  _NewRegisterDispenserScreenState createState() =>
+      _NewRegisterDispenserScreenState();
+}
+
+class _NewRegisterDispenserScreenState
+    extends State<NewRegisterDispenserScreen> {
+  final DispenserController dispenserController =
+      Get.find<DispenserController>();
   final RxBool showCalculatorButtons = false.obs;
   final RxBool buttonsEnabled = false.obs;
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final dispenserController = Get.put(DispenserController());
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Digitar Bombas'),
@@ -54,10 +74,30 @@ class NewRegisterDispenserScreen extends StatelessWidget {
       ),
       body: Stack(
         children: [
-          DispenserPageView(
-            showCalculatorButtons: showCalculatorButtons,
-            buttonsEnabled: buttonsEnabled,
-          ),
+          Obx(() {
+            if (dispenserController.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            } else {
+              return PageView.builder(
+                controller: _pageController,
+                itemCount: dispenserController.dispenserReaders.length,
+                onPageChanged: (index) {
+                  dispenserController.setFocusToFirstField(index);
+                },
+                itemBuilder: (context, index) {
+                  return RegisterDispenserPage(
+                    pageIndex: index,
+                    dispenserReader:
+                        dispenserController.dispenserReaders[index],
+                    totalPages: dispenserController.dispenserReaders.length,
+                    mainPageController: _pageController,
+                    showCalculatorButtons: showCalculatorButtons,
+                    buttonsEnabled: buttonsEnabled,
+                  );
+                },
+              );
+            }
+          }),
           Positioned(
             right: 36,
             bottom: 150,
@@ -143,43 +183,5 @@ class NewRegisterDispenserScreen extends StatelessWidget {
         titlePadding: EdgeInsets.only(top: 20, bottom: 20),
       );
     }
-  }
-}
-
-class DispenserPageView extends StatelessWidget {
-  final RxBool showCalculatorButtons;
-  final RxBool buttonsEnabled;
-
-  const DispenserPageView({
-    super.key,
-    required this.showCalculatorButtons,
-    required this.buttonsEnabled,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final PageController pageController = PageController();
-    final DispenserController controller = Get.find<DispenserController>();
-
-    return Obx(() {
-      if (controller.isLoading.value) {
-        return const Center(child: CircularProgressIndicator());
-      } else {
-        return PageView.builder(
-          controller: pageController,
-          itemCount: controller.dispenserReaders.length,
-          itemBuilder: (context, index) {
-            return RegisterDispenserPage(
-              pageIndex: index,
-              mainPageController: pageController,
-              dispenserReader: controller.dispenserReaders[index],
-              totalPages: controller.dispenserReaders.length,
-              showCalculatorButtons: showCalculatorButtons,
-              buttonsEnabled: buttonsEnabled,
-            );
-          },
-        );
-      }
-    });
   }
 }

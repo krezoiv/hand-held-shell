@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:flutter/cupertino.dart';
 
 class NavigationButtons extends StatelessWidget {
   final PageController mainPageController;
   final int pageIndex;
   final int totalPages;
-  final void Function(int, int) clearTextField;
+  final Function(int, int) clearTextField;
   final int currentCardIndex;
   final bool enabled;
   final VoidCallback onThumbUpPressed;
@@ -25,58 +24,39 @@ class NavigationButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildNavigationButton(
-          icon: Icons.arrow_back,
-          backgroundColor: Colors.blue[600]!,
-          onPressed: pageIndex > 0
-              ? () {
-                  mainPageController.previousPage(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.ease,
-                  );
-                }
-              : null,
+        ElevatedButton(
+          onPressed: pageIndex > 0 ? () => _changePage(pageIndex - 1) : null,
+          child: Icon(Icons.arrow_back),
         ),
-        _buildNavigationButton(
-          icon: CupertinoIcons.hand_thumbsup,
-          backgroundColor: Colors.green[600]!,
+        ElevatedButton(
+          onPressed: enabled
+              ? () => clearTextField(pageIndex, currentCardIndex)
+              : null,
+          child: Icon(Icons.clear),
+        ),
+        ElevatedButton(
           onPressed: enabled ? onThumbUpPressed : null,
+          child: Icon(Icons.thumb_up),
         ),
-        _buildNavigationButton(
-          icon: Icons.arrow_forward,
-          backgroundColor: Colors.blue[600]!,
+        ElevatedButton(
           onPressed: pageIndex < totalPages - 1
-              ? () {
-                  mainPageController.nextPage(
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.ease,
-                  );
-                }
+              ? () => _changePage(pageIndex + 1)
               : null,
+          child: Icon(Icons.arrow_forward),
         ),
       ],
     );
   }
 
-  Widget _buildNavigationButton({
-    required IconData icon,
-    required Color backgroundColor,
-    required VoidCallback? onPressed,
-  }) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        shape: CircleBorder(),
-        padding: EdgeInsets.all(16),
-      ),
-      child: Icon(
-        icon,
-        color: Colors.white,
-        size: 30,
-      ),
-    );
+  void _changePage(int newPage) {
+    if (mainPageController.hasClients) {
+      mainPageController.animateToPage(
+        newPage,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hand_held_shell/controllers/dispensers.controller.dart';
 import 'package:hand_held_shell/controllers/login.controller.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/services/auth/users.service.dart';
@@ -24,6 +25,7 @@ void main() async {
   Get.put(ChatService());
   Get.put(SocketService(), permanent: true);
   Get.put(UserService());
+  Get.lazyPut(() => DispenserController());
 
   // Conecta el socket después de inicializar los servicios
   final socketService = Get.find<SocketService>();

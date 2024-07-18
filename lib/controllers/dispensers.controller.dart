@@ -60,6 +60,10 @@ class DispenserController extends GetxController {
           (index) => List.generate(3, (_) => true.obs),
         ),
       );
+
+      if (readers.isNotEmpty) {
+        setFocusToFirstField(0);
+      }
     } catch (e) {
       print('Error fetching dispenser readers: $e');
     } finally {
@@ -67,17 +71,39 @@ class DispenserController extends GetxController {
     }
   }
 
+  void setFocusToFirstField(int pageIndex) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (focusNodes.isNotEmpty &&
+          focusNodes[pageIndex].isNotEmpty &&
+          focusNodes[pageIndex][0].canRequestFocus) {
+        // Asegurarse de que todos los campos estén habilitados
+        for (int i = 0; i < 3; i++) {
+          textFieldsEnabled[pageIndex][i].value = true;
+          buttonsEnabled[pageIndex][i].value = true;
+        }
+        // Establecer el foco en el primer campo (cardIndex: 0)
+        focusNodes[pageIndex][0].requestFocus();
+        // Limpiar todos los campos de texto
+        for (int i = 0; i < 3; i++) {
+          textControllers[pageIndex][i].clear();
+        }
+      }
+    });
+  }
+
   void updateTextField(int pageIndex, int cardIndex, String value) {
     textControllers[pageIndex][cardIndex].text = value;
+    textControllers[pageIndex][cardIndex].selection =
+        TextSelection.fromPosition(
+      TextPosition(offset: value.length),
+    );
   }
 
   String _sanitizeTextField(String text) {
-    // Remove commas from the text field value and trim any extra whitespace
-    return text.replaceAll(',', '').trim();
+    return text.replaceAll(',', '').replaceAll(' ', '').trim();
   }
 
   Decimal sanitizeAndParse(String value) {
-    // Sanitize the text field value before parsing to Decimal
     String sanitized = _sanitizeTextField(value);
     if (sanitized.isEmpty) {
       throw FormatException("Empty field");
@@ -103,8 +129,10 @@ class DispenserController extends GetxController {
           return;
         }
 
-        if (sanitizeAndParse(actualNoGallons) <
-            sanitizeAndParse(previousNoGallons)) {
+        Decimal prevGallons = sanitizeAndParse(previousNoGallons);
+        Decimal currGallons = sanitizeAndParse(actualNoGallons);
+
+        if (currGallons < prevGallons) {
           showValidationAlert(
               pageIndex, cardIndex, "El campo no puede ser menor al anterior");
           return;
@@ -112,7 +140,6 @@ class DispenserController extends GetxController {
 
         buttonsEnabled[pageIndex][cardIndex].value = false;
         textFieldsEnabled[pageIndex][0].value = false;
-        textFieldsEnabled[pageIndex][1].value = false;
         focusNextField(pageIndex, 1);
       }
 
@@ -129,15 +156,16 @@ class DispenserController extends GetxController {
           return;
         }
 
-        if (sanitizeAndParse(actualNoMechanic) <
-            sanitizeAndParse(previousNoMechanic)) {
+        Decimal prevMechanic = sanitizeAndParse(previousNoMechanic);
+        Decimal currMechanic = sanitizeAndParse(actualNoMechanic);
+
+        if (currMechanic < prevMechanic) {
           showValidationAlert(
               pageIndex, cardIndex, "El campo no puede ser menor al anterior");
           return;
         }
 
         buttonsEnabled[pageIndex][cardIndex].value = false;
-        textFieldsEnabled[pageIndex][0].value = false;
         textFieldsEnabled[pageIndex][1].value = false;
         focusNextField(pageIndex, 2);
       }
@@ -154,19 +182,19 @@ class DispenserController extends GetxController {
           return;
         }
 
-        if (sanitizeAndParse(actualNoMoney) <
-            sanitizeAndParse(previousNoMoney)) {
+        Decimal prevMoney = sanitizeAndParse(previousNoMoney);
+        Decimal currMoney = sanitizeAndParse(actualNoMoney);
+
+        if (currMoney < prevMoney) {
           showValidationAlert(
               pageIndex, cardIndex, "El campo no puede ser menor al anterior");
           return;
         }
 
         buttonsEnabled[pageIndex][cardIndex].value = false;
-        textFieldsEnabled[pageIndex][0].value = false;
-        textFieldsEnabled[pageIndex][1].value = false;
+        textFieldsEnabled[pageIndex][2].value = false;
       }
 
-      // Verificar si todos los botones están deshabilitados
       checkAllButtonsDisabled(pageIndex);
     } catch (e) {
       print('Error in validation: $e');
