@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:hand_held_shell/config/global/routes.path.dart';
+import 'package:hand_held_shell/controllers/dispensers.controller.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:hand_held_shell/shared/helpers/show.alert.dart';
 
@@ -56,9 +57,19 @@ class LoginController extends GetxController {
     }
   }
 
-  void logout() {
+  void logout() async {
+    // Intentar obtener la instancia de DispenserController
+
+    // Si hay un error (por ejemplo, si DispenserController no está disponible),
+    // aún así cerramos la sesión
     socketService.disconnect();
-    AuthService.deleteToken();
+    await AuthService.deleteToken();
+    if (Get.isRegistered<DispenserController>()) {
+      final dispenserController = Get.find<DispenserController>();
+      await dispenserController.clearSharedPreferences();
+      dispenserController
+          .resetState(); // Implementa este método en DispenserController
+    }
     Get.offAllNamed(RoutesPaths.loginHome);
   }
 }

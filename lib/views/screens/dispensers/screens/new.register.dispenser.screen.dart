@@ -16,8 +16,7 @@ class NewRegisterDispenserScreen extends StatefulWidget {
 
 class _NewRegisterDispenserScreenState
     extends State<NewRegisterDispenserScreen> {
-  final DispenserController dispenserController =
-      Get.find<DispenserController>();
+  late DispenserController dispenserController;
   final RxBool showCalculatorButtons = false.obs;
   final RxBool buttonsEnabled = false.obs;
   late PageController _pageController;
@@ -25,8 +24,14 @@ class _NewRegisterDispenserScreenState
   @override
   void initState() {
     super.initState();
+
     _pageController = PageController();
     Get.put(_pageController, tag: 'dispenser_page_controller');
+
+    if (!Get.isRegistered<DispenserController>()) {
+      Get.put(DispenserController());
+    }
+    dispenserController = Get.find<DispenserController>();
   }
 
   @override

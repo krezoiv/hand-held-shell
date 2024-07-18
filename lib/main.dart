@@ -7,6 +7,7 @@ import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/services/auth/users.service.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:hand_held_shell/config/routes/routes.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +18,7 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  await SharedPreferences.getInstance();
   // Inicializa el entorno (descomenta si es necesario)
   // await Environment.initEnvironment();
 

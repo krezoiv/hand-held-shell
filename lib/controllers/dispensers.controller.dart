@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:decimal/decimal.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 
@@ -23,7 +25,84 @@ class DispenserController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchDispenserReaders();
+    loadState();
+  }
+
+  Future<void> saveState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final state = {
+        'dispenserReaders':
+            dispenserReaders.map((reader) => json.encode(reader)).toList(),
+        'dataSubmitted': dataSubmitted.map((rx) => rx.value).toList(),
+        'showCalculatorButtons': showCalculatorButtons.value,
+        'sendButtonEnabled': sendButtonEnabled.value,
+        'buttonsEnabled': buttonsEnabled
+            .map((list) => list.map((rx) => rx.value).toList())
+            .toList(),
+        'textFieldsEnabled': textFieldsEnabled
+            .map((list) => list.map((rx) => rx.value).toList())
+            .toList(),
+        'textControllers': textControllers
+            .map((list) => list.map((controller) => controller.text).toList())
+            .toList(),
+      };
+      await prefs.setString('dispenserState', json.encode(state));
+    } catch (e) {
+      print('Error saving state: $e');
+    }
+  }
+
+  Future<void> loadState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedState = prefs.getString('dispenserState');
+      if (savedState != null) {
+        final state = json.decode(savedState);
+
+        dispenserReaders.assignAll(
+            state['dispenserReaders'].map((r) => json.decode(r)).toList());
+
+        // Convertir explícitamente a RxBool
+        dataSubmitted.assignAll((state['dataSubmitted'] as List)
+            .map((v) => RxBool(v as bool))
+            .toList());
+
+        showCalculatorButtons.value = state['showCalculatorButtons'] as bool;
+        sendButtonEnabled.value = state['sendButtonEnabled'] as bool;
+
+        // Convertir explícitamente a RxBool para buttonsEnabled y textFieldsEnabled
+        buttonsEnabled.assignAll((state['buttonsEnabled'] as List)
+            .map(
+                (list) => (list as List).map((v) => RxBool(v as bool)).toList())
+            .toList());
+
+        textFieldsEnabled.assignAll((state['textFieldsEnabled'] as List)
+            .map(
+                (list) => (list as List).map((v) => RxBool(v as bool)).toList())
+            .toList());
+
+        textControllers.assignAll((state['textControllers'] as List)
+            .map((list) => (list as List)
+                .map((text) => TextEditingController(text: text as String))
+                .toList())
+            .toList());
+
+        focusNodes.assignAll(
+          List.generate(
+            dispenserReaders.length,
+            (index) => List.generate(3, (_) => FocusNode()),
+          ),
+        );
+
+        isLoading.value = false;
+      } else {
+        await fetchDispenserReaders();
+      }
+    } catch (e) {
+      print('Error loading state: $e');
+      await fetchDispenserReaders(); // Fallback si no se puede cargar el estado
+    }
   }
 
   Future<void> fetchDispenserReaders() async {
@@ -74,6 +153,7 @@ class DispenserController extends GetxController {
       print('Error fetching dispenser readers: $e');
     } finally {
       isLoading.value = false;
+      saveState();
     }
   }
 
@@ -91,6 +171,7 @@ class DispenserController extends GetxController {
         focusNodes[pageIndex][0].requestFocus();
       }
     });
+    saveState();
   }
 
   void updateTextField(int pageIndex, int cardIndex, String value) {
@@ -99,6 +180,7 @@ class DispenserController extends GetxController {
         TextSelection.fromPosition(
       TextPosition(offset: value.length),
     );
+    saveState();
   }
 
   String _sanitizeTextField(String text) {
@@ -202,12 +284,14 @@ class DispenserController extends GetxController {
       showValidationAlert(
           pageIndex, cardIndex, "El campo no puede estar vacío");
     }
+    saveState();
   }
 
   void checkAllButtonsDisabled(int pageIndex) {
     bool allDisabled =
         buttonsEnabled[pageIndex].every((button) => !button.value);
     sendButtonEnabled.value = allDisabled;
+    saveState();
   }
 
   Future<void> sendDataToDatabase(int pageIndex) async {
@@ -311,6 +395,7 @@ class DispenserController extends GetxController {
       print('Error sending data to database: $e');
       Get.snackbar('Error', 'No se pudo enviar los datos. Intente nuevamente.');
     }
+    saveState();
   }
 
   void focusNextField(int pageIndex, int cardIndex) {
@@ -327,6 +412,28 @@ class DispenserController extends GetxController {
       duration: Duration(seconds: 3),
     );
     focusNodes[pageIndex][cardIndex].requestFocus();
+  }
+
+  Future<void> clearSharedPreferences() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('dispenserState');
+      print('SharedPreferences cleared successfully');
+    } catch (e) {
+      print('Error clearing SharedPreferences: $e');
+    }
+  }
+
+  void resetState() {
+    dispenserReaders.clear();
+    isLoading.value = true;
+    textControllers.clear();
+    focusNodes.clear();
+    showCalculatorButtons.value = false;
+    buttonsEnabled.clear();
+    textFieldsEnabled.clear();
+    sendButtonEnabled.value = false;
+    dataSubmitted.clear();
   }
 
   @override
