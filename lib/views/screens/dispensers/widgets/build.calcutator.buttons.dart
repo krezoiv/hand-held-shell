@@ -23,13 +23,13 @@ class BuildCalculatorButtons extends GetView<RegisterButtonsController> {
           _buildCalculatorRow(['4', '5', '6']),
           SizedBox(height: 5),
           _buildCalculatorRow(['1', '2', '3']),
-          _buildCalculatorRow(['0', '.', 'C']),
+          _buildCalculatorRow(['0', '.', 'C'], lastRow: true),
         ],
       ),
     );
   }
 
-  Widget _buildCalculatorRow(List<String> numbers) {
+  Widget _buildCalculatorRow(List<String> numbers, {bool lastRow = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: numbers
@@ -42,6 +42,7 @@ class BuildCalculatorButtons extends GetView<RegisterButtonsController> {
                       controller.addNumber(
                           number, pageIndex, controller.currentCardIndex.value);
                     },
+                    bgColor: lastRow && number == 'C' ? Colors.orange : null,
                   ),
                 ),
               ))

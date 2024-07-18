@@ -18,14 +18,14 @@ class RegisterDispenserPage extends StatefulWidget {
   final RxBool buttonsEnabled;
 
   const RegisterDispenserPage({
-    super.key,
+    Key? key,
     required this.pageIndex,
     required this.dispenserReader,
     required this.totalPages,
     required this.mainPageController,
     required this.showCalculatorButtons,
     required this.buttonsEnabled,
-  });
+  }) : super(key: key);
 
   @override
   _RegisterDispenserPageState createState() => _RegisterDispenserPageState();
@@ -152,18 +152,28 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                           calculatorCtrl.clearTextField(pageIndex, cardIndex);
                         },
                         currentCardIndex: calculatorCtrl.currentCardIndex.value,
-                        enabled: widget.buttonsEnabled.value,
+                        enabled: widget.buttonsEnabled.value &&
+                            !dispenserController
+                                .dataSubmitted[widget.pageIndex].value,
                         onThumbUpPressed: () {
-                          if (dispenserController.sendButtonEnabled.value) {
+                          if (dispenserController.sendButtonEnabled.value &&
+                              !dispenserController
+                                  .dataSubmitted[widget.pageIndex].value) {
                             dispenserController
                                 .sendDataToDatabase(widget.pageIndex);
+                          } else if (dispenserController
+                              .dataSubmitted[widget.pageIndex].value) {
+                            Get.snackbar('Información',
+                                'Los datos ya han sido enviados.');
                           } else {
                             _showMissingDataDialog();
                           }
                         },
                       )),
                   if (widget.showCalculatorButtons.value &&
-                      widget.buttonsEnabled.value)
+                      widget.buttonsEnabled.value &&
+                      !dispenserController
+                          .dataSubmitted[widget.pageIndex].value)
                     BuildCalculatorButtons(
                       pageIndex: widget.pageIndex,
                     ),
@@ -256,14 +266,19 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                               focusNode: dispenserController
                                   .focusNodes[widget.pageIndex][cardIndex],
                               readOnly: true,
+                              enabled: !dispenserController
+                                  .dataSubmitted[widget.pageIndex].value,
                               decoration: InputDecoration(
                                 border: const OutlineInputBorder(),
                                 contentPadding: const EdgeInsets.symmetric(
                                     vertical: 10, horizontal: 10),
                                 hintText: 'Ingrese numeración de la bomba',
-                                fillColor: themeController.isDarkMode
-                                    ? Colors.grey[800]
-                                    : Colors.white,
+                                fillColor: dispenserController
+                                        .dataSubmitted[widget.pageIndex].value
+                                    ? Colors.grey[300]
+                                    : (themeController.isDarkMode
+                                        ? Colors.grey[800]
+                                        : Colors.white),
                                 filled: true,
                                 hintStyle: TextStyle(
                                   fontSize: 12,
@@ -295,8 +310,11 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       height: 120,
                       child: Obx(() => ElevatedButton(
                             onPressed: dispenserController
-                                    .buttonsEnabled[widget.pageIndex][cardIndex]
-                                    .value
+                                        .buttonsEnabled[widget.pageIndex]
+                                            [cardIndex]
+                                        .value &&
+                                    !dispenserController
+                                        .dataSubmitted[widget.pageIndex].value
                                 ? () => dispenserController
                                     .validateAndDisableFields(
                                         widget.pageIndex, cardIndex)

@@ -3,25 +3,28 @@ import 'package:get/get.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 
 class CalculatorButton extends StatelessWidget {
-  final Color bgColor;
+  final Color? bgColor;
   final bool big;
   final String text;
   final VoidCallback onPressed;
 
   const CalculatorButton({
     super.key,
-    Color? bgColor,
+    this.bgColor,
     this.big = false,
     required this.text,
     required this.onPressed,
-  }) : bgColor = bgColor ?? const Color(0xff333333);
+  });
 
   @override
   Widget build(BuildContext context) {
     final themeController = Get.find<ThemeController>();
     final buttonStyle = TextButton.styleFrom(
       foregroundColor: Colors.white,
-      backgroundColor: themeController.isDarkMode ? bgColor : Colors.blue[900],
+      backgroundColor: bgColor ??
+          (themeController.isDarkMode
+              ? const Color(0xff333333)
+              : Colors.blue[900]),
       shape: const StadiumBorder(),
     );
 

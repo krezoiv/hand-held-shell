@@ -16,6 +16,8 @@ class DispenserController extends GetxController {
   final RxList<List<RxBool>> textFieldsEnabled = <List<RxBool>>[].obs;
   final RxBool sendButtonEnabled = false.obs;
 
+  final RxList<RxBool> dataSubmitted = <RxBool>[].obs;
+
   final FocusNode focusNode = FocusNode();
 
   @override
@@ -61,6 +63,10 @@ class DispenserController extends GetxController {
         ),
       );
 
+      dataSubmitted.assignAll(
+        List.generate(readers.length, (_) => false.obs),
+      );
+
       if (readers.isNotEmpty) {
         setFocusToFirstField(0);
       }
@@ -76,17 +82,13 @@ class DispenserController extends GetxController {
       if (focusNodes.isNotEmpty &&
           focusNodes[pageIndex].isNotEmpty &&
           focusNodes[pageIndex][0].canRequestFocus) {
-        // Asegurarse de que todos los campos estén habilitados
-        for (int i = 0; i < 3; i++) {
-          textFieldsEnabled[pageIndex][i].value = true;
-          buttonsEnabled[pageIndex][i].value = true;
+        if (!dataSubmitted[pageIndex].value) {
+          for (int i = 0; i < 3; i++) {
+            textFieldsEnabled[pageIndex][i].value = true;
+            buttonsEnabled[pageIndex][i].value = true;
+          }
         }
-        // Establecer el foco en el primer campo (cardIndex: 0)
         focusNodes[pageIndex][0].requestFocus();
-        // Limpiar todos los campos de texto
-        for (int i = 0; i < 3; i++) {
-          textControllers[pageIndex][i].clear();
-        }
       }
     });
   }
@@ -108,15 +110,16 @@ class DispenserController extends GetxController {
     if (sanitized.isEmpty) {
       throw FormatException("Empty field");
     }
-    print('Sanitized value: $sanitized'); // Debugging
+    print('Sanitized value: $sanitized');
     return Decimal.parse(sanitized);
   }
 
   void validateAndDisableFields(int pageIndex, int cardIndex) {
+    if (dataSubmitted[pageIndex].value) return;
+
     final dispenserReader = dispenserReaders[pageIndex];
 
     try {
-      // Gallons (CardIndex: 0)
       if (cardIndex == 0) {
         String previousNoGallons =
             dispenserReader['actualNoGallons'].toString();
@@ -143,7 +146,6 @@ class DispenserController extends GetxController {
         focusNextField(pageIndex, 1);
       }
 
-      // Mechanic (CardIndex: 1)
       if (cardIndex == 1) {
         String previousNoMechanic =
             dispenserReader['actualNoMechanic'].toString();
@@ -170,7 +172,6 @@ class DispenserController extends GetxController {
         focusNextField(pageIndex, 2);
       }
 
-      // Money (CardIndex: 2)
       if (cardIndex == 2) {
         String previousNoMoney = dispenserReader['actualNoMoney'].toString();
         String actualNoMoney =
@@ -210,32 +211,37 @@ class DispenserController extends GetxController {
   }
 
   Future<void> sendDataToDatabase(int pageIndex) async {
+    if (dataSubmitted[pageIndex].value) return;
+
     try {
+      final String? generalDispenserReaderId =
+          await DispenserReaderService.getLastGeneralDispenserReaderId();
+
+      if (generalDispenserReaderId == null) {
+        throw Exception('No se pudo obtener el último GeneralDispenserReader');
+      }
+
       final dispenserReader = dispenserReaders[pageIndex];
       final String assignmentHoseId =
           dispenserReader['assignmentHoseId']['_id'];
 
-      // Función auxiliar para sanitizar y convertir a Decimal
       Decimal sanitizeAndParse(String value) {
         String sanitized = value.replaceAll(',', '').trim();
         return Decimal.parse(sanitized);
       }
 
-      // Función auxiliar para realizar una resta precisa
       String subtractPrecise(String a, String b) {
         var numA = sanitizeAndParse(a);
         var numB = sanitizeAndParse(b);
         return (numA - numB).toString();
       }
 
-      // Gallons (CardIndex: 0)
       String previousNoGallons = dispenserReader['actualNoGallons'].toString();
       String actualNoGallons =
           _sanitizeTextField(textControllers[pageIndex][0].text);
       String totalNoGallons =
           subtractPrecise(actualNoGallons, previousNoGallons);
 
-      // Mechanic (CardIndex: 1)
       String previousNoMechanic =
           dispenserReader['actualNoMechanic'].toString();
       String actualNoMechanic =
@@ -243,13 +249,11 @@ class DispenserController extends GetxController {
       String totalNoMechanic =
           subtractPrecise(actualNoMechanic, previousNoMechanic);
 
-      // Money (CardIndex: 2)
       String previousNoMoney = dispenserReader['actualNoMoney'].toString();
       String actualNoMoney =
           _sanitizeTextField(textControllers[pageIndex][2].text);
       String totalNoMoney = subtractPrecise(actualNoMoney, previousNoMoney);
 
-      // Print the values to the console
       print('Data to be sent to the database:');
       print('previousNoGallons: $previousNoGallons');
       print('actualNoGallons: $actualNoGallons');
@@ -261,8 +265,9 @@ class DispenserController extends GetxController {
       print('actualNoMoney: $actualNoMoney');
       print('totalNoMoney: $totalNoMoney');
       print('assignmentHoseId: $assignmentHoseId');
+      print('generalDispenserReaderId: $generalDispenserReaderId');
 
-      await DispenserReaderService.addNewDispenserReader(
+      final response = await DispenserReaderService.addNewDispenserReader(
         sanitizeAndParse(previousNoGallons).toBigInt().toInt(),
         sanitizeAndParse(actualNoGallons).toBigInt().toInt(),
         sanitizeAndParse(totalNoGallons).toBigInt().toInt(),
@@ -273,9 +278,33 @@ class DispenserController extends GetxController {
         sanitizeAndParse(actualNoMoney).toBigInt().toInt(),
         sanitizeAndParse(totalNoMoney).toBigInt().toInt(),
         assignmentHoseId,
+        generalDispenserReaderId,
       );
+
+      print('New dispenser reader added: ${response.ok}');
+
+      dataSubmitted[pageIndex] = true.obs;
+
+      for (int i = 0; i < 3; i++) {
+        textFieldsEnabled[pageIndex][i].value = false;
+        buttonsEnabled[pageIndex][i].value = false;
+      }
+
+      sendButtonEnabled.value = false;
+
+      if (pageIndex < dispenserReaders.length - 1) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Get.find<PageController>(tag: 'dispenser_page_controller')
+              .animateToPage(
+            pageIndex + 1,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        });
+      }
     } catch (e) {
       print('Error sending data to database: $e');
+      Get.snackbar('Error', 'No se pudo enviar los datos. Intente nuevamente.');
     }
   }
 

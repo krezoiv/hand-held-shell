@@ -26,10 +26,12 @@ class _NewRegisterDispenserScreenState
   void initState() {
     super.initState();
     _pageController = PageController();
+    Get.put(_pageController, tag: 'dispenser_page_controller');
   }
 
   @override
   void dispose() {
+    Get.delete<PageController>(tag: 'dispenser_page_controller');
     _pageController.dispose();
     super.dispose();
   }

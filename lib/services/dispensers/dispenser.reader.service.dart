@@ -77,30 +77,29 @@ class DispenserReaderService {
     }
   }
 
-  static Future<DispenserReader?> addDispenserReader(
-      DispenserReader reading) async {
+  static Future<String?> getLastGeneralDispenserReaderId() async {
     try {
       final String? token = await AuthService.getToken();
       if (token == null) throw Exception('Token is null');
 
-      final response = await http.post(
-        Uri.parse('$baseUrl/dispenser-Reader/addDispenserReader'),
+      final response = await http.get(
+        Uri.parse('$baseUrl/generalDispenserReader/lastGeneralDispenserId'),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
         },
-        body: json.encode(reading.toJson()),
       );
 
-      if (response.statusCode == 201) {
-        return DispenserReader.fromJson(
-            json.decode(response.body)['newDispenserReader']);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['generalDispenserReader']['generalDispenserReaderId'];
       } else {
         throw Exception(
-            'Failed to add dispenser reader - StatusCode: ${response.statusCode}, Body: ${response.body}');
+            'Failed to get last GeneralDispenserReader - StatusCode: ${response.statusCode}, Body: ${response.body}');
       }
     } catch (e) {
-      throw Exception('Failed to add dispenser reader: $e');
+      print('Error getting last GeneralDispenserReader: $e');
+      return null;
     }
   }
 
@@ -115,6 +114,7 @@ class DispenserReaderService {
     int actualNoMoney,
     int totalNoMoney,
     String assignmentHoseId,
+    String generalDispenserReaderId,
   ) async {
     try {
       final String? token = await AuthService.getToken();
@@ -137,6 +137,7 @@ class DispenserReaderService {
           'actualNoMoney': actualNoMoney,
           'totalNoMoney': totalNoMoney,
           'assignmentHoseId': assignmentHoseId,
+          'generalDispenserReaderId': generalDispenserReaderId,
         }),
       );
 
