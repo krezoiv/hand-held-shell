@@ -233,7 +233,7 @@ class DispenserController extends GetxController {
       String subtractPrecise(String a, String b) {
         var numA = sanitizeAndParse(a);
         var numB = sanitizeAndParse(b);
-        return (numA - numB).toString();
+        return (numA - numB).toStringAsFixed(3); // Mantiene 3 decimales
       }
 
       String previousNoGallons = dispenserReader['actualNoGallons'].toString();
@@ -267,40 +267,45 @@ class DispenserController extends GetxController {
       print('assignmentHoseId: $assignmentHoseId');
       print('generalDispenserReaderId: $generalDispenserReaderId');
 
-      final response = await DispenserReaderService.addNewDispenserReader(
-        sanitizeAndParse(previousNoGallons).toBigInt().toInt(),
-        sanitizeAndParse(actualNoGallons).toBigInt().toInt(),
-        sanitizeAndParse(totalNoGallons).toBigInt().toInt(),
-        sanitizeAndParse(previousNoMechanic).toBigInt().toInt(),
-        sanitizeAndParse(actualNoMechanic).toBigInt().toInt(),
-        sanitizeAndParse(totalNoMechanic).toBigInt().toInt(),
-        sanitizeAndParse(previousNoMoney).toBigInt().toInt(),
-        sanitizeAndParse(actualNoMoney).toBigInt().toInt(),
-        sanitizeAndParse(totalNoMoney).toBigInt().toInt(),
+      final bool success = await DispenserReaderService.addNewDispenserReader(
+        previousNoGallons,
+        actualNoGallons,
+        totalNoGallons,
+        previousNoMechanic,
+        actualNoMechanic,
+        totalNoMechanic,
+        previousNoMoney,
+        actualNoMoney,
+        totalNoMoney,
         assignmentHoseId,
         generalDispenserReaderId,
       );
 
-      print('New dispenser reader added: ${response.ok}');
+      if (success) {
+        print('New dispenser reader added successfully');
+        dataSubmitted[pageIndex] = true.obs;
 
-      dataSubmitted[pageIndex] = true.obs;
+        for (int i = 0; i < 3; i++) {
+          textFieldsEnabled[pageIndex][i].value = false;
+          buttonsEnabled[pageIndex][i].value = false;
+        }
 
-      for (int i = 0; i < 3; i++) {
-        textFieldsEnabled[pageIndex][i].value = false;
-        buttonsEnabled[pageIndex][i].value = false;
-      }
+        sendButtonEnabled.value = false;
 
-      sendButtonEnabled.value = false;
+        if (pageIndex < dispenserReaders.length - 1) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Get.find<PageController>(tag: 'dispenser_page_controller')
+                .animateToPage(
+              pageIndex + 1,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          });
+        }
 
-      if (pageIndex < dispenserReaders.length - 1) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Get.find<PageController>(tag: 'dispenser_page_controller')
-              .animateToPage(
-            pageIndex + 1,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        });
+        Get.snackbar('Éxito', 'Los datos se han enviado correctamente.');
+      } else {
+        throw Exception('Failed to add new dispenser reader');
       }
     } catch (e) {
       print('Error sending data to database: $e');

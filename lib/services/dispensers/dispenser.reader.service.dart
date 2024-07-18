@@ -103,16 +103,16 @@ class DispenserReaderService {
     }
   }
 
-  static Future<AddNewReaderResponse> addNewDispenserReader(
-    int previousNoGallons,
-    int actualNoGallons,
-    int totalNoGallons,
-    int previousNoMechanic,
-    int actualNoMechanic,
-    int totalNoMechanic,
-    int previousNoMoney,
-    int actualNoMoney,
-    int totalNoMoney,
+  static Future<bool> addNewDispenserReader(
+    String previousNoGallons,
+    String actualNoGallons,
+    String totalNoGallons,
+    String previousNoMechanic,
+    String actualNoMechanic,
+    String totalNoMechanic,
+    String previousNoMoney,
+    String actualNoMoney,
+    String totalNoMoney,
     String assignmentHoseId,
     String generalDispenserReaderId,
   ) async {
@@ -127,28 +127,31 @@ class DispenserReaderService {
           'x-token': token,
         },
         body: json.encode({
-          'previousNoGallons': previousNoGallons,
-          'actualNoGallons': actualNoGallons,
-          'totalNoGallons': totalNoGallons,
-          'previousNoMechanic': previousNoMechanic,
-          'actualNoMechanic': actualNoMechanic,
-          'totalNoMechanic': totalNoMechanic,
-          'previousNoMoney': previousNoMoney,
-          'actualNoMoney': actualNoMoney,
-          'totalNoMoney': totalNoMoney,
+          'previousNoGallons': double.parse(previousNoGallons),
+          'actualNoGallons': double.parse(actualNoGallons),
+          'totalNoGallons': double.parse(totalNoGallons),
+          'previousNoMechanic': double.parse(previousNoMechanic),
+          'actualNoMechanic': double.parse(actualNoMechanic),
+          'totalNoMechanic': double.parse(totalNoMechanic),
+          'previousNoMoney': double.parse(previousNoMoney),
+          'actualNoMoney': double.parse(actualNoMoney),
+          'totalNoMoney': double.parse(totalNoMoney),
           'assignmentHoseId': assignmentHoseId,
           'generalDispenserReaderId': generalDispenserReaderId,
         }),
       );
 
       if (response.statusCode == 201) {
-        return AddNewReaderResponse.fromJson(json.decode(response.body));
+        final responseData = json.decode(response.body);
+        return responseData['ok'] ?? false;
       } else {
-        throw Exception(
-            'Failed to add new dispenser reader - StatusCode: ${response.statusCode}, Body: ${response.body}');
+        print('Server responded with status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return false;
       }
     } catch (e) {
-      throw Exception('Failed to add new dispenser reader: $e');
+      print('Error in addNewDispenserReader: $e');
+      return false;
     }
   }
 }
