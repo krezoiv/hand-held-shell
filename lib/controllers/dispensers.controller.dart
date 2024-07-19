@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
+import 'package:intl/intl.dart';
 
 class DispenserController extends GetxController {
   final RxList<dynamic> dispenserReaders = <dynamic>[].obs;
@@ -12,6 +13,7 @@ class DispenserController extends GetxController {
   final RxList<List<TextEditingController>> textControllers =
       <List<TextEditingController>>[].obs;
   final RxList<List<FocusNode>> focusNodes = <List<FocusNode>>[].obs;
+  final RxList<List<RxString>> differences = <List<RxString>>[].obs;
 
   final showCalculatorButtons = false.obs;
   final RxList<List<RxBool>> buttonsEnabled = <List<RxBool>>[].obs;
@@ -94,6 +96,8 @@ class DispenserController extends GetxController {
           ),
         );
 
+        initializeDifferences();
+
         isLoading.value = false;
       } else {
         await fetchDispenserReaders();
@@ -101,6 +105,38 @@ class DispenserController extends GetxController {
     } catch (e) {
       print('Error loading state: $e');
       await fetchDispenserReaders();
+    }
+  }
+
+  void initializeDifferences() {
+    differences.assignAll(
+      List.generate(
+          dispenserReaders.length, (_) => List.generate(3, (_) => '0'.obs)),
+    );
+  }
+
+  void calculateDifference(int pageIndex, int cardIndex) {
+    final previousValue = _sanitizeTextField(dispenserReaders[pageIndex][[
+      'actualNoGallons',
+      'actualNoMechanic',
+      'actualNoMoney'
+    ][cardIndex]]
+        .toString());
+    final currentValue =
+        _sanitizeTextField(textControllers[pageIndex][cardIndex].text);
+
+    if (currentValue.isNotEmpty && previousValue.isNotEmpty) {
+      try {
+        final difference =
+            Decimal.parse(currentValue) - Decimal.parse(previousValue);
+        differences[pageIndex][cardIndex].value =
+            formatNumber(difference.toString());
+      } catch (e) {
+        print('Error calculating difference: $e');
+        differences[pageIndex][cardIndex].value = 'Error';
+      }
+    } else {
+      differences[pageIndex][cardIndex].value = '0';
     }
   }
 
@@ -145,6 +181,8 @@ class DispenserController extends GetxController {
         List.generate(readers.length, (_) => false.obs),
       );
 
+      initializeDifferences();
+
       if (readers.isNotEmpty) {
         setFocusToFirstField(0);
       }
@@ -152,7 +190,6 @@ class DispenserController extends GetxController {
       print('Error fetching dispenser readers: $e');
     } finally {
       isLoading.value = false;
-      saveState();
     }
   }
 
@@ -170,7 +207,6 @@ class DispenserController extends GetxController {
         focusNodes[pageIndex][0].requestFocus();
       }
     });
-    saveState();
   }
 
   void updateTextField(int pageIndex, int cardIndex, String value) {
@@ -179,7 +215,7 @@ class DispenserController extends GetxController {
         TextSelection.fromPosition(
       TextPosition(offset: value.length),
     );
-    saveState();
+    calculateDifference(pageIndex, cardIndex);
   }
 
   String _sanitizeTextField(String text) {
@@ -195,6 +231,11 @@ class DispenserController extends GetxController {
     return Decimal.parse(sanitized);
   }
 
+  String formatNumber(String number) {
+    final formatter = NumberFormat('#,##0.00', 'en_US');
+    return formatter.format(double.parse(number));
+  }
+
   void validateAndDisableFields(int pageIndex, int cardIndex) {
     if (dataSubmitted[pageIndex].value) return;
 
@@ -203,7 +244,7 @@ class DispenserController extends GetxController {
     try {
       if (cardIndex == 0) {
         String previousNoGallons =
-            dispenserReader['actualNoGallons'].toString();
+            _sanitizeTextField(dispenserReader['actualNoGallons'].toString());
         String actualNoGallons =
             _sanitizeTextField(textControllers[pageIndex][0].text);
 
@@ -229,7 +270,7 @@ class DispenserController extends GetxController {
 
       if (cardIndex == 1) {
         String previousNoMechanic =
-            dispenserReader['actualNoMechanic'].toString();
+            _sanitizeTextField(dispenserReader['actualNoMechanic'].toString());
         String actualNoMechanic =
             _sanitizeTextField(textControllers[pageIndex][1].text);
 
@@ -254,7 +295,8 @@ class DispenserController extends GetxController {
       }
 
       if (cardIndex == 2) {
-        String previousNoMoney = dispenserReader['actualNoMoney'].toString();
+        String previousNoMoney =
+            _sanitizeTextField(dispenserReader['actualNoMoney'].toString());
         String actualNoMoney =
             _sanitizeTextField(textControllers[pageIndex][2].text);
 
@@ -283,14 +325,12 @@ class DispenserController extends GetxController {
       showValidationAlert(
           pageIndex, cardIndex, "El campo no puede estar vacío");
     }
-    saveState();
   }
 
   void checkAllButtonsDisabled(int pageIndex) {
     bool allDisabled =
         buttonsEnabled[pageIndex].every((button) => !button.value);
     sendButtonEnabled.value = allDisabled;
-    saveState();
   }
 
   Future<void> sendDataToDatabase(int pageIndex) async {
@@ -318,23 +358,25 @@ class DispenserController extends GetxController {
       String subtractPrecise(String a, String b) {
         var numA = sanitizeAndParse(a);
         var numB = sanitizeAndParse(b);
-        return (numA - numB).toStringAsFixed(3); // Mantiene 3 decimales
+        return (numA - numB).toString(); // Mantiene precisión
       }
 
-      String previousNoGallons = dispenserReader['actualNoGallons'].toString();
+      String previousNoGallons =
+          _sanitizeTextField(dispenserReader['actualNoGallons'].toString());
       String actualNoGallons =
           _sanitizeTextField(textControllers[pageIndex][0].text);
       String totalNoGallons =
           subtractPrecise(actualNoGallons, previousNoGallons);
 
       String previousNoMechanic =
-          dispenserReader['actualNoMechanic'].toString();
+          _sanitizeTextField(dispenserReader['actualNoMechanic'].toString());
       String actualNoMechanic =
           _sanitizeTextField(textControllers[pageIndex][1].text);
       String totalNoMechanic =
           subtractPrecise(actualNoMechanic, previousNoMechanic);
 
-      String previousNoMoney = dispenserReader['actualNoMoney'].toString();
+      String previousNoMoney =
+          _sanitizeTextField(dispenserReader['actualNoMoney'].toString());
       String actualNoMoney =
           _sanitizeTextField(textControllers[pageIndex][2].text);
       String totalNoMoney = subtractPrecise(actualNoMoney, previousNoMoney);
@@ -367,7 +409,6 @@ class DispenserController extends GetxController {
       );
 
       if (success) {
-        // Actualizar el GeneralDispenserReader
         final bool updateSuccess =
             await DispenserReaderService.updateGeneralDispenserReader(
           totalNoGallons,
@@ -413,7 +454,6 @@ class DispenserController extends GetxController {
     } finally {
       isLoading.value = false;
     }
-    saveState();
   }
 
   void focusNextField(int pageIndex, int cardIndex) {

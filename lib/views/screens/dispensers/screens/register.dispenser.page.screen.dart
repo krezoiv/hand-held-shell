@@ -44,7 +44,6 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
     calculatorCtrl.setDispenserController(dispenserController);
     verticalPageController = PageController();
 
-    // Set initial focus
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FocusScope.of(context)
           .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
@@ -124,19 +123,19 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       },
                       children: [
                         _buildCard(
-                          'Numeración en Galones',
+                          'Numeración en Galones: ${dispenserController.differences[widget.pageIndex][0].value}',
                           widget.dispenserReader['actualNoGallons'].toString(),
                           0,
                           titleColor: Colors.blue[900],
                         ),
                         _buildCard(
-                          'Numeración Mecánica',
+                          'Numeración Mecánica: ${dispenserController.differences[widget.pageIndex][1].value}',
                           widget.dispenserReader['actualNoMechanic'].toString(),
                           1,
                           titleColor: Colors.blue[900],
                         ),
                         _buildCard(
-                          'Numeración en Dinero',
+                          'Numeración en Dinero: ${dispenserController.differences[widget.pageIndex][2].value}',
                           widget.dispenserReader['actualNoMoney'].toString(),
                           2,
                           titleColor: Colors.blue[900],
@@ -272,19 +271,18 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                               focusNode: dispenserController
                                   .focusNodes[widget.pageIndex][cardIndex],
                               readOnly: true,
-                              enabled: !dispenserController
-                                  .dataSubmitted[widget.pageIndex].value,
+                              onChanged: (value) {
+                                dispenserController.updateTextField(
+                                    widget.pageIndex, cardIndex, value);
+                              },
                               decoration: InputDecoration(
                                 border: const OutlineInputBorder(),
                                 contentPadding: const EdgeInsets.symmetric(
                                     vertical: 10, horizontal: 10),
                                 hintText: 'Ingrese numeración de la bomba',
-                                fillColor: dispenserController
-                                        .dataSubmitted[widget.pageIndex].value
-                                    ? Colors.grey[300]
-                                    : (themeController.isDarkMode
-                                        ? Colors.grey[800]
-                                        : Colors.white),
+                                fillColor: themeController.isDarkMode
+                                    ? Colors.grey[800]
+                                    : Colors.white,
                                 filled: true,
                                 hintStyle: TextStyle(
                                   fontSize: 12,
@@ -316,11 +314,8 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       height: 120,
                       child: Obx(() => ElevatedButton(
                             onPressed: dispenserController
-                                        .buttonsEnabled[widget.pageIndex]
-                                            [cardIndex]
-                                        .value &&
-                                    !dispenserController
-                                        .dataSubmitted[widget.pageIndex].value
+                                    .buttonsEnabled[widget.pageIndex][cardIndex]
+                                    .value
                                 ? () => dispenserController
                                     .validateAndDisableFields(
                                         widget.pageIndex, cardIndex)
