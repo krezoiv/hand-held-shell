@@ -32,6 +32,10 @@ class _NewRegisterDispenserScreenState
       Get.put(DispenserController());
     }
     dispenserController = Get.find<DispenserController>();
+
+    showCalculatorButtons.value =
+        dispenserController.hasSharedPreferencesData.value;
+    buttonsEnabled.value = dispenserController.hasSharedPreferencesData.value;
   }
 
   @override
@@ -60,6 +64,8 @@ class _NewRegisterDispenserScreenState
                             try {
                               await DispenserReaderService
                                   .deleteLastGeneralDispenserReader();
+                              await dispenserController
+                                  .clearSharedPreferences();
                               Get.back();
                               Get.toNamed(RoutesPaths.dispensersHome);
                             } catch (e) {
@@ -105,43 +111,45 @@ class _NewRegisterDispenserScreenState
               );
             }
           }),
-          Positioned(
-            right: 36,
-            bottom: 150,
-            child: Obx(() => buttonsEnabled.value
-                ? const SizedBox.shrink()
-                : IconButton(
-                    onPressed: () {
-                      showConfirmationDialog(
-                        title: 'APERTURA DE DÍA',
-                        message: '¿Confirmar apertura de día?',
-                        confirmText: 'Sí',
-                        cancelText: 'No',
-                        onConfirm: () async {
-                          try {
-                            await DispenserReaderService
-                                .createGeneralDispenserReader();
-                            showCalculatorButtons.value = true;
-                            buttonsEnabled.value = true;
-                            Get.back();
-                          } catch (e) {
-                            print('Error: $e');
-                          }
+          Obx(() => Positioned(
+                right: 36,
+                bottom: 150,
+                child: !dispenserController.hasSharedPreferencesData.value
+                    ? IconButton(
+                        onPressed: () {
+                          showConfirmationDialog(
+                            title: 'APERTURA DE DÍA',
+                            message: '¿Confirmar apertura de día?',
+                            confirmText: 'Sí',
+                            cancelText: 'No',
+                            onConfirm: () async {
+                              try {
+                                await DispenserReaderService
+                                    .createGeneralDispenserReader();
+                                showCalculatorButtons.value = true;
+                                buttonsEnabled.value = true;
+                                dispenserController
+                                    .hasSharedPreferencesData.value = true;
+                                Get.back();
+                              } catch (e) {
+                                print('Error: $e');
+                              }
+                            },
+                            onCancel: () {
+                              return;
+                            },
+                          );
                         },
-                        onCancel: () {
-                          return;
-                        },
-                      );
-                    },
-                    icon: Icon(
-                      CupertinoIcons.folder_badge_plus,
-                      size: 60,
-                      color: Colors.teal.shade600,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: BoxConstraints(),
-                  )),
-          ),
+                        icon: Icon(
+                          CupertinoIcons.folder_badge_plus,
+                          size: 60,
+                          color: Colors.teal.shade600,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                      )
+                    : SizedBox.shrink(),
+              )),
         ],
       ),
     );

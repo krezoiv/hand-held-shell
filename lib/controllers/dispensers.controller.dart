@@ -17,6 +17,7 @@ class DispenserController extends GetxController {
   final RxList<List<RxBool>> buttonsEnabled = <List<RxBool>>[].obs;
   final RxList<List<RxBool>> textFieldsEnabled = <List<RxBool>>[].obs;
   final RxBool sendButtonEnabled = false.obs;
+  final RxBool hasSharedPreferencesData = false.obs;
 
   final RxList<RxBool> dataSubmitted = <RxBool>[].obs;
 
@@ -422,6 +423,12 @@ class DispenserController extends GetxController {
     } catch (e) {
       print('Error clearing SharedPreferences: $e');
     }
+  }
+
+  Future<void> checkSharedPreferencesData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedState = prefs.getString('dispenserState');
+    hasSharedPreferencesData.value = savedState != null;
   }
 
   void resetState() {
