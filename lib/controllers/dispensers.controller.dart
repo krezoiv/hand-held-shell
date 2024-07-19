@@ -8,7 +8,7 @@ import 'package:hand_held_shell/services/services.exports.files.dart';
 
 class DispenserController extends GetxController {
   final RxList<dynamic> dispenserReaders = <dynamic>[].obs;
-  final RxBool isLoading = true.obs;
+  final RxBool isLoading = false.obs;
   final RxList<List<TextEditingController>> textControllers =
       <List<TextEditingController>>[].obs;
   final RxList<List<FocusNode>> focusNodes = <List<FocusNode>>[].obs;
@@ -64,7 +64,6 @@ class DispenserController extends GetxController {
         dispenserReaders.assignAll(
             state['dispenserReaders'].map((r) => json.decode(r)).toList());
 
-        // Convertir explícitamente a RxBool
         dataSubmitted.assignAll((state['dataSubmitted'] as List)
             .map((v) => RxBool(v as bool))
             .toList());
@@ -72,7 +71,6 @@ class DispenserController extends GetxController {
         showCalculatorButtons.value = state['showCalculatorButtons'] as bool;
         sendButtonEnabled.value = state['sendButtonEnabled'] as bool;
 
-        // Convertir explícitamente a RxBool para buttonsEnabled y textFieldsEnabled
         buttonsEnabled.assignAll((state['buttonsEnabled'] as List)
             .map(
                 (list) => (list as List).map((v) => RxBool(v as bool)).toList())
@@ -102,7 +100,7 @@ class DispenserController extends GetxController {
       }
     } catch (e) {
       print('Error loading state: $e');
-      await fetchDispenserReaders(); // Fallback si no se puede cargar el estado
+      await fetchDispenserReaders();
     }
   }
 
@@ -296,7 +294,9 @@ class DispenserController extends GetxController {
   }
 
   Future<void> sendDataToDatabase(int pageIndex) async {
-    if (dataSubmitted[pageIndex].value) return;
+    if (dataSubmitted[pageIndex].value || isLoading.value) return;
+
+    isLoading.value = true;
 
     try {
       final String? generalDispenserReaderId =
@@ -367,34 +367,51 @@ class DispenserController extends GetxController {
       );
 
       if (success) {
-        print('New dispenser reader added successfully');
-        dataSubmitted[pageIndex] = true.obs;
+        // Actualizar el GeneralDispenserReader
+        final bool updateSuccess =
+            await DispenserReaderService.updateGeneralDispenserReader(
+          totalNoGallons,
+          totalNoMechanic,
+          totalNoMoney,
+          assignmentHoseId,
+          generalDispenserReaderId,
+        );
 
-        for (int i = 0; i < 3; i++) {
-          textFieldsEnabled[pageIndex][i].value = false;
-          buttonsEnabled[pageIndex][i].value = false;
+        if (updateSuccess) {
+          print('GeneralDispenserReader updated successfully');
+          dataSubmitted[pageIndex] = true.obs;
+
+          for (int i = 0; i < 3; i++) {
+            textFieldsEnabled[pageIndex][i].value = false;
+            buttonsEnabled[pageIndex][i].value = false;
+          }
+
+          sendButtonEnabled.value = false;
+
+          if (pageIndex < dispenserReaders.length - 1) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Get.find<PageController>(tag: 'dispenser_page_controller')
+                  .animateToPage(
+                pageIndex + 1,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            });
+          }
+
+          Get.snackbar(
+              'Éxito', 'Los datos se han enviado y actualizado correctamente.');
+        } else {
+          throw Exception('Failed to update GeneralDispenserReader');
         }
-
-        sendButtonEnabled.value = false;
-
-        if (pageIndex < dispenserReaders.length - 1) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Get.find<PageController>(tag: 'dispenser_page_controller')
-                .animateToPage(
-              pageIndex + 1,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
-          });
-        }
-
-        Get.snackbar('Éxito', 'Los datos se han enviado correctamente.');
       } else {
         throw Exception('Failed to add new dispenser reader');
       }
     } catch (e) {
       print('Error sending data to database: $e');
       Get.snackbar('Error', 'No se pudo enviar los datos. Intente nuevamente.');
+    } finally {
+      isLoading.value = false;
     }
     saveState();
   }
@@ -419,6 +436,7 @@ class DispenserController extends GetxController {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('dispenserState');
+      hasSharedPreferencesData.value = false;
       print('SharedPreferences cleared successfully');
     } catch (e) {
       print('Error clearing SharedPreferences: $e');

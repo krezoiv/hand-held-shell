@@ -154,21 +154,27 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                         currentCardIndex: calculatorCtrl.currentCardIndex.value,
                         enabled: widget.buttonsEnabled.value &&
                             !dispenserController
-                                .dataSubmitted[widget.pageIndex].value,
+                                .dataSubmitted[widget.pageIndex].value &&
+                            !dispenserController.isLoading.value,
                         onThumbUpPressed: () {
                           if (dispenserController.sendButtonEnabled.value &&
                               !dispenserController
-                                  .dataSubmitted[widget.pageIndex].value) {
+                                  .dataSubmitted[widget.pageIndex].value &&
+                              !dispenserController.isLoading.value) {
                             dispenserController
                                 .sendDataToDatabase(widget.pageIndex);
                           } else if (dispenserController
                               .dataSubmitted[widget.pageIndex].value) {
                             Get.snackbar('Información',
                                 'Los datos ya han sido enviados.');
+                          } else if (dispenserController.isLoading.value) {
+                            Get.snackbar('Información',
+                                'Enviando datos, por favor espere...');
                           } else {
                             _showMissingDataDialog();
                           }
                         },
+                        dispenserController: dispenserController,
                       )),
                   if (widget.showCalculatorButtons.value &&
                       widget.buttonsEnabled.value &&

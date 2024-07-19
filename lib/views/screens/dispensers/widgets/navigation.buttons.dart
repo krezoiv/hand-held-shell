@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hand_held_shell/controllers/dispensers.controller.dart';
 
 class NavigationButtons extends StatelessWidget {
   final PageController mainPageController;
@@ -9,6 +10,7 @@ class NavigationButtons extends StatelessWidget {
   final int currentCardIndex;
   final bool enabled;
   final VoidCallback onThumbUpPressed;
+  final DispenserController dispenserController;
 
   const NavigationButtons({
     Key? key,
@@ -19,6 +21,7 @@ class NavigationButtons extends StatelessWidget {
     required this.currentCardIndex,
     required this.enabled,
     required this.onThumbUpPressed,
+    required this.dispenserController,
   }) : super(key: key);
 
   @override
@@ -38,7 +41,9 @@ class NavigationButtons extends StatelessWidget {
         ),
         ElevatedButton(
           onPressed: enabled ? onThumbUpPressed : null,
-          child: Icon(Icons.thumb_up),
+          child: dispenserController.isLoading.value
+              ? CircularProgressIndicator(color: Colors.white)
+              : Icon(Icons.thumb_up),
         ),
         ElevatedButton(
           onPressed: pageIndex < totalPages - 1
