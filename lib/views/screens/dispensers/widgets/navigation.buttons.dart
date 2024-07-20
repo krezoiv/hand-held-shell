@@ -44,38 +44,60 @@ class NavigationButtons extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: SizedBox(
               width: 180, // Ajusta este valor según tus necesidades
-              child: ElevatedButton(
-                onPressed: enabled ? onThumbUpPressed : null,
-                style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                ),
-                child: dispenserController.isLoading.value
-                    ? const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 16,
-                            height: 16,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              'Enviando información',
-                              style: TextStyle(fontSize: 12),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
-                      )
-                    : const Icon(Icons.thumb_up),
-              ),
+              child: Obx(() => ElevatedButton(
+                    onPressed: enabled &&
+                            !dispenserController
+                                .showUpdateButtonList[pageIndex].value
+                        ? () {
+                            onThumbUpPressed();
+                            dispenserController
+                                .showUpdateButtonList[pageIndex].value = true;
+                          }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 8),
+                    ),
+                    child: dispenserController.isLoading.value
+                        ? const Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                              SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  'Enviando información',
+                                  style: TextStyle(fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          )
+                        : const Icon(Icons.thumb_up),
+                  )),
             ),
           ),
+          Obx(() => Visibility(
+                visible:
+                    dispenserController.showUpdateButtonList[pageIndex].value,
+                child: IconButton(
+                  icon: const Icon(Icons.update),
+                  color: Colors.orange[400], // Color del icono
+                  onPressed: () {
+                    // Aquí defines la acción para el botón de actualización
+                    dispenserController.showUpdateButtonList[pageIndex].value =
+                        false;
+                    dispenserController.sendButtonEnabled.value = true;
+                  },
+                ),
+              )),
           IconButton(
             icon: const Icon(Icons.arrow_forward),
             onPressed: pageIndex < totalPages - 1
