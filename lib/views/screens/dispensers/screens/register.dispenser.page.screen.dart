@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:decimal/decimal.dart';
 import 'package:hand_held_shell/shared/helpers/text.helpers.dart';
 import 'package:hand_held_shell/controllers/register.button.controller.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
@@ -123,22 +124,28 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       },
                       children: [
                         _buildCard(
-                          'Numeración en Galones: ${dispenserController.differences[widget.pageIndex][0].value}',
+                          'Numeración en Galones',
                           widget.dispenserReader['actualNoGallons'].toString(),
                           0,
                           titleColor: Colors.blue[900],
+                          difference: dispenserController
+                              .differences[widget.pageIndex][0].value,
                         ),
                         _buildCard(
-                          'Numeración Mecánica: ${dispenserController.differences[widget.pageIndex][1].value}',
+                          'Numeración Mecánica',
                           widget.dispenserReader['actualNoMechanic'].toString(),
                           1,
                           titleColor: Colors.blue[900],
+                          difference: dispenserController
+                              .differences[widget.pageIndex][1].value,
                         ),
                         _buildCard(
-                          'Numeración en Dinero: ${dispenserController.differences[widget.pageIndex][2].value}',
+                          'Numeración en Dinero',
                           widget.dispenserReader['actualNoMoney'].toString(),
                           2,
                           titleColor: Colors.blue[900],
+                          difference: dispenserController
+                              .differences[widget.pageIndex][2].value,
                         ),
                       ],
                     ),
@@ -186,12 +193,21 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
               ),
             ),
           ),
-          bottomNavigationBar: const CustomBottomNavigation(),
+          // bottomNavigationBar: const CustomBottomNavigation(),
         ));
   }
 
   Widget _buildCard(String title, String value, int cardIndex,
-      {Color? titleColor}) {
+      {Color? titleColor, required String difference}) {
+    Color getDifferenceColor() {
+      if (difference == 'Error') return Colors.red;
+      final numDifference = Decimal.tryParse(difference.replaceAll(',', ''));
+      if (numDifference == null) return Colors.black;
+      if (numDifference < Decimal.zero) return Colors.red;
+      if (numDifference > Decimal.zero) return Colors.green;
+      return Colors.blue;
+    }
+
     String formatNumber(String number) {
       if (number.isEmpty) return '0';
 
@@ -222,17 +238,31 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: titleColor ??
-                      (themeController.isDarkMode
-                          ? Colors.white
-                          : Colors.black87),
-                ),
-                textAlign: TextAlign.center,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: titleColor ??
+                            (themeController.isDarkMode
+                                ? Colors.white
+                                : Colors.black87),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    difference,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: getDifferenceColor(),
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 1),
               Row(

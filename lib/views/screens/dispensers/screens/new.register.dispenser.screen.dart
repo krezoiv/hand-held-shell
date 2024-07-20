@@ -17,8 +17,6 @@ class NewRegisterDispenserScreen extends StatefulWidget {
 class _NewRegisterDispenserScreenState
     extends State<NewRegisterDispenserScreen> {
   late DispenserController dispenserController;
-  final RxBool showCalculatorButtons = false.obs;
-  final RxBool buttonsEnabled = false.obs;
   late PageController _pageController;
 
   @override
@@ -33,9 +31,8 @@ class _NewRegisterDispenserScreenState
     }
     dispenserController = Get.find<DispenserController>();
 
-    showCalculatorButtons.value =
-        dispenserController.hasSharedPreferencesData.value;
-    buttonsEnabled.value = dispenserController.hasSharedPreferencesData.value;
+    // Carga el estado al iniciar
+    dispenserController.loadState();
   }
 
   @override
@@ -52,7 +49,7 @@ class _NewRegisterDispenserScreenState
         title: const Text('Digitar Bombas'),
         actions: [
           Obx(() => CupertinoButton(
-                onPressed: buttonsEnabled.value
+                onPressed: dispenserController.hasSharedPreferencesData.value
                     ? () {
                         showConfirmationDialog(
                           title: 'Eliminar Último Dispensador',
@@ -64,8 +61,7 @@ class _NewRegisterDispenserScreenState
                             try {
                               await DispenserReaderService
                                   .deleteLastGeneralDispenserReader();
-                              await dispenserController
-                                  .clearSharedPreferences();
+                              await dispenserController.clearState();
                               Get.back();
                               Get.toNamed(RoutesPaths.dispensersHome);
                             } catch (e) {
@@ -104,8 +100,10 @@ class _NewRegisterDispenserScreenState
                         dispenserController.dispenserReaders[index],
                     totalPages: dispenserController.dispenserReaders.length,
                     mainPageController: _pageController,
-                    showCalculatorButtons: showCalculatorButtons,
-                    buttonsEnabled: buttonsEnabled,
+                    showCalculatorButtons:
+                        dispenserController.showCalculatorButtons,
+                    buttonsEnabled:
+                        dispenserController.hasSharedPreferencesData,
                   );
                 },
               );
@@ -126,10 +124,11 @@ class _NewRegisterDispenserScreenState
                               try {
                                 await DispenserReaderService
                                     .createGeneralDispenserReader();
-                                showCalculatorButtons.value = true;
-                                buttonsEnabled.value = true;
+                                dispenserController
+                                    .showCalculatorButtons.value = true;
                                 dispenserController
                                     .hasSharedPreferencesData.value = true;
+                                await dispenserController.saveState();
                                 Get.back();
                               } catch (e) {
                                 print('Error: $e');

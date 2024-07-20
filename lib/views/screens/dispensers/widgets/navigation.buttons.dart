@@ -26,32 +26,64 @@ class NavigationButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        ElevatedButton(
-          onPressed: pageIndex > 0 ? () => _changePage(pageIndex - 1) : null,
-          child: Icon(Icons.arrow_back),
-        ),
-        ElevatedButton(
-          onPressed: enabled
-              ? () => clearTextField(pageIndex, currentCardIndex)
-              : null,
-          child: Icon(Icons.clear),
-        ),
-        ElevatedButton(
-          onPressed: enabled ? onThumbUpPressed : null,
-          child: dispenserController.isLoading.value
-              ? CircularProgressIndicator(color: Colors.white)
-              : Icon(Icons.thumb_up),
-        ),
-        ElevatedButton(
-          onPressed: pageIndex < totalPages - 1
-              ? () => _changePage(pageIndex + 1)
-              : null,
-          child: Icon(Icons.arrow_forward),
-        ),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: pageIndex > 0 ? () => _changePage(pageIndex - 1) : null,
+          ),
+          IconButton(
+            icon: const Icon(Icons.clear),
+            onPressed: enabled
+                ? () => clearTextField(pageIndex, currentCardIndex)
+                : null,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: SizedBox(
+              width: 180, // Ajusta este valor según tus necesidades
+              child: ElevatedButton(
+                onPressed: enabled ? onThumbUpPressed : null,
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                ),
+                child: dispenserController.isLoading.value
+                    ? const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              'Enviando información',
+                              style: TextStyle(fontSize: 12),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      )
+                    : const Icon(Icons.thumb_up),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: const Icon(Icons.arrow_forward),
+            onPressed: pageIndex < totalPages - 1
+                ? () => _changePage(pageIndex + 1)
+                : null,
+          ),
+        ],
+      ),
     );
   }
 

@@ -49,8 +49,12 @@ class DispenserController extends GetxController {
         'textControllers': textControllers
             .map((list) => list.map((controller) => controller.text).toList())
             .toList(),
+        'differences': differences
+            .map((list) => list.map((rx) => rx.value).toList())
+            .toList(),
       };
       await prefs.setString('dispenserState', json.encode(state));
+      hasSharedPreferencesData.value = true;
     } catch (e) {
       print('Error saving state: $e');
     }
@@ -89,6 +93,11 @@ class DispenserController extends GetxController {
                 .toList())
             .toList());
 
+        differences.assignAll((state['differences'] as List)
+            .map((list) =>
+                (list as List).map((v) => RxString(v as String)).toList())
+            .toList());
+
         focusNodes.assignAll(
           List.generate(
             dispenserReaders.length,
@@ -96,15 +105,19 @@ class DispenserController extends GetxController {
           ),
         );
 
-        initializeDifferences();
-
         isLoading.value = false;
+        hasSharedPreferencesData.value = true;
+        showCalculatorButtons.value = true;
       } else {
         await fetchDispenserReaders();
+        hasSharedPreferencesData.value = false;
+        showCalculatorButtons.value = false;
       }
     } catch (e) {
       print('Error loading state: $e');
       await fetchDispenserReaders();
+      hasSharedPreferencesData.value = false;
+      showCalculatorButtons.value = false;
     }
   }
 
@@ -130,7 +143,7 @@ class DispenserController extends GetxController {
         final difference =
             Decimal.parse(currentValue) - Decimal.parse(previousValue);
         differences[pageIndex][cardIndex].value =
-            formatNumber(difference.toString());
+            formatNumber(difference.toStringAsFixed(difference.scale));
       } catch (e) {
         print('Error calculating difference: $e');
         differences[pageIndex][cardIndex].value = 'Error';
@@ -216,6 +229,7 @@ class DispenserController extends GetxController {
       TextPosition(offset: value.length),
     );
     calculateDifference(pageIndex, cardIndex);
+    saveState();
   }
 
   String _sanitizeTextField(String text) {
@@ -232,8 +246,21 @@ class DispenserController extends GetxController {
   }
 
   String formatNumber(String number) {
-    final formatter = NumberFormat('#,##0.00', 'en_US');
-    return formatter.format(double.parse(number));
+    String cleanNumber = number.replaceAll(',', '');
+    List<String> parts = cleanNumber.split('.');
+    String integerPart = parts[0];
+    String decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
+
+    String formattedInteger = '';
+    for (int i = integerPart.length - 1; i >= 0; i--) {
+      if ((integerPart.length - 1 - i) % 3 == 0 &&
+          i != integerPart.length - 1) {
+        formattedInteger = ',$formattedInteger';
+      }
+      formattedInteger = integerPart[i] + formattedInteger;
+    }
+
+    return formattedInteger + decimalPart;
   }
 
   void validateAndDisableFields(int pageIndex, int cardIndex) {
@@ -320,6 +347,7 @@ class DispenserController extends GetxController {
       }
 
       checkAllButtonsDisabled(pageIndex);
+      saveState();
     } catch (e) {
       print('Error in validation: $e');
       showValidationAlert(
@@ -420,7 +448,7 @@ class DispenserController extends GetxController {
 
         if (updateSuccess) {
           print('GeneralDispenserReader updated successfully');
-          dataSubmitted[pageIndex] = true.obs;
+          dataSubmitted[pageIndex].value = true;
 
           for (int i = 0; i < 3; i++) {
             textFieldsEnabled[pageIndex][i].value = false;
@@ -453,6 +481,7 @@ class DispenserController extends GetxController {
       Get.snackbar('Error', 'No se pudo enviar los datos. Intente nuevamente.');
     } finally {
       isLoading.value = false;
+      saveState();
     }
   }
 
@@ -470,6 +499,17 @@ class DispenserController extends GetxController {
       duration: Duration(seconds: 3),
     );
     focusNodes[pageIndex][cardIndex].requestFocus();
+  }
+
+  Future<void> clearState() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('dispenserState');
+      resetState();
+      hasSharedPreferencesData.value = false;
+    } catch (e) {
+      print('Error clearing state: $e');
+    }
   }
 
   Future<void> clearSharedPreferences() async {
@@ -499,6 +539,7 @@ class DispenserController extends GetxController {
     textFieldsEnabled.clear();
     sendButtonEnabled.value = false;
     dataSubmitted.clear();
+    differences.clear();
   }
 
   @override
