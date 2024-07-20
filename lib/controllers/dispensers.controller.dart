@@ -5,7 +5,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
-import 'package:intl/intl.dart';
 
 class DispenserController extends GetxController {
   final RxList<dynamic> dispenserReaders = <dynamic>[].obs;
@@ -15,20 +14,29 @@ class DispenserController extends GetxController {
   final RxList<List<FocusNode>> focusNodes = <List<FocusNode>>[].obs;
   final RxList<List<RxString>> differences = <List<RxString>>[].obs;
 
-  final showCalculatorButtons = false.obs;
+  final RxBool showCalculatorButtons = false.obs;
   final RxList<List<RxBool>> buttonsEnabled = <List<RxBool>>[].obs;
   final RxList<List<RxBool>> textFieldsEnabled = <List<RxBool>>[].obs;
   final RxBool sendButtonEnabled = false.obs;
   final RxBool hasSharedPreferencesData = false.obs;
+  final RxBool isEditMode = false.obs;
 
   final RxList<RxBool> dataSubmitted = <RxBool>[].obs;
 
   final FocusNode focusNode = FocusNode();
 
+  final RxBool isAnyButtonDisabled = false.obs;
+
   @override
   void onInit() {
     super.onInit();
+    ever(buttonsEnabled, _updateIsAnyButtonDisabled);
     loadState();
+  }
+
+  void _updateIsAnyButtonDisabled(_) {
+    isAnyButtonDisabled.value = buttonsEnabled
+        .any((pageButtons) => pageButtons.any((button) => !button.value));
   }
 
   Future<void> saveState() async {
@@ -378,17 +386,6 @@ class DispenserController extends GetxController {
       final String assignmentHoseId =
           dispenserReader['assignmentHoseId']['_id'];
 
-      Decimal sanitizeAndParse(String value) {
-        String sanitized = value.replaceAll(',', '').trim();
-        return Decimal.parse(sanitized);
-      }
-
-      String subtractPrecise(String a, String b) {
-        var numA = sanitizeAndParse(a);
-        var numB = sanitizeAndParse(b);
-        return (numA - numB).toString(); // Mantiene precisión
-      }
-
       String previousNoGallons =
           _sanitizeTextField(dispenserReader['actualNoGallons'].toString());
       String actualNoGallons =
@@ -408,20 +405,6 @@ class DispenserController extends GetxController {
       String actualNoMoney =
           _sanitizeTextField(textControllers[pageIndex][2].text);
       String totalNoMoney = subtractPrecise(actualNoMoney, previousNoMoney);
-
-      print('Data to be sent to the database:');
-      print('previousNoGallons: $previousNoGallons');
-      print('actualNoGallons: $actualNoGallons');
-      print('totalNoGallons: $totalNoGallons');
-      print('previousNoMechanic: $previousNoMechanic');
-      print('actualNoMechanic: $actualNoMechanic');
-      print('totalNoMechanic: $totalNoMechanic');
-      print('previousNoMoney: $previousNoMoney');
-      print('actualNoMoney: $actualNoMoney');
-      print('totalNoMoney: $totalNoMoney');
-      print('assignmentHoseId: $assignmentHoseId');
-      print('generalDispenserReaderId: $generalDispenserReaderId');
-
       final bool success = await DispenserReaderService.addNewDispenserReader(
         previousNoGallons,
         actualNoGallons,
@@ -555,5 +538,108 @@ class DispenserController extends GetxController {
       }
     }
     super.onClose();
+  }
+
+  Future<void> updateDataToDatabase(int pageIndex) async {
+    if (dataSubmitted[pageIndex].value || isLoading.value) return;
+
+    isLoading.value = true;
+
+    try {
+      final dispenserReader = dispenserReaders[pageIndex];
+      final String dispenserReaderId = dispenserReader['_id'];
+
+      String actualNoGallons =
+          _sanitizeTextField(textControllers[pageIndex][0].text);
+      String actualNoMechanic =
+          _sanitizeTextField(textControllers[pageIndex][1].text);
+      String actualNoMoney =
+          _sanitizeTextField(textControllers[pageIndex][2].text);
+
+      final bool success = await DispenserReaderService.updateDispenserReader(
+        dispenserReaderId,
+        actualNoGallons,
+        actualNoMechanic,
+        actualNoMoney,
+      );
+
+      if (success) {
+        print('DispenserReader updated successfully');
+        dataSubmitted[pageIndex].value = true;
+
+        for (int i = 0; i < 3; i++) {
+          textFieldsEnabled[pageIndex][i].value = false;
+          buttonsEnabled[pageIndex][i].value = false;
+        }
+
+        sendButtonEnabled.value = false;
+
+        // Actualizar los valores en dispenserReaders
+        dispenserReaders[pageIndex]['actualNoGallons'] =
+            double.parse(actualNoGallons);
+        dispenserReaders[pageIndex]['actualNoMechanic'] =
+            double.parse(actualNoMechanic);
+        dispenserReaders[pageIndex]['actualNoMoney'] =
+            double.parse(actualNoMoney);
+
+        // Recalcular las diferencias
+        calculateDifference(pageIndex, 0);
+        calculateDifference(pageIndex, 1);
+        calculateDifference(pageIndex, 2);
+
+        if (pageIndex < dispenserReaders.length - 1) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Get.find<PageController>(tag: 'dispenser_page_controller')
+                .animateToPage(
+              pageIndex + 1,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          });
+        }
+
+        Get.snackbar('Éxito', 'Los datos se han actualizado correctamente.');
+      } else {
+        throw Exception('Failed to update DispenserReader');
+      }
+    } catch (e) {
+      print('Error updating data in database: $e');
+      Get.snackbar(
+          'Error', 'No se pudo actualizar los datos. Intente nuevamente.');
+    } finally {
+      isLoading.value = false;
+      saveState();
+    }
+  }
+
+  void toggleEditMode() {
+    isEditMode.value = !isEditMode.value;
+    if (isEditMode.value) {
+      enableEditMode();
+    } else {
+      disableEditMode();
+    }
+  }
+
+  void enableEditMode() {
+    for (int pageIndex = 0; pageIndex < dispenserReaders.length; pageIndex++) {
+      for (int cardIndex = 0; cardIndex < 3; cardIndex++) {
+        if (!buttonsEnabled[pageIndex][cardIndex].value) {
+          textFieldsEnabled[pageIndex][cardIndex].value = true;
+          buttonsEnabled[pageIndex][cardIndex].value = true;
+        }
+      }
+    }
+  }
+
+  void disableEditMode() {
+    // Implementa la lógica para salir del modo de edición
+    // Por ejemplo, validar los campos editados y actualizar la base de datos
+  }
+
+  String subtractPrecise(String a, String b) {
+    var numA = sanitizeAndParse(a);
+    var numB = sanitizeAndParse(b);
+    return (numA - numB).toString();
   }
 }

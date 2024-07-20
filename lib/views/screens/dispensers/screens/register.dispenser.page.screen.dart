@@ -6,7 +6,6 @@ import 'package:hand_held_shell/shared/helpers/text.helpers.dart';
 import 'package:hand_held_shell/controllers/register.button.controller.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/controllers/dispensers.controller.dart';
-import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/build.calcutator.buttons.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/navigation.buttons.dart';
 
@@ -19,14 +18,14 @@ class RegisterDispenserPage extends StatefulWidget {
   final RxBool buttonsEnabled;
 
   const RegisterDispenserPage({
-    Key? key,
+    super.key,
     required this.pageIndex,
     required this.dispenserReader,
     required this.totalPages,
     required this.mainPageController,
     required this.showCalculatorButtons,
     required this.buttonsEnabled,
-  }) : super(key: key);
+  });
 
   @override
   _RegisterDispenserPageState createState() => _RegisterDispenserPageState();

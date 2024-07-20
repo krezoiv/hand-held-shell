@@ -7,7 +7,7 @@ import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dar
 import 'package:hand_held_shell/views/screens/dispensers/screens/register.dispenser.page.screen.dart';
 
 class NewRegisterDispenserScreen extends StatefulWidget {
-  NewRegisterDispenserScreen({Key? key}) : super(key: key);
+  const NewRegisterDispenserScreen({super.key});
 
   @override
   _NewRegisterDispenserScreenState createState() =>
@@ -48,6 +48,21 @@ class _NewRegisterDispenserScreenState
       appBar: AppBar(
         title: const Text('Digitar Bombas'),
         actions: [
+          Obx(() => CupertinoButton(
+                onPressed: dispenserController.hasSharedPreferencesData.value &&
+                        dispenserController.isAnyButtonDisabled.value
+                    ? () {
+                        dispenserController.toggleEditMode();
+                      }
+                    : null,
+                child: Icon(
+                  CupertinoIcons.pencil,
+                  color: (dispenserController.hasSharedPreferencesData.value &&
+                          dispenserController.isAnyButtonDisabled.value)
+                      ? Colors.blue[900]
+                      : Colors.grey,
+                ),
+              )),
           Obx(() => CupertinoButton(
                 onPressed: dispenserController.hasSharedPreferencesData.value
                     ? () {
@@ -199,3 +214,29 @@ class _NewRegisterDispenserScreenState
     }
   }
 }
+
+
+/**
+ * 1820
+ * 650
+ * 3000
+ * 1656
+ * 1370
+ * 320
+ * 562.19
+ * 1958
+ * 1955
+ * 
+ * 
+ * 272==
+ * 220==
+ * 275==
+ * 1950==
+ * 734===
+ * 225==
+ * 2500==
+ * 500
+ * 
+ * 667622
+ * 13802
+ * */
