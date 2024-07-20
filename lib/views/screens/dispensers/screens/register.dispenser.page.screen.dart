@@ -182,10 +182,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                         },
                         dispenserController: dispenserController,
                       )),
-                  if (widget.showCalculatorButtons.value &&
-                      widget.buttonsEnabled.value &&
-                      !dispenserController
-                          .dataSubmitted[widget.pageIndex].value)
+                  if (widget.showCalculatorButtons.value)
                     BuildCalculatorButtons(
                       pageIndex: widget.pageIndex,
                     ),
