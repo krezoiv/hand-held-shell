@@ -253,6 +253,10 @@ class DispenserController extends GetxController {
     if (sanitized.isEmpty) {
       throw FormatException("Empty field");
     }
+    // Asegúrate de que el valor es un número válido
+    if (!RegExp(r'^\d*\.?\d*$').hasMatch(sanitized)) {
+      throw FormatException("Invalid number format");
+    }
     print('Sanitized value: $sanitized');
     return Decimal.parse(sanitized);
   }
@@ -373,8 +377,8 @@ class DispenserController extends GetxController {
     sendButtonEnabled.value = allDisabled;
   }
 
-  Future<void> sendDataToDatabase(int pageIndex) async {
-    if (dataSubmitted[pageIndex].value || isLoading.value) return;
+  Future<String?> sendDataToDatabase(int pageIndex) async {
+    if (dataSubmitted[pageIndex].value || isLoading.value) return null;
 
     isLoading.value = true;
 
@@ -434,7 +438,8 @@ class DispenserController extends GetxController {
       print('assignmentHoseId: $assignmentHoseId');
       print('generalDispenserReaderId: $generalDispenserReaderId');
 
-      final bool success = await DispenserReaderService.addNewDispenserReader(
+      final newDispenserReaderId =
+          await DispenserReaderService.addNewDispenserReader(
         previousNoGallons,
         actualNoGallons,
         totalNoGallons,
@@ -448,7 +453,7 @@ class DispenserController extends GetxController {
         generalDispenserReaderId,
       );
 
-      if (success) {
+      if (newDispenserReaderId != null) {
         final bool updateSuccess =
             await DispenserReaderService.updateGeneralDispenserReader(
           totalNoGallons,
@@ -469,11 +474,16 @@ class DispenserController extends GetxController {
 
           sendButtonEnabled.value = false;
 
-          showUpdateButtonList[pageIndex].value =
-              true; // Mostrar botón de actualización en la página actual
+          showUpdateButtonList[pageIndex].value = true;
+
+          // Actualizar el dispenserReaderId en el modelo local
+          dispenserReaders[pageIndex]['dispenserReaderId'] =
+              newDispenserReaderId;
 
           Get.snackbar(
               'Éxito', 'Los datos se han enviado y actualizado correctamente.');
+
+          return newDispenserReaderId;
         } else {
           throw Exception('Failed to update GeneralDispenserReader');
         }
@@ -487,6 +497,7 @@ class DispenserController extends GetxController {
       isLoading.value = false;
       saveState();
     }
+    return null;
   }
 
   void focusNextField(int pageIndex, int cardIndex) {
@@ -533,6 +544,173 @@ class DispenserController extends GetxController {
     hasSharedPreferencesData.value = savedState != null;
   }
 
+  // String formatNumberForParsing(String number) {
+  //   // Elimina todos los espacios
+  //   number = number.replaceAll(' ', '');
+
+  //   // Si el número comienza con un punto, añade un 0 al principio
+  //   if (number.startsWith('.')) {
+  //     number = '0' + number;
+  //   }
+
+  //   // Reemplaza la coma por un punto
+  //   number = number.replaceAll(',', '.');
+
+  //   // Si hay más de un punto, elimina todos excepto el último
+  //   var parts = number.split('.');
+  //   if (parts.length > 2) {
+  //     var lastPart = parts.removeLast();
+  //     number = '${parts.join('')}.$lastPart';
+  //   }
+
+  //   return number;
+  // }
+
+  Future<void> updateDispenserReader(int pageIndex) async {
+    if (isLoading.value) return;
+
+    isLoading.value = true;
+
+    try {
+      final dispenserReader = dispenserReaders[pageIndex];
+      print('Dispenser Reader: $dispenserReader');
+
+      final String dispenserReaderId = dispenserReader['dispenserReaderId'];
+      final String generalDispenserReaderId =
+          dispenserReader['generalDispenserReaderId'];
+
+      print('Dispenser Reader ID: $dispenserReaderId');
+      print('General Dispenser Reader ID: $generalDispenserReaderId');
+
+      String newPreviousNoGallons =
+          dispenserReader['actualNoGallons'].toString();
+      String newActualNoGallons = textControllers[pageIndex][0].text.trim();
+      String newPreviousNoMechanic =
+          dispenserReader['actualNoMechanic'].toString();
+      String newActualNoMechanic = textControllers[pageIndex][1].text.trim();
+      String newPreviousNoMoney = dispenserReader['actualNoMoney'].toString();
+      String newActualNoMoney = textControllers[pageIndex][2].text.trim();
+
+      print('Before formatting:');
+      print(
+          'Previous Gallons: $newPreviousNoGallons, Actual Gallons: $newActualNoGallons');
+      print(
+          'Previous Mechanic: $newPreviousNoMechanic, Actual Mechanic: $newActualNoMechanic');
+      print(
+          'Previous Money: $newPreviousNoMoney, Actual Money: $newActualNoMoney');
+
+      if (newActualNoGallons.isEmpty ||
+          newActualNoMechanic.isEmpty ||
+          newActualNoMoney.isEmpty) {
+        throw Exception('One or more fields are empty');
+      }
+
+      // Formatea los números para el parsing
+      newPreviousNoGallons = formatNumberForParsing(newPreviousNoGallons);
+      newActualNoGallons = formatNumberForParsing(newActualNoGallons);
+      newPreviousNoMechanic = formatNumberForParsing(newPreviousNoMechanic);
+      newActualNoMechanic = formatNumberForParsing(newActualNoMechanic);
+      newPreviousNoMoney = formatNumberForParsing(newPreviousNoMoney);
+      newActualNoMoney = formatNumberForParsing(newActualNoMoney);
+
+      print('After formatting:');
+      print(
+          'Previous Gallons: $newPreviousNoGallons, Actual Gallons: $newActualNoGallons');
+      print(
+          'Previous Mechanic: $newPreviousNoMechanic, Actual Mechanic: $newActualNoMechanic');
+      print(
+          'Previous Money: $newPreviousNoMoney, Actual Money: $newActualNoMoney');
+
+      // Verifica que los números sean válidos antes de enviarlos
+      if (double.tryParse(newActualNoGallons) == null ||
+          double.tryParse(newActualNoMechanic) == null ||
+          double.tryParse(newActualNoMoney) == null) {
+        throw Exception('Invalid number format after parsing');
+      }
+
+      final bool success = await DispenserReaderService.updateDispenserReader(
+        dispenserReaderId,
+        newPreviousNoGallons,
+        newActualNoGallons,
+        newPreviousNoMechanic,
+        newActualNoMechanic,
+        newPreviousNoMoney,
+        newActualNoMoney,
+      );
+
+      if (success) {
+        // Actualizar los datos locales
+        dispenserReaders[pageIndex]['previousNoGallons'] =
+            double.parse(newPreviousNoGallons);
+        dispenserReaders[pageIndex]['actualNoGallons'] =
+            double.parse(newActualNoGallons);
+        dispenserReaders[pageIndex]['previousNoMechanic'] =
+            double.parse(newPreviousNoMechanic);
+        dispenserReaders[pageIndex]['actualNoMechanic'] =
+            double.parse(newActualNoMechanic);
+        dispenserReaders[pageIndex]['previousNoMoney'] =
+            double.parse(newPreviousNoMoney);
+        dispenserReaders[pageIndex]['actualNoMoney'] =
+            double.parse(newActualNoMoney);
+
+        // Recalcular las diferencias
+        calculateDifference(pageIndex, 0);
+        calculateDifference(pageIndex, 1);
+        calculateDifference(pageIndex, 2);
+
+        showUpdateButtonList[pageIndex].value = false;
+        sendButtonEnabled.value = false;
+        dataSubmitted[pageIndex].value = true;
+
+        Get.snackbar('Éxito', 'Los datos se han actualizado correctamente.');
+
+        // Actualiza la vista
+        update(['dispenserReader_$pageIndex']);
+      } else {
+        throw Exception('Failed to update dispenser reader');
+      }
+    } catch (e) {
+      print('Error updating dispenser reader: $e');
+      Get.snackbar(
+          'Error', 'No se pudo actualizar los datos. Intente nuevamente.');
+    } finally {
+      isLoading.value = false;
+      saveState();
+    }
+  }
+
+  String formatNumberForParsing(String number) {
+    // Elimina todos los espacios y comas
+    number = number.replaceAll(' ', '').replaceAll(',', '');
+
+    // Si el número comienza con un punto, añade un 0 al principio
+    if (number.startsWith('.')) {
+      number = '0' + number;
+    }
+
+    // Asegúrate de que solo haya un punto decimal
+    var parts = number.split('.');
+    if (parts.length > 2) {
+      var integerPart = parts[0];
+      var decimalPart = parts.sublist(1).join('');
+      number = '$integerPart.$decimalPart';
+    }
+
+    // Si no hay punto decimal, añade .000 al final
+    if (!number.contains('.')) {
+      number += '.000';
+    }
+
+    // Asegúrate de que siempre haya tres decimales
+    parts = number.split('.');
+    if (parts.length == 2) {
+      var decimalPart = parts[1].padRight(3, '0').substring(0, 3);
+      number = '${parts[0]}.$decimalPart';
+    }
+
+    return number;
+  }
+
   void resetState() {
     dispenserReaders.clear();
     isLoading.value = true;
@@ -562,3 +740,48 @@ class DispenserController extends GetxController {
     super.onClose();
   }
 }
+
+/*
+{
+  previousNoGallons: 49930,
+  actualNoGallons: 49941,
+  totalNoGallons: 11,
+  previousNoMechanic: 49930.732,
+  actualNoMechanic: 49941.045,
+  totalNoMechanic: 10.313,
+  previousNoMoney: 1580972.11,
+  actualNoMoney: 1581309.2,
+  totalNoMoney: 337.09,
+  assignmentHoseId: {
+    _id: 633f69f1dad5b9b5ee4c42e1,
+    position: 1,
+    hoseId: {
+      _id: 633f6036dad5b9b5ee4c4207,
+      hoseColor: amarillo,
+      fuelId: {
+        _id: 633f4336345498b64890a931,
+        fuelName: regular
+      },
+      statusId: 633f0e5bdcc030846c271119,
+      __v: 0,
+      code: 1
+    },
+    sideId: {
+      _id: 633a2f683e373282cf01dee0,
+      sideName: LadoA
+    },
+    assignmentId: {
+      _id: 633f69d9dad5b9b5ee4c42db,
+      dispenserId: {
+        _id: 633f5c2d6fba6413361cbb6c,
+        dispenserCode: bomba1
+      },
+      __v: 0
+    },
+    statusId: 633f0e5bdcc030846c271119,
+    __v: 0
+  },
+  generalDispenserReaderId: 669c2f87fab4b4faa8261ec6,
+  __v: 0,
+  dispenserReaderId: 669c2fa4fab4b4faa8261ec9
+}*/

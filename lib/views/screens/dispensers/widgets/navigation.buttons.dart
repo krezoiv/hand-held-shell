@@ -11,6 +11,7 @@ class NavigationButtons extends StatelessWidget {
   final bool enabled;
   final VoidCallback onThumbUpPressed;
   final DispenserController dispenserController;
+  final Function(int) onUpdatePressed;
 
   const NavigationButtons({
     Key? key,
@@ -22,6 +23,7 @@ class NavigationButtons extends StatelessWidget {
     required this.enabled,
     required this.onThumbUpPressed,
     required this.dispenserController,
+    required this.onUpdatePressed,
   }) : super(key: key);
 
   @override
@@ -89,13 +91,8 @@ class NavigationButtons extends StatelessWidget {
                     dispenserController.showUpdateButtonList[pageIndex].value,
                 child: IconButton(
                   icon: const Icon(Icons.update),
-                  color: Colors.orange[400], // Color del icono
-                  onPressed: () {
-                    // Aquí defines la acción para el botón de actualización
-                    dispenserController.showUpdateButtonList[pageIndex].value =
-                        false;
-                    dispenserController.sendButtonEnabled.value = true;
-                  },
+                  color: Colors.orange[400],
+                  onPressed: () => onUpdatePressed(pageIndex),
                 ),
               )),
           IconButton(

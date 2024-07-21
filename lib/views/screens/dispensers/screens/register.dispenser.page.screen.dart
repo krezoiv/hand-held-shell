@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:decimal/decimal.dart';
 import 'package:hand_held_shell/shared/helpers/text.helpers.dart';
@@ -81,6 +82,14 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
         ['assignmentId']['dispenserId']['dispenserCode'];
     final String assignmentHoseId =
         widget.dispenserReader['assignmentHoseId']['_id'];
+
+    final String dispenserReaderId =
+        widget.dispenserReader['dispenserReaderId'];
+    final String generalDispenserReaderId =
+        widget.dispenserReader['generalDispenserReaderId'];
+
+    print('Current Dispenser Reader ID: $dispenserReaderId');
+    print('Current Dispenser Reader ID: $generalDispenserReaderId');
 
     return Obx(() => Scaffold(
           key: scaffoldKey,
@@ -179,6 +188,9 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                           } else {
                             _showMissingDataDialog();
                           }
+                        },
+                        onUpdatePressed: (pageIndex) {
+                          dispenserController.updateDispenserReader(pageIndex);
                         },
                         dispenserController: dispenserController,
                       )),
@@ -297,7 +309,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                                   .textControllers[widget.pageIndex][cardIndex],
                               focusNode: dispenserController
                                   .focusNodes[widget.pageIndex][cardIndex],
-                              readOnly: true,
+                              readOnly: !widget.buttonsEnabled.value,
                               onChanged: (value) {
                                 dispenserController.updateTextField(
                                     widget.pageIndex, cardIndex, value);
@@ -326,9 +338,12 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                                     : Colors.black87,
                               ),
                               textAlign: TextAlign.center,
-                              onTap: () {
-                                // Do nothing to prevent keyboard from showing
-                              },
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
+                              inputFormatters: [
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'^\d*\.?\d*')),
+                              ],
                             )),
                       ],
                     ),

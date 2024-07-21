@@ -102,7 +102,7 @@ class DispenserReaderService {
     }
   }
 
-  static Future<bool> addNewDispenserReader(
+  static Future<String?> addNewDispenserReader(
     String previousNoGallons,
     String actualNoGallons,
     String totalNoGallons,
@@ -142,15 +142,15 @@ class DispenserReaderService {
 
       if (response.statusCode == 201) {
         final responseData = json.decode(response.body);
-        return responseData['ok'] ?? false;
+        return responseData['newDispenserReader']['dispenserReaderId'];
       } else {
         print('Server responded with status code: ${response.statusCode}');
         print('Response body: ${response.body}');
-        return false;
+        return null;
       }
     } catch (e) {
       print('Error in addNewDispenserReader: $e');
-      return false;
+      return null;
     }
   }
 
@@ -195,11 +195,52 @@ class DispenserReaderService {
     }
   }
 
+  // static Future<bool> updateDispenserReader(
+  //   String dispenserReaderId,
+  //   String actualNoGallons,
+  //   String actualNoMechanic,
+  //   String actualNoMoney,
+  // ) async {
+  //   try {
+  //     final String? token = await AuthService.getToken();
+  //     if (token == null) throw Exception('Token is null');
+
+  //     final response = await http.put(
+  //       Uri.parse('$baseUrl/dispenser-Reader/updateDispenserReader'),
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'x-token': token,
+  //       },
+  //       body: json.encode({
+  //         'dispenserReaderId': dispenserReaderId,
+  //         'actualNoGallons': double.parse(actualNoGallons),
+  //         'actualNoMechanic': double.parse(actualNoMechanic),
+  //         'actualNoMoney': double.parse(actualNoMoney),
+  //       }),
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final responseData = json.decode(response.body);
+  //       return responseData['ok'] ?? false;
+  //     } else {
+  //       print('Server responded with status code: ${response.statusCode}');
+  //       print('Response body: ${response.body}');
+  //       return false;
+  //     }
+  //   } catch (e) {
+  //     print('Error in updateDispenserReader: $e');
+  //     return false;
+  //   }
+  // }
+
   static Future<bool> updateDispenserReader(
     String dispenserReaderId,
-    String actualNoGallons,
-    String actualNoMechanic,
-    String actualNoMoney,
+    String newPreviousNoGallons,
+    String newActualNoGallons,
+    String newPreviousNoMechanic,
+    String newActualNoMechanic,
+    String newPreviousNoMoney,
+    String newActualNoMoney,
   ) async {
     try {
       final String? token = await AuthService.getToken();
@@ -213,11 +254,27 @@ class DispenserReaderService {
         },
         body: json.encode({
           'dispenserReaderId': dispenserReaderId,
-          'actualNoGallons': double.parse(actualNoGallons),
-          'actualNoMechanic': double.parse(actualNoMechanic),
-          'actualNoMoney': double.parse(actualNoMoney),
+          'newPreviousNoGallons': newPreviousNoGallons,
+          'newActualNoGallons': newActualNoGallons,
+          'newPreviousNoMechanic': newPreviousNoMechanic,
+          'newActualNoMechanic': newActualNoMechanic,
+          'newPreviousNoMoney': newPreviousNoMoney,
+          'newActualNoMoney': newActualNoMoney,
         }),
       );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+      print('Request body:');
+      print(json.encode({
+        'dispenserReaderId': dispenserReaderId,
+        'newPreviousNoGallons': newPreviousNoGallons,
+        'newActualNoGallons': newActualNoGallons,
+        'newPreviousNoMechanic': newPreviousNoMechanic,
+        'newActualNoMechanic': newActualNoMechanic,
+        'newPreviousNoMoney': newPreviousNoMoney,
+        'newActualNoMoney': newActualNoMoney,
+      }));
 
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
