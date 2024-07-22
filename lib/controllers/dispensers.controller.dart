@@ -290,7 +290,7 @@ class DispenserController extends GetxController {
   }
 
   void validateAndDisableFields(int pageIndex, int cardIndex) {
-    if (dataSubmitted[pageIndex].value) return;
+    if (!isEditMode.value && dataSubmitted[pageIndex].value) return;
 
     final dispenserReader = dispenserReaders[pageIndex];
 
@@ -372,12 +372,18 @@ class DispenserController extends GetxController {
         textFieldsEnabled[pageIndex][2].value = false;
       }
 
+      if (isEditMode.value) {
+        // Si estamos en modo de edición, actualizamos los datos en lugar de enviarlos
+        if (buttonsEnabled[pageIndex].every((button) => !button.value)) {
+          updateDataToDatabase(pageIndex);
+        }
+      }
+
       checkAllButtonsDisabled(pageIndex);
       saveState();
     } catch (e) {
       print('Error in validation: $e');
-      showValidationAlert(
-          pageIndex, cardIndex, "El campo no puede estar vacío");
+      showValidationAlert(pageIndex, cardIndex, "Error en la validación");
     }
   }
 
@@ -559,7 +565,7 @@ class DispenserController extends GetxController {
   }
 
   Future<void> updateDataToDatabase(int pageIndex) async {
-    if (dataSubmitted[pageIndex].value || isLoading.value) return;
+    if (!isEditMode.value || isLoading.value) return;
 
     isLoading.value = true;
 
@@ -583,14 +589,12 @@ class DispenserController extends GetxController {
 
       if (success) {
         print('DispenserReader updated successfully');
-        dataSubmitted[pageIndex].value = true;
-
         for (int i = 0; i < 3; i++) {
           textFieldsEnabled[pageIndex][i].value = false;
           buttonsEnabled[pageIndex][i].value = false;
         }
-
         sendButtonEnabled.value = false;
+        isEditMode.value = false;
 
         // Actualizar los valores en dispenserReaders
         dispenserReaders[pageIndex]['actualNoGallons'] =
@@ -604,17 +608,6 @@ class DispenserController extends GetxController {
         calculateDifference(pageIndex, 0);
         calculateDifference(pageIndex, 1);
         calculateDifference(pageIndex, 2);
-
-        if (pageIndex < dispenserReaders.length - 1) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Get.find<PageController>(tag: 'dispenser_page_controller')
-                .animateToPage(
-              pageIndex + 1,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
-          });
-        }
 
         Get.snackbar('Éxito', 'Los datos se han actualizado correctamente.');
       } else {
@@ -630,23 +623,23 @@ class DispenserController extends GetxController {
     }
   }
 
-  void toggleEditMode() {
+  void toggleEditMode(int pageIndex) {
     isEditMode.value = !isEditMode.value;
     if (isEditMode.value) {
-      enableEditMode();
+      enableEditMode(pageIndex);
     } else {
       disableEditMode();
     }
   }
 
-  void enableEditMode() {
-    for (int pageIndex = 0; pageIndex < dispenserReaders.length; pageIndex++) {
-      for (int cardIndex = 0; cardIndex < 3; cardIndex++) {
-        if (!buttonsEnabled[pageIndex][cardIndex].value) {
-          textFieldsEnabled[pageIndex][cardIndex].value = true;
-          buttonsEnabled[pageIndex][cardIndex].value = true;
-        }
+  void enableEditMode(int pageIndex) {
+    if (dataSubmitted[pageIndex].value) {
+      for (int i = 0; i < 3; i++) {
+        textFieldsEnabled[pageIndex][i].value = true;
+        buttonsEnabled[pageIndex][i].value = true;
       }
+      sendButtonEnabled.value = false;
+      isEditMode.value = true;
     }
   }
 

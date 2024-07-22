@@ -75,7 +75,8 @@ class _NavigationButtonsState extends State<NavigationButtons>
               },
               child: IconButton(
                 icon: Icon(
-                  Icons.sync,
+                  Icons
+                      .sync, //!boton que sera para enviar la data modificada del dispenserReader que anteriormente fue creada a la base de datos
                   color: isEnabled
                       ? Colors.cyanAccent[700]
                       : (isDarkMode ? Colors.white : Colors.black),
@@ -124,7 +125,8 @@ class _NavigationButtonsState extends State<NavigationButtons>
                               ),
                             ],
                           )
-                        : const Icon(Icons.thumb_up),
+                        : const Icon(Icons
+                            .cloud_done_outlined), //!boton que sirve para crear un nuevo dispenserReader a la base de datos
                   )),
             ),
           ),

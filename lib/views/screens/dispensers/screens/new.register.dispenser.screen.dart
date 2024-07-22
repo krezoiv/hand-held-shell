@@ -18,6 +18,7 @@ class _NewRegisterDispenserScreenState
     extends State<NewRegisterDispenserScreen> {
   late DispenserController dispenserController;
   late PageController _pageController;
+  final RxInt currentPageIndex = 0.obs;
 
   @override
   void initState() {
@@ -33,6 +34,11 @@ class _NewRegisterDispenserScreenState
 
     // Carga el estado al iniciar
     dispenserController.loadState();
+
+    // Añade un listener al PageController para actualizar currentPageIndex
+    _pageController.addListener(() {
+      currentPageIndex.value = _pageController.page?.round() ?? 0;
+    });
   }
 
   @override
@@ -50,15 +56,20 @@ class _NewRegisterDispenserScreenState
         actions: [
           Obx(() => CupertinoButton(
                 onPressed: dispenserController.hasSharedPreferencesData.value &&
-                        dispenserController.isAnyButtonDisabledInCards
+                        dispenserController.isAnyButtonDisabledInCards &&
+                        dispenserController
+                            .dataSubmitted[currentPageIndex.value].value
                     ? () {
-                        dispenserController.toggleEditMode();
+                        dispenserController
+                            .toggleEditMode(currentPageIndex.value);
                       }
                     : null,
                 child: Icon(
                   CupertinoIcons.pencil,
                   color: (dispenserController.hasSharedPreferencesData.value &&
-                          dispenserController.isAnyButtonDisabledInCards)
+                          dispenserController.isAnyButtonDisabledInCards &&
+                          dispenserController
+                              .dataSubmitted[currentPageIndex.value].value)
                       ? Colors.blue[900]
                       : Colors.grey,
                 ),
@@ -107,6 +118,7 @@ class _NewRegisterDispenserScreenState
                 itemCount: dispenserController.dispenserReaders.length,
                 onPageChanged: (index) {
                   dispenserController.setFocusToFirstField(index);
+                  currentPageIndex.value = index;
                 },
                 itemBuilder: (context, index) {
                   return RegisterDispenserPage(
@@ -214,29 +226,3 @@ class _NewRegisterDispenserScreenState
     }
   }
 }
-
-
-/**
- * 1820
- * 650
- * 3000
- * 1656
- * 1370
- * 320
- * 562.19
- * 1958
- * 1955
- * 
- * 
- * 272==
- * 220==
- * 275==
- * 1950==
- * 734===
- * 225==
- * 2500==
- * 500
- * 
- * 667622
- * 13802
- * */

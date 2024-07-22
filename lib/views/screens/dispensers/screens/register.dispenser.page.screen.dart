@@ -163,8 +163,8 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                               !dispenserController
                                   .dataSubmitted[widget.pageIndex].value &&
                               !dispenserController.isLoading.value) {
-                            dispenserController
-                                .sendDataToDatabase(widget.pageIndex);
+                            dispenserController.sendDataToDatabase(widget
+                                .pageIndex); // !se manade a guardar el nuevo dispenserReader
                           } else if (dispenserController
                               .dataSubmitted[widget.pageIndex].value) {
                             Get.snackbar('Información',
@@ -355,7 +355,9 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(CupertinoIcons.hand_thumbsup,
+                                  Icon(
+                                      CupertinoIcons
+                                          .hand_thumbsup, //!boton para hacer validacaiones de los texfields
                                       color: Colors.white),
                                 ],
                               ),
