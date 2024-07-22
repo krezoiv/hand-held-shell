@@ -1,13 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:decimal/decimal.dart';
 import 'package:hand_held_shell/shared/helpers/text.helpers.dart';
 import 'package:hand_held_shell/controllers/register.button.controller.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/controllers/dispensers.controller.dart';
-
 import 'package:hand_held_shell/views/screens/dispensers/widgets/build.calcutator.buttons.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/navigation.buttons.dart';
 
@@ -20,14 +18,14 @@ class RegisterDispenserPage extends StatefulWidget {
   final RxBool buttonsEnabled;
 
   const RegisterDispenserPage({
-    Key? key,
+    super.key,
     required this.pageIndex,
     required this.dispenserReader,
     required this.totalPages,
     required this.mainPageController,
     required this.showCalculatorButtons,
     required this.buttonsEnabled,
-  }) : super(key: key);
+  });
 
   @override
   _RegisterDispenserPageState createState() => _RegisterDispenserPageState();
@@ -82,14 +80,6 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
         ['assignmentId']['dispenserId']['dispenserCode'];
     final String assignmentHoseId =
         widget.dispenserReader['assignmentHoseId']['_id'];
-
-    final String dispenserReaderId =
-        widget.dispenserReader['dispenserReaderId'];
-    final String generalDispenserReaderId =
-        widget.dispenserReader['generalDispenserReaderId'];
-
-    print('Current Dispenser Reader ID: $dispenserReaderId');
-    print('Current Dispenser Reader ID: $generalDispenserReaderId');
 
     return Obx(() => Scaffold(
           key: scaffoldKey,
@@ -189,12 +179,12 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                             _showMissingDataDialog();
                           }
                         },
-                        onUpdatePressed: (pageIndex) {
-                          dispenserController.updateDispenserReader(pageIndex);
-                        },
                         dispenserController: dispenserController,
                       )),
-                  if (widget.showCalculatorButtons.value)
+                  if (widget.showCalculatorButtons.value &&
+                      widget.buttonsEnabled.value &&
+                      !dispenserController
+                          .dataSubmitted[widget.pageIndex].value)
                     BuildCalculatorButtons(
                       pageIndex: widget.pageIndex,
                     ),
@@ -309,7 +299,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                                   .textControllers[widget.pageIndex][cardIndex],
                               focusNode: dispenserController
                                   .focusNodes[widget.pageIndex][cardIndex],
-                              readOnly: !widget.buttonsEnabled.value,
+                              readOnly: true,
                               onChanged: (value) {
                                 dispenserController.updateTextField(
                                     widget.pageIndex, cardIndex, value);
@@ -338,12 +328,9 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                                     : Colors.black87,
                               ),
                               textAlign: TextAlign.center,
-                              keyboardType: TextInputType.numberWithOptions(
-                                  decimal: true),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d*\.?\d*')),
-                              ],
+                              onTap: () {
+                                // Do nothing to prevent keyboard from showing
+                              },
                             )),
                       ],
                     ),

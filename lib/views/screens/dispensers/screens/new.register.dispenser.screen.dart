@@ -7,7 +7,7 @@ import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dar
 import 'package:hand_held_shell/views/screens/dispensers/screens/register.dispenser.page.screen.dart';
 
 class NewRegisterDispenserScreen extends StatefulWidget {
-  NewRegisterDispenserScreen({Key? key}) : super(key: key);
+  const NewRegisterDispenserScreen({super.key});
 
   @override
   _NewRegisterDispenserScreenState createState() =>
@@ -49,6 +49,21 @@ class _NewRegisterDispenserScreenState
         title: const Text('Digitar Bombas'),
         actions: [
           Obx(() => CupertinoButton(
+                onPressed: dispenserController.hasSharedPreferencesData.value &&
+                        dispenserController.isAnyButtonDisabledInCards
+                    ? () {
+                        dispenserController.toggleEditMode();
+                      }
+                    : null,
+                child: Icon(
+                  CupertinoIcons.pencil,
+                  color: (dispenserController.hasSharedPreferencesData.value &&
+                          dispenserController.isAnyButtonDisabledInCards)
+                      ? Colors.blue[900]
+                      : Colors.grey,
+                ),
+              )),
+          Obx(() => CupertinoButton(
                 onPressed: dispenserController.hasSharedPreferencesData.value
                     ? () {
                         showConfirmationDialog(
@@ -77,18 +92,6 @@ class _NewRegisterDispenserScreenState
                 child: Icon(
                   CupertinoIcons.delete,
                   color: Colors.red[900],
-                ),
-              )),
-          Obx(() => CupertinoButton(
-                onPressed: dispenserController.hasSharedPreferencesData.value
-                    ? () {
-                        // Aquí defines la acción de editar
-                        enableFieldsAndButtons();
-                      }
-                    : null,
-                child: Icon(
-                  CupertinoIcons.pencil,
-                  color: Colors.blue[900],
                 ),
               )),
         ],
@@ -210,18 +213,30 @@ class _NewRegisterDispenserScreenState
       );
     }
   }
-
-  void enableFieldsAndButtons() {
-    for (int pageIndex = 0;
-        pageIndex < dispenserController.dispenserReaders.length;
-        pageIndex++) {
-      for (int cardIndex = 0; cardIndex < 3; cardIndex++) {
-        dispenserController.buttonsEnabled[pageIndex][cardIndex].value = true;
-        dispenserController.textFieldsEnabled[pageIndex][cardIndex].value =
-            true;
-      }
-    }
-    dispenserController.sendButtonEnabled.value = false;
-    dispenserController.saveState();
-  }
 }
+
+
+/**
+ * 1820
+ * 650
+ * 3000
+ * 1656
+ * 1370
+ * 320
+ * 562.19
+ * 1958
+ * 1955
+ * 
+ * 
+ * 272==
+ * 220==
+ * 275==
+ * 1950==
+ * 734===
+ * 225==
+ * 2500==
+ * 500
+ * 
+ * 667622
+ * 13802
+ * */

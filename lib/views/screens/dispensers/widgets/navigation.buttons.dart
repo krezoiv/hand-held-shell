@@ -11,7 +11,6 @@ class NavigationButtons extends StatelessWidget {
   final bool enabled;
   final VoidCallback onThumbUpPressed;
   final DispenserController dispenserController;
-  final Function(int) onUpdatePressed;
 
   const NavigationButtons({
     Key? key,
@@ -23,7 +22,6 @@ class NavigationButtons extends StatelessWidget {
     required this.enabled,
     required this.onThumbUpPressed,
     required this.dispenserController,
-    required this.onUpdatePressed,
   }) : super(key: key);
 
   @override
@@ -36,25 +34,20 @@ class NavigationButtons extends StatelessWidget {
             icon: const Icon(Icons.arrow_back),
             onPressed: pageIndex > 0 ? () => _changePage(pageIndex - 1) : null,
           ),
-          IconButton(
-            icon: const Icon(Icons.clear),
-            onPressed: enabled
-                ? () => clearTextField(pageIndex, currentCardIndex)
-                : null,
-          ),
+          Obx(() => IconButton(
+                icon: const Icon(Icons.clear),
+                onPressed: dispenserController.canClearFields(pageIndex)
+                    ? () => clearTextField(pageIndex, currentCardIndex)
+                    : null,
+              )),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: SizedBox(
-              width: 180, // Ajusta este valor según tus necesidades
+              width: 180,
               child: Obx(() => ElevatedButton(
                     onPressed: enabled &&
-                            !dispenserController
-                                .showUpdateButtonList[pageIndex].value
-                        ? () {
-                            onThumbUpPressed();
-                            dispenserController
-                                .showUpdateButtonList[pageIndex].value = true;
-                          }
+                            !dispenserController.dataSubmitted[pageIndex].value
+                        ? onThumbUpPressed
                         : null,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -86,15 +79,6 @@ class NavigationButtons extends StatelessWidget {
                   )),
             ),
           ),
-          Obx(() => Visibility(
-                visible:
-                    dispenserController.showUpdateButtonList[pageIndex].value,
-                child: IconButton(
-                  icon: const Icon(Icons.update),
-                  color: Colors.orange[400],
-                  onPressed: () => onUpdatePressed(pageIndex),
-                ),
-              )),
           IconButton(
             icon: const Icon(Icons.arrow_forward),
             onPressed: pageIndex < totalPages - 1

@@ -1,11 +1,10 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:decimal/decimal.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
-import 'package:intl/intl.dart';
 
 class DispenserController extends GetxController {
   final RxList<dynamic> dispenserReaders = <dynamic>[].obs;
@@ -15,22 +14,47 @@ class DispenserController extends GetxController {
   final RxList<List<FocusNode>> focusNodes = <List<FocusNode>>[].obs;
   final RxList<List<RxString>> differences = <List<RxString>>[].obs;
 
-  final showCalculatorButtons = false.obs;
+  final RxBool showCalculatorButtons = false.obs;
   final RxList<List<RxBool>> buttonsEnabled = <List<RxBool>>[].obs;
   final RxList<List<RxBool>> textFieldsEnabled = <List<RxBool>>[].obs;
   final RxBool sendButtonEnabled = false.obs;
   final RxBool hasSharedPreferencesData = false.obs;
+  final RxBool isEditMode = false.obs;
+
   final RxList<RxBool> dataSubmitted = <RxBool>[].obs;
 
-  final RxList<RxBool> showUpdateButtonList = <RxBool>[]
-      .obs; // Lista para manejar la visibilidad del botón de actualización por página
-
   final FocusNode focusNode = FocusNode();
+
+  final RxBool isAnyButtonDisabled = false.obs;
 
   @override
   void onInit() {
     super.onInit();
+    ever(buttonsEnabled, _updateIsAnyButtonDisabled);
     loadState();
+  }
+
+  void _updateIsAnyButtonDisabled(_) {
+    isAnyButtonDisabled.value = buttonsEnabled
+        .any((pageButtons) => pageButtons.any((button) => !button.value));
+  }
+
+  bool get isAnyButtonDisabledInCards {
+    for (var pageButtons in buttonsEnabled) {
+      for (var button in pageButtons) {
+        if (!button.value) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+// En DispenserController
+  bool canClearFields(int pageIndex) {
+    return dataSubmitted[pageIndex].value &&
+        !isLoading.value &&
+        buttonsEnabled[pageIndex].every((button) => !button.value);
   }
 
   Future<void> saveState() async {
@@ -54,8 +78,6 @@ class DispenserController extends GetxController {
         'differences': differences
             .map((list) => list.map((rx) => rx.value).toList())
             .toList(),
-        'showUpdateButtonList':
-            showUpdateButtonList.map((rx) => rx.value).toList(),
       };
       await prefs.setString('dispenserState', json.encode(state));
       hasSharedPreferencesData.value = true;
@@ -100,10 +122,6 @@ class DispenserController extends GetxController {
         differences.assignAll((state['differences'] as List)
             .map((list) =>
                 (list as List).map((v) => RxString(v as String)).toList())
-            .toList());
-
-        showUpdateButtonList.assignAll((state['showUpdateButtonList'] as List)
-            .map((v) => RxBool(v as bool))
             .toList());
 
         focusNodes.assignAll(
@@ -202,10 +220,6 @@ class DispenserController extends GetxController {
         List.generate(readers.length, (_) => false.obs),
       );
 
-      showUpdateButtonList.assignAll(
-        List.generate(readers.length, (_) => false.obs),
-      );
-
       initializeDifferences();
 
       if (readers.isNotEmpty) {
@@ -252,10 +266,6 @@ class DispenserController extends GetxController {
     String sanitized = _sanitizeTextField(value);
     if (sanitized.isEmpty) {
       throw FormatException("Empty field");
-    }
-    // Asegúrate de que el valor es un número válido
-    if (!RegExp(r'^\d*\.?\d*$').hasMatch(sanitized)) {
-      throw FormatException("Invalid number format");
     }
     print('Sanitized value: $sanitized');
     return Decimal.parse(sanitized);
@@ -377,8 +387,8 @@ class DispenserController extends GetxController {
     sendButtonEnabled.value = allDisabled;
   }
 
-  Future<String?> sendDataToDatabase(int pageIndex) async {
-    if (dataSubmitted[pageIndex].value || isLoading.value) return null;
+  Future<void> sendDataToDatabase(int pageIndex) async {
+    if (dataSubmitted[pageIndex].value || isLoading.value) return;
 
     isLoading.value = true;
 
@@ -393,17 +403,6 @@ class DispenserController extends GetxController {
       final dispenserReader = dispenserReaders[pageIndex];
       final String assignmentHoseId =
           dispenserReader['assignmentHoseId']['_id'];
-
-      Decimal sanitizeAndParse(String value) {
-        String sanitized = value.replaceAll(',', '').trim();
-        return Decimal.parse(sanitized);
-      }
-
-      String subtractPrecise(String a, String b) {
-        var numA = sanitizeAndParse(a);
-        var numB = sanitizeAndParse(b);
-        return (numA - numB).toString(); // Mantiene precisión
-      }
 
       String previousNoGallons =
           _sanitizeTextField(dispenserReader['actualNoGallons'].toString());
@@ -424,22 +423,7 @@ class DispenserController extends GetxController {
       String actualNoMoney =
           _sanitizeTextField(textControllers[pageIndex][2].text);
       String totalNoMoney = subtractPrecise(actualNoMoney, previousNoMoney);
-
-      print('Data to be sent to the database:');
-      print('previousNoGallons: $previousNoGallons');
-      print('actualNoGallons: $actualNoGallons');
-      print('totalNoGallons: $totalNoGallons');
-      print('previousNoMechanic: $previousNoMechanic');
-      print('actualNoMechanic: $actualNoMechanic');
-      print('totalNoMechanic: $totalNoMechanic');
-      print('previousNoMoney: $previousNoMoney');
-      print('actualNoMoney: $actualNoMoney');
-      print('totalNoMoney: $totalNoMoney');
-      print('assignmentHoseId: $assignmentHoseId');
-      print('generalDispenserReaderId: $generalDispenserReaderId');
-
-      final newDispenserReaderId =
-          await DispenserReaderService.addNewDispenserReader(
+      final bool success = await DispenserReaderService.addNewDispenserReader(
         previousNoGallons,
         actualNoGallons,
         totalNoGallons,
@@ -453,7 +437,7 @@ class DispenserController extends GetxController {
         generalDispenserReaderId,
       );
 
-      if (newDispenserReaderId != null) {
+      if (success) {
         final bool updateSuccess =
             await DispenserReaderService.updateGeneralDispenserReader(
           totalNoGallons,
@@ -474,16 +458,19 @@ class DispenserController extends GetxController {
 
           sendButtonEnabled.value = false;
 
-          showUpdateButtonList[pageIndex].value = true;
-
-          // Actualizar el dispenserReaderId en el modelo local
-          dispenserReaders[pageIndex]['dispenserReaderId'] =
-              newDispenserReaderId;
+          if (pageIndex < dispenserReaders.length - 1) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Get.find<PageController>(tag: 'dispenser_page_controller')
+                  .animateToPage(
+                pageIndex + 1,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+              );
+            });
+          }
 
           Get.snackbar(
               'Éxito', 'Los datos se han enviado y actualizado correctamente.');
-
-          return newDispenserReaderId;
         } else {
           throw Exception('Failed to update GeneralDispenserReader');
         }
@@ -497,7 +484,6 @@ class DispenserController extends GetxController {
       isLoading.value = false;
       saveState();
     }
-    return null;
   }
 
   void focusNextField(int pageIndex, int cardIndex) {
@@ -544,173 +530,6 @@ class DispenserController extends GetxController {
     hasSharedPreferencesData.value = savedState != null;
   }
 
-  // String formatNumberForParsing(String number) {
-  //   // Elimina todos los espacios
-  //   number = number.replaceAll(' ', '');
-
-  //   // Si el número comienza con un punto, añade un 0 al principio
-  //   if (number.startsWith('.')) {
-  //     number = '0' + number;
-  //   }
-
-  //   // Reemplaza la coma por un punto
-  //   number = number.replaceAll(',', '.');
-
-  //   // Si hay más de un punto, elimina todos excepto el último
-  //   var parts = number.split('.');
-  //   if (parts.length > 2) {
-  //     var lastPart = parts.removeLast();
-  //     number = '${parts.join('')}.$lastPart';
-  //   }
-
-  //   return number;
-  // }
-
-  Future<void> updateDispenserReader(int pageIndex) async {
-    if (isLoading.value) return;
-
-    isLoading.value = true;
-
-    try {
-      final dispenserReader = dispenserReaders[pageIndex];
-      print('Dispenser Reader: $dispenserReader');
-
-      final String dispenserReaderId = dispenserReader['dispenserReaderId'];
-      final String generalDispenserReaderId =
-          dispenserReader['generalDispenserReaderId'];
-
-      print('Dispenser Reader ID: $dispenserReaderId');
-      print('General Dispenser Reader ID: $generalDispenserReaderId');
-
-      String newPreviousNoGallons =
-          dispenserReader['actualNoGallons'].toString();
-      String newActualNoGallons = textControllers[pageIndex][0].text.trim();
-      String newPreviousNoMechanic =
-          dispenserReader['actualNoMechanic'].toString();
-      String newActualNoMechanic = textControllers[pageIndex][1].text.trim();
-      String newPreviousNoMoney = dispenserReader['actualNoMoney'].toString();
-      String newActualNoMoney = textControllers[pageIndex][2].text.trim();
-
-      print('Before formatting:');
-      print(
-          'Previous Gallons: $newPreviousNoGallons, Actual Gallons: $newActualNoGallons');
-      print(
-          'Previous Mechanic: $newPreviousNoMechanic, Actual Mechanic: $newActualNoMechanic');
-      print(
-          'Previous Money: $newPreviousNoMoney, Actual Money: $newActualNoMoney');
-
-      if (newActualNoGallons.isEmpty ||
-          newActualNoMechanic.isEmpty ||
-          newActualNoMoney.isEmpty) {
-        throw Exception('One or more fields are empty');
-      }
-
-      // Formatea los números para el parsing
-      newPreviousNoGallons = formatNumberForParsing(newPreviousNoGallons);
-      newActualNoGallons = formatNumberForParsing(newActualNoGallons);
-      newPreviousNoMechanic = formatNumberForParsing(newPreviousNoMechanic);
-      newActualNoMechanic = formatNumberForParsing(newActualNoMechanic);
-      newPreviousNoMoney = formatNumberForParsing(newPreviousNoMoney);
-      newActualNoMoney = formatNumberForParsing(newActualNoMoney);
-
-      print('After formatting:');
-      print(
-          'Previous Gallons: $newPreviousNoGallons, Actual Gallons: $newActualNoGallons');
-      print(
-          'Previous Mechanic: $newPreviousNoMechanic, Actual Mechanic: $newActualNoMechanic');
-      print(
-          'Previous Money: $newPreviousNoMoney, Actual Money: $newActualNoMoney');
-
-      // Verifica que los números sean válidos antes de enviarlos
-      if (double.tryParse(newActualNoGallons) == null ||
-          double.tryParse(newActualNoMechanic) == null ||
-          double.tryParse(newActualNoMoney) == null) {
-        throw Exception('Invalid number format after parsing');
-      }
-
-      final bool success = await DispenserReaderService.updateDispenserReader(
-        dispenserReaderId,
-        newPreviousNoGallons,
-        newActualNoGallons,
-        newPreviousNoMechanic,
-        newActualNoMechanic,
-        newPreviousNoMoney,
-        newActualNoMoney,
-      );
-
-      if (success) {
-        // Actualizar los datos locales
-        dispenserReaders[pageIndex]['previousNoGallons'] =
-            double.parse(newPreviousNoGallons);
-        dispenserReaders[pageIndex]['actualNoGallons'] =
-            double.parse(newActualNoGallons);
-        dispenserReaders[pageIndex]['previousNoMechanic'] =
-            double.parse(newPreviousNoMechanic);
-        dispenserReaders[pageIndex]['actualNoMechanic'] =
-            double.parse(newActualNoMechanic);
-        dispenserReaders[pageIndex]['previousNoMoney'] =
-            double.parse(newPreviousNoMoney);
-        dispenserReaders[pageIndex]['actualNoMoney'] =
-            double.parse(newActualNoMoney);
-
-        // Recalcular las diferencias
-        calculateDifference(pageIndex, 0);
-        calculateDifference(pageIndex, 1);
-        calculateDifference(pageIndex, 2);
-
-        showUpdateButtonList[pageIndex].value = false;
-        sendButtonEnabled.value = false;
-        dataSubmitted[pageIndex].value = true;
-
-        Get.snackbar('Éxito', 'Los datos se han actualizado correctamente.');
-
-        // Actualiza la vista
-        update(['dispenserReader_$pageIndex']);
-      } else {
-        throw Exception('Failed to update dispenser reader');
-      }
-    } catch (e) {
-      print('Error updating dispenser reader: $e');
-      Get.snackbar(
-          'Error', 'No se pudo actualizar los datos. Intente nuevamente.');
-    } finally {
-      isLoading.value = false;
-      saveState();
-    }
-  }
-
-  String formatNumberForParsing(String number) {
-    // Elimina todos los espacios y comas
-    number = number.replaceAll(' ', '').replaceAll(',', '');
-
-    // Si el número comienza con un punto, añade un 0 al principio
-    if (number.startsWith('.')) {
-      number = '0' + number;
-    }
-
-    // Asegúrate de que solo haya un punto decimal
-    var parts = number.split('.');
-    if (parts.length > 2) {
-      var integerPart = parts[0];
-      var decimalPart = parts.sublist(1).join('');
-      number = '$integerPart.$decimalPart';
-    }
-
-    // Si no hay punto decimal, añade .000 al final
-    if (!number.contains('.')) {
-      number += '.000';
-    }
-
-    // Asegúrate de que siempre haya tres decimales
-    parts = number.split('.');
-    if (parts.length == 2) {
-      var decimalPart = parts[1].padRight(3, '0').substring(0, 3);
-      number = '${parts[0]}.$decimalPart';
-    }
-
-    return number;
-  }
-
   void resetState() {
     dispenserReaders.clear();
     isLoading.value = true;
@@ -722,7 +541,6 @@ class DispenserController extends GetxController {
     sendButtonEnabled.value = false;
     dataSubmitted.clear();
     differences.clear();
-    showUpdateButtonList.clear();
   }
 
   @override
@@ -739,49 +557,107 @@ class DispenserController extends GetxController {
     }
     super.onClose();
   }
-}
 
-/*
-{
-  previousNoGallons: 49930,
-  actualNoGallons: 49941,
-  totalNoGallons: 11,
-  previousNoMechanic: 49930.732,
-  actualNoMechanic: 49941.045,
-  totalNoMechanic: 10.313,
-  previousNoMoney: 1580972.11,
-  actualNoMoney: 1581309.2,
-  totalNoMoney: 337.09,
-  assignmentHoseId: {
-    _id: 633f69f1dad5b9b5ee4c42e1,
-    position: 1,
-    hoseId: {
-      _id: 633f6036dad5b9b5ee4c4207,
-      hoseColor: amarillo,
-      fuelId: {
-        _id: 633f4336345498b64890a931,
-        fuelName: regular
-      },
-      statusId: 633f0e5bdcc030846c271119,
-      __v: 0,
-      code: 1
-    },
-    sideId: {
-      _id: 633a2f683e373282cf01dee0,
-      sideName: LadoA
-    },
-    assignmentId: {
-      _id: 633f69d9dad5b9b5ee4c42db,
-      dispenserId: {
-        _id: 633f5c2d6fba6413361cbb6c,
-        dispenserCode: bomba1
-      },
-      __v: 0
-    },
-    statusId: 633f0e5bdcc030846c271119,
-    __v: 0
-  },
-  generalDispenserReaderId: 669c2f87fab4b4faa8261ec6,
-  __v: 0,
-  dispenserReaderId: 669c2fa4fab4b4faa8261ec9
-}*/
+  Future<void> updateDataToDatabase(int pageIndex) async {
+    if (dataSubmitted[pageIndex].value || isLoading.value) return;
+
+    isLoading.value = true;
+
+    try {
+      final dispenserReader = dispenserReaders[pageIndex];
+      final String dispenserReaderId = dispenserReader['_id'];
+
+      String actualNoGallons =
+          _sanitizeTextField(textControllers[pageIndex][0].text);
+      String actualNoMechanic =
+          _sanitizeTextField(textControllers[pageIndex][1].text);
+      String actualNoMoney =
+          _sanitizeTextField(textControllers[pageIndex][2].text);
+
+      final bool success = await DispenserReaderService.updateDispenserReader(
+        dispenserReaderId,
+        actualNoGallons,
+        actualNoMechanic,
+        actualNoMoney,
+      );
+
+      if (success) {
+        print('DispenserReader updated successfully');
+        dataSubmitted[pageIndex].value = true;
+
+        for (int i = 0; i < 3; i++) {
+          textFieldsEnabled[pageIndex][i].value = false;
+          buttonsEnabled[pageIndex][i].value = false;
+        }
+
+        sendButtonEnabled.value = false;
+
+        // Actualizar los valores en dispenserReaders
+        dispenserReaders[pageIndex]['actualNoGallons'] =
+            double.parse(actualNoGallons);
+        dispenserReaders[pageIndex]['actualNoMechanic'] =
+            double.parse(actualNoMechanic);
+        dispenserReaders[pageIndex]['actualNoMoney'] =
+            double.parse(actualNoMoney);
+
+        // Recalcular las diferencias
+        calculateDifference(pageIndex, 0);
+        calculateDifference(pageIndex, 1);
+        calculateDifference(pageIndex, 2);
+
+        if (pageIndex < dispenserReaders.length - 1) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Get.find<PageController>(tag: 'dispenser_page_controller')
+                .animateToPage(
+              pageIndex + 1,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          });
+        }
+
+        Get.snackbar('Éxito', 'Los datos se han actualizado correctamente.');
+      } else {
+        throw Exception('Failed to update DispenserReader');
+      }
+    } catch (e) {
+      print('Error updating data in database: $e');
+      Get.snackbar(
+          'Error', 'No se pudo actualizar los datos. Intente nuevamente.');
+    } finally {
+      isLoading.value = false;
+      saveState();
+    }
+  }
+
+  void toggleEditMode() {
+    isEditMode.value = !isEditMode.value;
+    if (isEditMode.value) {
+      enableEditMode();
+    } else {
+      disableEditMode();
+    }
+  }
+
+  void enableEditMode() {
+    for (int pageIndex = 0; pageIndex < dispenserReaders.length; pageIndex++) {
+      for (int cardIndex = 0; cardIndex < 3; cardIndex++) {
+        if (!buttonsEnabled[pageIndex][cardIndex].value) {
+          textFieldsEnabled[pageIndex][cardIndex].value = true;
+          buttonsEnabled[pageIndex][cardIndex].value = true;
+        }
+      }
+    }
+  }
+
+  void disableEditMode() {
+    // Implementa la lógica para salir del modo de edición
+    // Por ejemplo, validar los campos editados y actualizar la base de datos
+  }
+
+  String subtractPrecise(String a, String b) {
+    var numA = sanitizeAndParse(a);
+    var numB = sanitizeAndParse(b);
+    return (numA - numB).toString();
+  }
+}
