@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:math' as math;
 import 'package:hand_held_shell/controllers/dispensers.controller.dart';
+import 'package:hand_held_shell/controllers/theme.controller.dart';
 
-class NavigationButtons extends StatelessWidget {
+class NavigationButtons extends StatefulWidget {
   final PageController mainPageController;
   final int pageIndex;
   final int totalPages;
@@ -23,6 +25,31 @@ class NavigationButtons extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _NavigationButtonsState createState() => _NavigationButtonsState();
+}
+
+class _NavigationButtonsState extends State<NavigationButtons>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late ThemeController themeController;
+
+  @override
+  void initState() {
+    super.initState();
+    themeController = Get.find<ThemeController>();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 5),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -30,31 +57,52 @@ class NavigationButtons extends StatelessWidget {
         children: [
           IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: pageIndex > 0 ? () => _changePage(pageIndex - 1) : null,
+            onPressed: widget.pageIndex > 0
+                ? () => _changePage(widget.pageIndex - 1)
+                : null,
           ),
-          Obx(() => IconButton(
-                icon: Icon(Icons.sync, color: Colors.cyanAccent[700]),
-                onPressed: dispenserController.canClearFields(pageIndex)
+          Obx(() {
+            final bool isEnabled =
+                widget.dispenserController.canClearFields(widget.pageIndex);
+            final bool isDarkMode = themeController.isDarkMode;
+            return AnimatedBuilder(
+              animation: _controller,
+              builder: (_, child) {
+                return Transform.rotate(
+                  angle: isEnabled ? -_controller.value * 2 * math.pi : 0,
+                  child: child,
+                );
+              },
+              child: IconButton(
+                icon: Icon(
+                  Icons.sync,
+                  color: isEnabled
+                      ? Colors.cyanAccent[700]
+                      : (isDarkMode ? Colors.white : Colors.black),
+                ),
+                onPressed: isEnabled
                     ? () {
-                        // No hace nada cuando se presiona
                         print('Clear button pressed, but no action taken');
                       }
                     : null,
-              )),
+              ),
+            );
+          }),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: SizedBox(
               width: 180,
               child: Obx(() => ElevatedButton(
-                    onPressed: enabled &&
-                            !dispenserController.dataSubmitted[pageIndex].value
-                        ? onThumbUpPressed
+                    onPressed: widget.enabled &&
+                            !widget.dispenserController
+                                .dataSubmitted[widget.pageIndex].value
+                        ? widget.onThumbUpPressed
                         : null,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 8),
                     ),
-                    child: dispenserController.isLoading.value
+                    child: widget.dispenserController.isLoading.value
                         ? const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -82,8 +130,8 @@ class NavigationButtons extends StatelessWidget {
           ),
           IconButton(
             icon: const Icon(Icons.arrow_forward),
-            onPressed: pageIndex < totalPages - 1
-                ? () => _changePage(pageIndex + 1)
+            onPressed: widget.pageIndex < widget.totalPages - 1
+                ? () => _changePage(widget.pageIndex + 1)
                 : null,
           ),
         ],
@@ -92,8 +140,8 @@ class NavigationButtons extends StatelessWidget {
   }
 
   void _changePage(int newPage) {
-    if (mainPageController.hasClients) {
-      mainPageController.animateToPage(
+    if (widget.mainPageController.hasClients) {
+      widget.mainPageController.animateToPage(
         newPage,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
