@@ -153,9 +153,6 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                         mainPageController: widget.mainPageController,
                         pageIndex: widget.pageIndex,
                         totalPages: widget.totalPages,
-                        clearTextField: (pageIndex, cardIndex) {
-                          calculatorCtrl.clearTextField(pageIndex, cardIndex);
-                        },
                         currentCardIndex: calculatorCtrl.currentCardIndex.value,
                         enabled: widget.buttonsEnabled.value &&
                             !dispenserController
@@ -181,10 +178,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                         },
                         dispenserController: dispenserController,
                       )),
-                  if (widget.showCalculatorButtons.value &&
-                      widget.buttonsEnabled.value &&
-                      !dispenserController
-                          .dataSubmitted[widget.pageIndex].value)
+                  if (widget.showCalculatorButtons.value)
                     BuildCalculatorButtons(
                       pageIndex: widget.pageIndex,
                     ),

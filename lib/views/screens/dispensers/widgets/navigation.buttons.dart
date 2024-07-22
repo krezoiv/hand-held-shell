@@ -6,7 +6,6 @@ class NavigationButtons extends StatelessWidget {
   final PageController mainPageController;
   final int pageIndex;
   final int totalPages;
-  final Function(int, int) clearTextField;
   final int currentCardIndex;
   final bool enabled;
   final VoidCallback onThumbUpPressed;
@@ -17,7 +16,6 @@ class NavigationButtons extends StatelessWidget {
     required this.mainPageController,
     required this.pageIndex,
     required this.totalPages,
-    required this.clearTextField,
     required this.currentCardIndex,
     required this.enabled,
     required this.onThumbUpPressed,
@@ -35,9 +33,12 @@ class NavigationButtons extends StatelessWidget {
             onPressed: pageIndex > 0 ? () => _changePage(pageIndex - 1) : null,
           ),
           Obx(() => IconButton(
-                icon: const Icon(Icons.clear),
+                icon: Icon(Icons.sync, color: Colors.cyanAccent[700]),
                 onPressed: dispenserController.canClearFields(pageIndex)
-                    ? () => clearTextField(pageIndex, currentCardIndex)
+                    ? () {
+                        // No hace nada cuando se presiona
+                        print('Clear button pressed, but no action taken');
+                      }
                     : null,
               )),
           Padding(
