@@ -372,13 +372,6 @@ class DispenserController extends GetxController {
         textFieldsEnabled[pageIndex][2].value = false;
       }
 
-      if (isEditMode.value) {
-        // Si estamos en modo de edición, actualizamos los datos en lugar de enviarlos
-        if (buttonsEnabled[pageIndex].every((button) => !button.value)) {
-          updateDataToDatabase(pageIndex);
-        }
-      }
-
       checkAllButtonsDisabled(pageIndex);
       saveState();
     } catch (e) {
