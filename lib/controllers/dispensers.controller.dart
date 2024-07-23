@@ -598,4 +598,97 @@ class DispenserController extends GetxController {
     var numB = sanitizeAndParse(b);
     return (numA - numB).toString();
   }
+
+  Future<void> updateDispenserReader(int pageIndex) async {
+    if (isLoading.value) return;
+
+    isLoading.value = true;
+
+    try {
+      final dispenserReader = dispenserReaders[pageIndex];
+      final String dispenserReaderId = dispenserReader['dispenserReaderId'];
+
+      String sanitizeAndFormatNumber(String number) {
+        return sanitizeAndParse(number).toString();
+      }
+
+      final result = await DispenserReaderService.updateDispenserReader(
+        dispenserReaderId,
+        sanitizeAndFormatNumber(textControllers[pageIndex][0].text),
+        sanitizeAndFormatNumber(dispenserReader['actualNoGallons'].toString()),
+        sanitizeAndFormatNumber(textControllers[pageIndex][1].text),
+        sanitizeAndFormatNumber(dispenserReader['actualNoMechanic'].toString()),
+        sanitizeAndFormatNumber(textControllers[pageIndex][2].text),
+        sanitizeAndFormatNumber(dispenserReader['actualNoMoney'].toString()),
+      );
+
+      if (result['success']) {
+        final updatedDispenserReader = result['updatedDispenserReader'];
+        final updatedGeneralDispenserReader =
+            result['updatedGeneralDispenserReader'];
+
+        // Actualizar los datos locales del DispenserReader
+        dispenserReaders[pageIndex] = updatedDispenserReader;
+
+        // Actualizar el GeneralDispenserReader en la lista de dispenserReaders
+        for (var i = 0; i < dispenserReaders.length; i++) {
+          if (dispenserReaders[i]['generalDispenserReaderId'] ==
+              updatedGeneralDispenserReader['_id']) {
+            final String dbFuelName = dispenserReaders[i]['assignmentHoseId']
+                ['hoseId']['fuelId']['fuelName'];
+
+            switch (dbFuelName) {
+              case "regular":
+                dispenserReaders[i]['generalDispenserReaderId'] = {
+                  ...dispenserReaders[i]['generalDispenserReaderId'],
+                  'totalGallonRegular':
+                      updatedGeneralDispenserReader['totalGallonRegular'],
+                  'totalMechanicRegular':
+                      updatedGeneralDispenserReader['totalMechanicRegular'],
+                  'totalMoneyRegular':
+                      updatedGeneralDispenserReader['totalMoneyRegular'],
+                };
+                break;
+              case "super":
+                dispenserReaders[i]['generalDispenserReaderId'] = {
+                  ...dispenserReaders[i]['generalDispenserReaderId'],
+                  'totalGallonSuper':
+                      updatedGeneralDispenserReader['totalGallonSuper'],
+                  'totalMechanicSuper':
+                      updatedGeneralDispenserReader['totalMechanicSuper'],
+                  'totalMoneySuper':
+                      updatedGeneralDispenserReader['totalMoneySuper'],
+                };
+                break;
+              case "diesel":
+                dispenserReaders[i]['generalDispenserReaderId'] = {
+                  ...dispenserReaders[i]['generalDispenserReaderId'],
+                  'totalGallonDiesel':
+                      updatedGeneralDispenserReader['totalGallonDiesel'],
+                  'totalMechanicDiesel':
+                      updatedGeneralDispenserReader['totalMechanicDiesel'],
+                  'totalMoneyDiesel':
+                      updatedGeneralDispenserReader['totalMoneyDiesel'],
+                };
+                break;
+              default:
+                print("Tipo de combustible no reconocido: $dbFuelName");
+            }
+          }
+        }
+
+        Get.snackbar('Éxito',
+            'DispenserReader y GeneralDispenserReader actualizados correctamente.');
+      } else {
+        Get.snackbar('Error', 'No se pudo actualizar el DispenserReader.');
+      }
+    } catch (e) {
+      print('Error updating DispenserReader: $e');
+      Get.snackbar(
+          'Error', 'Ocurrió un error al actualizar. Intente nuevamente.');
+    } finally {
+      isLoading.value = false;
+      await saveState();
+    }
+  }
 }

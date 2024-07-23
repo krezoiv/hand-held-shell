@@ -197,4 +197,53 @@ class DispenserReaderService {
       return false;
     }
   }
+
+  static Future<Map<String, dynamic>> updateDispenserReader(
+    String dispenserReaderId,
+    String newPreviousNoGallons,
+    String newActualNoGallons,
+    String newPreviousNoMechanic,
+    String newActualNoMechanic,
+    String newPreviousNoMoney,
+    String newActualNoMoney,
+  ) async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) throw Exception('Token is null');
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/dispenser-Reader/updateDispenserReader'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+        body: json.encode({
+          'dispenserReaderId': dispenserReaderId,
+          'newPreviousNoGallons': newPreviousNoGallons,
+          'newActualNoGallons': newActualNoGallons,
+          'newPreviousNoMechanic': newPreviousNoMechanic,
+          'newActualNoMechanic': newActualNoMechanic,
+          'newPreviousNoMoney': newPreviousNoMoney,
+          'newActualNoMoney': newActualNoMoney,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        return {
+          'success': responseData['ok'] ?? false,
+          'updatedDispenserReader': responseData['updatedDispenserReader'],
+          'updatedGeneralDispenserReader':
+              responseData['updatedGeneralDispenserReader'],
+        };
+      } else {
+        print('Server responded with status code: ${response.statusCode}');
+        print('Response body: ${response.body}');
+        return {'success': false};
+      }
+    } catch (e) {
+      print('Error in updateDispenserReader: $e');
+      return {'success': false};
+    }
+  }
 }

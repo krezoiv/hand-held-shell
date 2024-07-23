@@ -83,7 +83,8 @@ class _NavigationButtonsState extends State<NavigationButtons>
                 ),
                 onPressed: isEnabled
                     ? () {
-                        print('Clear button pressed, but no action taken');
+                        widget.dispenserController
+                            .updateDispenserReader(widget.pageIndex);
                       }
                     : null,
               ),
