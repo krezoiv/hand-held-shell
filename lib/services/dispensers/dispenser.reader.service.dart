@@ -194,42 +194,4 @@ class DispenserReaderService {
       return false;
     }
   }
-
-  static Future<bool> updateDispenserReader(
-    String dispenserReaderId,
-    String actualNoGallons,
-    String actualNoMechanic,
-    String actualNoMoney,
-  ) async {
-    try {
-      final String? token = await AuthService.getToken();
-      if (token == null) throw Exception('Token is null');
-
-      final response = await http.put(
-        Uri.parse('$baseUrl/dispenser-Reader/updateDispenserReader'),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-token': token,
-        },
-        body: json.encode({
-          'dispenserReaderId': dispenserReaderId,
-          'actualNoGallons': double.parse(actualNoGallons),
-          'actualNoMechanic': double.parse(actualNoMechanic),
-          'actualNoMoney': double.parse(actualNoMoney),
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        return responseData['ok'] ?? false;
-      } else {
-        print('Server responded with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        return false;
-      }
-    } catch (e) {
-      print('Error in updateDispenserReader: $e');
-      return false;
-    }
-  }
 }

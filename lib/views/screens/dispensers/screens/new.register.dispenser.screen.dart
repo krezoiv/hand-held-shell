@@ -56,9 +56,7 @@ class _NewRegisterDispenserScreenState
         actions: [
           Obx(() => CupertinoButton(
                 onPressed: dispenserController.hasSharedPreferencesData.value &&
-                        dispenserController.isAnyButtonDisabledInCards &&
-                        dispenserController
-                            .dataSubmitted[currentPageIndex.value].value
+                        dispenserController.isAnyButtonDisabledInCards
                     ? () {
                         dispenserController
                             .toggleEditMode(currentPageIndex.value);
@@ -67,9 +65,7 @@ class _NewRegisterDispenserScreenState
                 child: Icon(
                   CupertinoIcons.pencil,
                   color: (dispenserController.hasSharedPreferencesData.value &&
-                          dispenserController.isAnyButtonDisabledInCards &&
-                          dispenserController
-                              .dataSubmitted[currentPageIndex.value].value)
+                          dispenserController.isAnyButtonDisabledInCards)
                       ? Colors.blue[900]
                       : Colors.grey,
                 ),

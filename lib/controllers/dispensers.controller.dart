@@ -557,88 +557,31 @@ class DispenserController extends GetxController {
     super.onClose();
   }
 
-  Future<void> updateDataToDatabase(int pageIndex) async {
-    if (!isEditMode.value || isLoading.value) return;
-
-    isLoading.value = true;
-
-    try {
-      final dispenserReader = dispenserReaders[pageIndex];
-      final String dispenserReaderId = dispenserReader['_id'];
-
-      String actualNoGallons =
-          _sanitizeTextField(textControllers[pageIndex][0].text);
-      String actualNoMechanic =
-          _sanitizeTextField(textControllers[pageIndex][1].text);
-      String actualNoMoney =
-          _sanitizeTextField(textControllers[pageIndex][2].text);
-
-      final bool success = await DispenserReaderService.updateDispenserReader(
-        dispenserReaderId,
-        actualNoGallons,
-        actualNoMechanic,
-        actualNoMoney,
-      );
-
-      if (success) {
-        print('DispenserReader updated successfully');
-        for (int i = 0; i < 3; i++) {
-          textFieldsEnabled[pageIndex][i].value = false;
-          buttonsEnabled[pageIndex][i].value = false;
-        }
-        sendButtonEnabled.value = false;
-        isEditMode.value = false;
-
-        // Actualizar los valores en dispenserReaders
-        dispenserReaders[pageIndex]['actualNoGallons'] =
-            double.parse(actualNoGallons);
-        dispenserReaders[pageIndex]['actualNoMechanic'] =
-            double.parse(actualNoMechanic);
-        dispenserReaders[pageIndex]['actualNoMoney'] =
-            double.parse(actualNoMoney);
-
-        // Recalcular las diferencias
-        calculateDifference(pageIndex, 0);
-        calculateDifference(pageIndex, 1);
-        calculateDifference(pageIndex, 2);
-
-        Get.snackbar('Éxito', 'Los datos se han actualizado correctamente.');
-      } else {
-        throw Exception('Failed to update DispenserReader');
-      }
-    } catch (e) {
-      print('Error updating data in database: $e');
-      Get.snackbar(
-          'Error', 'No se pudo actualizar los datos. Intente nuevamente.');
-    } finally {
-      isLoading.value = false;
-      saveState();
-    }
-  }
-
   void toggleEditMode(int pageIndex) {
     isEditMode.value = !isEditMode.value;
     if (isEditMode.value) {
       enableEditMode(pageIndex);
     } else {
-      disableEditMode();
+      disableEditMode(pageIndex);
     }
   }
 
   void enableEditMode(int pageIndex) {
-    if (dataSubmitted[pageIndex].value) {
-      for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++) {
+      if (!buttonsEnabled[pageIndex][i].value) {
         textFieldsEnabled[pageIndex][i].value = true;
         buttonsEnabled[pageIndex][i].value = true;
       }
-      sendButtonEnabled.value = false;
-      isEditMode.value = true;
     }
   }
 
-  void disableEditMode() {
-    // Implementa la lógica para salir del modo de edición
-    // Por ejemplo, validar los campos editados y actualizar la base de datos
+  void disableEditMode(int pageIndex) {
+    for (int i = 0; i < 3; i++) {
+      if (textFieldsEnabled[pageIndex][i].value) {
+        textFieldsEnabled[pageIndex][i].value = false;
+      }
+    }
+    isEditMode.value = false;
   }
 
   String subtractPrecise(String a, String b) {
