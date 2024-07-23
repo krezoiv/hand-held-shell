@@ -102,7 +102,7 @@ class DispenserReaderService {
     }
   }
 
-  static Future<bool> addNewDispenserReader(
+  static Future<Map<String, dynamic>> addNewDispenserReader(
     String previousNoGallons,
     String actualNoGallons,
     String totalNoGallons,
@@ -142,15 +142,18 @@ class DispenserReaderService {
 
       if (response.statusCode == 201) {
         final responseData = json.decode(response.body);
-        return responseData['ok'] ?? false;
+        return {
+          'success': responseData['ok'] ?? false,
+          'dispenserReaderId': responseData['dispenserReaderId'],
+        };
       } else {
         print('Server responded with status code: ${response.statusCode}');
         print('Response body: ${response.body}');
-        return false;
+        return {'success': false, 'dispenserReaderId': null};
       }
     } catch (e) {
       print('Error in addNewDispenserReader: $e');
-      return false;
+      return {'success': false, 'dispenserReaderId': null};
     }
   }
 

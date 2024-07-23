@@ -117,16 +117,19 @@ class _NewRegisterDispenserScreenState
                   currentPageIndex.value = index;
                 },
                 itemBuilder: (context, index) {
+                  final dispenserReader =
+                      dispenserController.dispenserReaders[index];
                   return RegisterDispenserPage(
                     pageIndex: index,
-                    dispenserReader:
-                        dispenserController.dispenserReaders[index],
+                    dispenserReader: dispenserReader,
                     totalPages: dispenserController.dispenserReaders.length,
                     mainPageController: _pageController,
                     showCalculatorButtons:
                         dispenserController.showCalculatorButtons,
                     buttonsEnabled:
                         dispenserController.hasSharedPreferencesData,
+                    dispenserReaderId: dispenserReader[
+                        'dispenserReaderId'], // Pasamos el ID aquí
                   );
                 },
               );

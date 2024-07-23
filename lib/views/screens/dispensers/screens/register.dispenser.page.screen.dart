@@ -16,6 +16,7 @@ class RegisterDispenserPage extends StatefulWidget {
   final PageController mainPageController;
   final RxBool showCalculatorButtons;
   final RxBool buttonsEnabled;
+  final String? dispenserReaderId;
 
   const RegisterDispenserPage({
     super.key,
@@ -25,6 +26,7 @@ class RegisterDispenserPage extends StatefulWidget {
     required this.mainPageController,
     required this.showCalculatorButtons,
     required this.buttonsEnabled,
+    this.dispenserReaderId,
   });
 
   @override
@@ -99,6 +101,16 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                 Text('${widget.pageIndex + 1}/${widget.totalPages}',
                     style: const TextStyle(
                         fontSize: 12, fontStyle: FontStyle.italic)),
+                Obx(() {
+                  final String? dispenserReaderId = dispenserController
+                      .dispenserReaders[widget.pageIndex]['dispenserReaderId'];
+                  return dispenserReaderId != null
+                      ? Text(
+                          'ID: ...${dispenserReaderId.substring(dispenserReaderId.length - 10)}',
+                          style: const TextStyle(
+                              fontSize: 10, fontStyle: FontStyle.italic))
+                      : const SizedBox.shrink();
+                }),
               ],
             ),
           ),

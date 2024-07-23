@@ -422,7 +422,8 @@ class DispenserController extends GetxController {
       String actualNoMoney =
           _sanitizeTextField(textControllers[pageIndex][2].text);
       String totalNoMoney = subtractPrecise(actualNoMoney, previousNoMoney);
-      final bool success = await DispenserReaderService.addNewDispenserReader(
+
+      final result = await DispenserReaderService.addNewDispenserReader(
         previousNoGallons,
         actualNoGallons,
         totalNoGallons,
@@ -436,7 +437,15 @@ class DispenserController extends GetxController {
         generalDispenserReaderId,
       );
 
-      if (success) {
+      if (result['success']) {
+        final String? newDispenserReaderId = result['dispenserReaderId'];
+
+        if (newDispenserReaderId != null) {
+          // Asignar el nuevo dispenserReaderId al pageview actual
+          dispenserReaders[pageIndex]['dispenserReaderId'] =
+              newDispenserReaderId;
+        }
+
         final bool updateSuccess =
             await DispenserReaderService.updateGeneralDispenserReader(
           totalNoGallons,
