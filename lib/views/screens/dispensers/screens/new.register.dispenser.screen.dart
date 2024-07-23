@@ -167,7 +167,8 @@ class _NewRegisterDispenserScreenState
                           );
                         },
                         icon: Icon(
-                          CupertinoIcons.folder_badge_plus,
+                          CupertinoIcons
+                              .folder_badge_plus, //!booton que se encarga de aperturar el dia nuevo, crea un nuevo generalDispenserReader
                           size: 60,
                           color: Colors.teal.shade600,
                         ),

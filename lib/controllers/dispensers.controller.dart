@@ -51,7 +51,7 @@ class DispenserController extends GetxController {
   }
 
 // En DispenserController
-  bool canClearFields(int pageIndex) {
+  bool canUpdateFields(int pageIndex) {
     return dataSubmitted[pageIndex].value &&
         !isLoading.value &&
         buttonsEnabled[pageIndex].every((button) => !button.value);

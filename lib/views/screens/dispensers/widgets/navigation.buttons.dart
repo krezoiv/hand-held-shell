@@ -63,7 +63,7 @@ class _NavigationButtonsState extends State<NavigationButtons>
           ),
           Obx(() {
             final bool isEnabled =
-                widget.dispenserController.canClearFields(widget.pageIndex);
+                widget.dispenserController.canUpdateFields(widget.pageIndex);
             final bool isDarkMode = themeController.isDarkMode;
             return AnimatedBuilder(
               animation: _controller,
