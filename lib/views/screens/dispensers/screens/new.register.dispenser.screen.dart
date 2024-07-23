@@ -63,7 +63,8 @@ class _NewRegisterDispenserScreenState
                       }
                     : null,
                 child: Icon(
-                  CupertinoIcons.pencil,
+                  CupertinoIcons
+                      .pencil, //!boton para habilitar nuevamente los textfield y boton de validaciones
                   color: (dispenserController.hasSharedPreferencesData.value &&
                           dispenserController.isAnyButtonDisabledInCards)
                       ? Colors.blue[900]
