@@ -614,12 +614,18 @@ class DispenserController extends GetxController {
 
       final result = await DispenserReaderService.updateDispenserReader(
         dispenserReaderId,
-        sanitizeAndFormatNumber(textControllers[pageIndex][0].text),
-        sanitizeAndFormatNumber(dispenserReader['actualNoGallons'].toString()),
-        sanitizeAndFormatNumber(textControllers[pageIndex][1].text),
-        sanitizeAndFormatNumber(dispenserReader['actualNoMechanic'].toString()),
-        sanitizeAndFormatNumber(textControllers[pageIndex][2].text),
-        sanitizeAndFormatNumber(dispenserReader['actualNoMoney'].toString()),
+        sanitizeAndFormatNumber(dispenserReader['actualNoGallons']
+            .toString()), // Valor anterior (previousNoGallons)
+        sanitizeAndFormatNumber(textControllers[pageIndex][0]
+            .text), // Nuevo valor (actualNoGallons)
+        sanitizeAndFormatNumber(dispenserReader['actualNoMechanic']
+            .toString()), // Valor anterior (previousNoMechanic)
+        sanitizeAndFormatNumber(textControllers[pageIndex][1]
+            .text), // Nuevo valor (actualNoMechanic)
+        sanitizeAndFormatNumber(dispenserReader['actualNoMoney']
+            .toString()), // Valor anterior (previousNoMoney)
+        sanitizeAndFormatNumber(
+            textControllers[pageIndex][2].text), // Nuevo valor (actualNoMoney)
       );
 
       if (result['success']) {
