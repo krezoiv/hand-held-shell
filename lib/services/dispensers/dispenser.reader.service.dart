@@ -246,4 +246,58 @@ class DispenserReaderService {
       return {'success': false};
     }
   }
+
+  static Future<dynamic> fetchLastNumeration() async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) throw Exception('Token is null');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/dispenser-Reader/lastReaderNumeration'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['dispenserReaders'].isNotEmpty
+            ? data['dispenserReaders'][0]
+            : null;
+      } else {
+        throw Exception(
+            'Failed to load last numeration - StatusCode: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Failed to load last numeration: $e');
+    }
+  }
+
+  static Future<dynamic> fetchPenultimateNumeration() async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) throw Exception('Token is null');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/dispenser-Reader/penultimateReaderNumeration'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['dispenserReaders'].isNotEmpty
+            ? data['dispenserReaders'][0]
+            : null;
+      } else {
+        throw Exception(
+            'Failed to load penultimate numeration - StatusCode: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Failed to load penultimate numeration: $e');
+    }
+  }
 }

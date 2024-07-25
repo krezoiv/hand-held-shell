@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:hand_held_shell/controllers/dispensers.controller.dart';
+import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
 
 class RegisterButtonsController extends GetxController {
   late DispenserController dispenserController;

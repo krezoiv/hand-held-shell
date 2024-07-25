@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
 import 'dart:math' as math;
-import 'package:hand_held_shell/controllers/dispensers.controller.dart';
+
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 
 class NavigationButtons extends StatefulWidget {
@@ -14,7 +15,7 @@ class NavigationButtons extends StatefulWidget {
   final DispenserController dispenserController;
 
   const NavigationButtons({
-    Key? key,
+    super.key,
     required this.mainPageController,
     required this.pageIndex,
     required this.totalPages,
@@ -22,7 +23,7 @@ class NavigationButtons extends StatefulWidget {
     required this.enabled,
     required this.onThumbUpPressed,
     required this.dispenserController,
-  }) : super(key: key);
+  });
 
   @override
   _NavigationButtonsState createState() => _NavigationButtonsState();

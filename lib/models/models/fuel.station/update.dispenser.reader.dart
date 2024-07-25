@@ -1,15 +1,228 @@
-class UpdatedDispenserReader {
+class DispenserReader {
   int previousNoGallons;
   int actualNoGallons;
   int totalNoGallons;
   double previousNoMechanic;
   double actualNoMechanic;
-  int totalNoMechanic;
+  double totalNoMechanic;
   double previousNoMoney;
   double actualNoMoney;
-  int totalNoMoney;
+  double totalNoMoney;
+  AssignmentHoseId assignmentHoseId;
+  String generalDispenserReaderId;
+  String dispenserReaderId;
+
+  DispenserReader({
+    required this.previousNoGallons,
+    required this.actualNoGallons,
+    required this.totalNoGallons,
+    required this.previousNoMechanic,
+    required this.actualNoMechanic,
+    required this.totalNoMechanic,
+    required this.previousNoMoney,
+    required this.actualNoMoney,
+    required this.totalNoMoney,
+    required this.assignmentHoseId,
+    required this.generalDispenserReaderId,
+    required this.dispenserReaderId,
+  });
+
+  factory DispenserReader.fromJson(Map<String, dynamic> json) =>
+      DispenserReader(
+        previousNoGallons: json["previousNoGallons"] ?? 0,
+        actualNoGallons: json["actualNoGallons"] ?? 0,
+        totalNoGallons: json["totalNoGallons"] ?? 0,
+        previousNoMechanic: (json["previousNoMechanic"] ?? 0).toDouble(),
+        actualNoMechanic: (json["actualNoMechanic"] ?? 0).toDouble(),
+        totalNoMechanic: (json["totalNoMechanic"] ?? 0).toDouble(),
+        previousNoMoney: (json["previousNoMoney"] ?? 0).toDouble(),
+        actualNoMoney: (json["actualNoMoney"] ?? 0).toDouble(),
+        totalNoMoney: (json["totalNoMoney"] ?? 0).toDouble(),
+        assignmentHoseId:
+            AssignmentHoseId.fromJson(json["assignmentHoseId"] ?? {}),
+        generalDispenserReaderId: json["generalDispenserReaderId"] ?? '',
+        dispenserReaderId: json["dispenserReaderId"] ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {
+        "previousNoGallons": previousNoGallons,
+        "actualNoGallons": actualNoGallons,
+        "totalNoGallons": totalNoGallons,
+        "previousNoMechanic": previousNoMechanic,
+        "actualNoMechanic": actualNoMechanic,
+        "totalNoMechanic": totalNoMechanic,
+        "previousNoMoney": previousNoMoney,
+        "actualNoMoney": actualNoMoney,
+        "totalNoMoney": totalNoMoney,
+        "assignmentHoseId": assignmentHoseId.toJson(),
+        "generalDispenserReaderId": generalDispenserReaderId,
+        "dispenserReaderId": dispenserReaderId,
+      };
+}
+
+class AssignmentHoseId {
+  String id;
+  int position;
+  HoseId hoseId;
+  SideId sideId;
+  AssignmentId assignmentId;
+  String statusId;
+
+  AssignmentHoseId({
+    required this.id,
+    required this.position,
+    required this.hoseId,
+    required this.sideId,
+    required this.assignmentId,
+    required this.statusId,
+  });
+
+  factory AssignmentHoseId.fromJson(Map<String, dynamic> json) =>
+      AssignmentHoseId(
+        id: json["_id"] ?? '',
+        position: json["position"] ?? 0,
+        hoseId: HoseId.fromJson(json["hoseId"] ?? {}),
+        sideId: SideId.fromJson(json["sideId"] ?? {}),
+        assignmentId: AssignmentId.fromJson(json["assignmentId"] ?? {}),
+        statusId: json["statusId"] ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {
+        "_id": id,
+        "position": position,
+        "hoseId": hoseId.toJson(),
+        "sideId": sideId.toJson(),
+        "assignmentId": assignmentId.toJson(),
+        "statusId": statusId,
+      };
+}
+
+class AssignmentId {
+  String id;
+  DispenserId dispenserId;
+
+  AssignmentId({
+    required this.id,
+    required this.dispenserId,
+  });
+
+  factory AssignmentId.fromJson(Map<String, dynamic> json) => AssignmentId(
+        id: json["_id"] ?? '',
+        dispenserId: DispenserId.fromJson(json["dispenserId"] ?? {}),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "_id": id,
+        "dispenserId": dispenserId.toJson(),
+      };
+}
+
+class DispenserId {
+  String id;
+  String dispenserCode;
+
+  DispenserId({
+    required this.id,
+    required this.dispenserCode,
+  });
+
+  factory DispenserId.fromJson(Map<String, dynamic> json) => DispenserId(
+        id: json["_id"] ?? '',
+        dispenserCode: json["dispenserCode"] ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {
+        "_id": id,
+        "dispenserCode": dispenserCode,
+      };
+}
+
+class HoseId {
+  String id;
+  String hoseColor;
+  FuelId fuelId;
+  String statusId;
+
+  int code;
+
+  HoseId({
+    required this.id,
+    required this.hoseColor,
+    required this.fuelId,
+    required this.statusId,
+    required this.code,
+  });
+
+  factory HoseId.fromJson(Map<String, dynamic> json) => HoseId(
+        id: json["_id"] ?? '',
+        hoseColor: json["hoseColor"] ?? '',
+        fuelId: FuelId.fromJson(json["fuelId"] ?? {}),
+        statusId: json["statusId"] ?? '',
+        code: json["code"] ?? 0,
+      );
+
+  Map<String, dynamic> toJson() => {
+        "_id": id,
+        "hoseColor": hoseColor,
+        "fuelId": fuelId.toJson(),
+        "statusId": statusId,
+        "code": code,
+      };
+}
+
+class FuelId {
+  String id;
+  String fuelName;
+
+  FuelId({
+    required this.id,
+    required this.fuelName,
+  });
+
+  factory FuelId.fromJson(Map<String, dynamic> json) => FuelId(
+        id: json["_id"] ?? '',
+        fuelName: json["fuelName"] ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {
+        "_id": id,
+        "fuelName": fuelName,
+      };
+}
+
+class SideId {
+  String id;
+  String sideName;
+
+  SideId({
+    required this.id,
+    required this.sideName,
+  });
+
+  factory SideId.fromJson(Map<String, dynamic> json) => SideId(
+        id: json["_id"] ?? '',
+        sideName: json["sideName"] ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {
+        "_id": id,
+        "sideName": sideName,
+      };
+}
+
+class UpdatedDispenserReader {
+  int previousNoGallons;
+  int actualNoGallons;
+  int totalNoGallons;
+  double previousNoMechanic;
+  int actualNoMechanic;
+  double totalNoMechanic;
+  double previousNoMoney;
+  int actualNoMoney;
+  double totalNoMoney;
   String assignmentHoseId;
   String generalDispenserReaderId;
+
   String dispenserReaderId;
 
   UpdatedDispenserReader({
@@ -29,18 +242,18 @@ class UpdatedDispenserReader {
 
   factory UpdatedDispenserReader.fromJson(Map<String, dynamic> json) =>
       UpdatedDispenserReader(
-        previousNoGallons: json["previousNoGallons"],
-        actualNoGallons: json["actualNoGallons"],
-        totalNoGallons: json["totalNoGallons"],
-        previousNoMechanic: json["previousNoMechanic"].toDouble(),
-        actualNoMechanic: json["actualNoMechanic"].toDouble(),
-        totalNoMechanic: json["totalNoMechanic"],
-        previousNoMoney: json["previousNoMoney"].toDouble(),
-        actualNoMoney: json["actualNoMoney"].toDouble(),
-        totalNoMoney: json["totalNoMoney"],
-        assignmentHoseId: json["assignmentHoseId"],
-        generalDispenserReaderId: json["generalDispenserReaderId"],
-        dispenserReaderId: json["dispenserReaderId"],
+        previousNoGallons: json["previousNoGallons"] ?? 0,
+        actualNoGallons: json["actualNoGallons"] ?? 0,
+        totalNoGallons: json["totalNoGallons"] ?? 0,
+        previousNoMechanic: (json["previousNoMechanic"] ?? 0).toDouble(),
+        actualNoMechanic: json["actualNoMechanic"] ?? 0,
+        totalNoMechanic: (json["totalNoMechanic"] ?? 0).toDouble(),
+        previousNoMoney: (json["previousNoMoney"] ?? 0).toDouble(),
+        actualNoMoney: json["actualNoMoney"] ?? 0,
+        totalNoMoney: (json["totalNoMoney"] ?? 0).toDouble(),
+        assignmentHoseId: json["assignmentHoseId"] ?? '',
+        generalDispenserReaderId: json["generalDispenserReaderId"] ?? '',
+        dispenserReaderId: json["dispenserReaderId"] ?? '',
       );
 
   Map<String, dynamic> toJson() => {
@@ -62,8 +275,8 @@ class UpdatedDispenserReader {
 class UpdatedGeneralDispenserReader {
   bool applied;
   int totalGallonRegular;
-  int totalMechanicRegular;
-  int totalMoneyRegular;
+  double totalMechanicRegular;
+  double totalMoneyRegular;
   int totalGallonSuper;
   int totalMechanicSuper;
   int totalMoneySuper;
@@ -97,21 +310,22 @@ class UpdatedGeneralDispenserReader {
 
   factory UpdatedGeneralDispenserReader.fromJson(Map<String, dynamic> json) =>
       UpdatedGeneralDispenserReader(
-        applied: json["applied"],
-        totalGallonRegular: json["totalGallonRegular"],
-        totalMechanicRegular: json["totalMechanicRegular"],
-        totalMoneyRegular: json["totalMoneyRegular"],
-        totalGallonSuper: json["totalGallonSuper"],
-        totalMechanicSuper: json["totalMechanicSuper"],
-        totalMoneySuper: json["totalMoneySuper"],
-        totalGallonDiesel: json["totalGallonDiesel"],
-        totalMechanicDiesel: json["totalMechanicDiesel"],
-        totalMoneyDiesel: json["totalMoneyDiesel"],
-        totalGallonVpower: json["totalGallonVpower"],
-        totalMechanicVpower: json["totalMechanicVpower"],
-        totalMoneyVpower: json["totalMoneyVpower"],
-        readingDate: DateTime.parse(json["readingDate"]),
-        generalDispenserReaderId: json["generalDispenserReaderId"],
+        applied: json["applied"] ?? false,
+        totalGallonRegular: json["totalGallonRegular"] ?? 0,
+        totalMechanicRegular: (json["totalMechanicRegular"] ?? 0).toDouble(),
+        totalMoneyRegular: (json["totalMoneyRegular"] ?? 0).toDouble(),
+        totalGallonSuper: json["totalGallonSuper"] ?? 0,
+        totalMechanicSuper: json["totalMechanicSuper"] ?? 0,
+        totalMoneySuper: json["totalMoneySuper"] ?? 0,
+        totalGallonDiesel: json["totalGallonDiesel"] ?? 0,
+        totalMechanicDiesel: json["totalMechanicDiesel"] ?? 0,
+        totalMoneyDiesel: json["totalMoneyDiesel"] ?? 0,
+        totalGallonVpower: json["totalGallonVpower"] ?? 0,
+        totalMechanicVpower: json["totalMechanicVpower"] ?? 0,
+        totalMoneyVpower: json["totalMoneyVpower"] ?? 0,
+        readingDate: DateTime.parse(
+            json["readingDate"] ?? DateTime.now().toIso8601String()),
+        generalDispenserReaderId: json["generalDispenserReaderId"] ?? '',
       );
 
   Map<String, dynamic> toJson() => {

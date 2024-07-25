@@ -683,6 +683,9 @@ class DispenserController extends GetxController {
           }
         }
 
+        // Obtener los últimos y penúltimos datos
+        await _fetchAndSetLastAndPenultimateNumerations(pageIndex);
+
         Get.snackbar('Éxito',
             'DispenserReader y GeneralDispenserReader actualizados correctamente.');
       } else {
@@ -695,6 +698,41 @@ class DispenserController extends GetxController {
     } finally {
       isLoading.value = false;
       await saveState();
+    }
+  }
+
+  Future<void> _fetchAndSetLastAndPenultimateNumerations(int pageIndex) async {
+    try {
+      final lastNumeration = await DispenserReaderService.fetchLastNumeration();
+      final penultimateNumeration =
+          await DispenserReaderService.fetchPenultimateNumeration();
+
+      if (lastNumeration != null && penultimateNumeration != null) {
+        if (textControllers[pageIndex].length >= 6) {
+          textControllers[pageIndex][0].text =
+              penultimateNumeration['previousNoGallons'].toString();
+          textControllers[pageIndex][1].text =
+              lastNumeration['actualNoGallons'].toString();
+
+          textControllers[pageIndex][2].text =
+              penultimateNumeration['previousNoMechanic'].toString();
+          textControllers[pageIndex][3].text =
+              lastNumeration['actualNoMechanic'].toString();
+
+          textControllers[pageIndex][4].text =
+              penultimateNumeration['previousNoMoney'].toString();
+          textControllers[pageIndex][5].text =
+              lastNumeration['actualNoMoney'].toString();
+        } else {
+          throw Exception(
+              'Insufficient text controllers in pageIndex $pageIndex');
+        }
+      } else {
+        throw Exception('Invalid numeration data');
+      }
+    } catch (e) {
+      print('Error fetching numerations: $e');
+      Get.snackbar('Error', 'Error al obtener los datos de numeración.');
     }
   }
 }

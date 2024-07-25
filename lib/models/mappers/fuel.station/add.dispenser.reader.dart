@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:hand_held_shell/models/enteties.exports.files.dart';
+import 'package:hand_held_shell/models/models/fuel.station/update.dispenser.reader.dart';
 
 AddNewReaderResponse addNewReaderResponseFromJson(String str) =>
     AddNewReaderResponse.fromJson(json.decode(str));
