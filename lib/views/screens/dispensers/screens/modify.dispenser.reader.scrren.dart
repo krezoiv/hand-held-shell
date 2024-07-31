@@ -133,7 +133,9 @@ class _ModifyDispenserReaderScreenState
               ),
               const SizedBox(height: 8),
               TextField(
-                controller: modifyController.previousControllers[cardIndex],
+                controller: TextEditingController(
+                    text: modifyController.formatNumberWithCommas(
+                        modifyController.previousControllers[cardIndex].text)),
                 decoration: InputDecoration(
                   labelText: 'Lectura Anterior',
                   border: OutlineInputBorder(),
@@ -143,7 +145,9 @@ class _ModifyDispenserReaderScreenState
               ),
               SizedBox(height: 8),
               TextField(
-                controller: modifyController.actualControllers[cardIndex],
+                controller: TextEditingController(
+                    text: modifyController.formatNumberWithCommas(
+                        modifyController.actualControllers[cardIndex].text)),
                 decoration: InputDecoration(
                   labelText: 'Lectura Actual',
                   border: OutlineInputBorder(),
@@ -151,7 +155,10 @@ class _ModifyDispenserReaderScreenState
                 readOnly: true,
               ),
               const SizedBox(height: 8),
-              Text('Total: ${modifyController.totalValues[cardIndex].value}'),
+              Obx(() => Text(
+                    'Total: ${modifyController.formatNumberWithCommas(modifyController.totalValues[cardIndex].value)}',
+                    style: modifyController.getTotalTextStyle(cardIndex),
+                  )),
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
