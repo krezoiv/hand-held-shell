@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:decimal/decimal.dart';
+import 'package:hand_held_shell/controllers/disepensers/modify.dispenser.controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
@@ -22,6 +23,7 @@ class DispenserController extends GetxController {
   final RxList<RxBool> dataSubmitted = <RxBool>[].obs;
   final FocusNode focusNode = FocusNode();
   final RxBool isAnyButtonDisabled = false.obs;
+
   final Rx<Map<String, dynamic>> dispenserReaderDetail =
       Rx<Map<String, dynamic>>({});
 
@@ -702,6 +704,8 @@ class DispenserController extends GetxController {
       final detail = await DispenserReaderService.getDispenserReaderById(
           dispenserReaderId);
       dispenserReaderDetail.value = detail;
+      Get.find<ModifyDispenserController>()
+          .setValues(detail); // Cambiado de setActualValues a setValues
     } catch (e) {
       print('Error fetching dispenser reader detail: $e');
       Get.snackbar(
