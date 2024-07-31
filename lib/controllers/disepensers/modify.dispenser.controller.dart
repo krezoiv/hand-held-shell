@@ -73,7 +73,7 @@ class ModifyDispenserController extends GetxController {
     }
 
     String newText = currentText + number;
-    newText = _formatNumberWithCommas(newText);
+    newText = formatNumberWithCommas(newText);
     updateTextField(cardIndex, newText);
   }
 
@@ -87,7 +87,7 @@ class ModifyDispenserController extends GetxController {
         currentText = currentText.substring(0, currentText.length - 1);
       }
 
-      currentText = _formatNumberWithCommas(currentText);
+      currentText = formatNumberWithCommas(currentText);
 
       updateTextField(cardIndex, currentText);
     }
@@ -100,7 +100,7 @@ class ModifyDispenserController extends GetxController {
     );
   }
 
-  String _formatNumberWithCommas(String number) {
+  String formatNumberWithCommas(String number) {
     number = number.replaceAll(',', '');
 
     if (number.isEmpty) return '';
@@ -118,7 +118,28 @@ class ModifyDispenserController extends GetxController {
     }
 
     return formattedInteger + decimalPart;
-    // Implementa la lógica de formateo aquí (similar a la que ya tienes)
+  }
+
+  TextStyle getTotalTextStyle(int cardIndex) {
+    final totalValue = totalValues[cardIndex].value;
+    final double? numericValue = double.tryParse(totalValue);
+    Color textColor;
+
+    if (numericValue == null) {
+      textColor = Colors.black;
+    } else if (numericValue < 0) {
+      textColor = Colors.red;
+    } else if (numericValue == 0) {
+      textColor = Colors.blue;
+    } else {
+      textColor = Colors.green;
+    }
+
+    return TextStyle(
+      color: textColor,
+      fontWeight: FontWeight.bold,
+      fontSize: 16,
+    );
   }
 
   @override

@@ -60,7 +60,7 @@ class RegisterButtonsController extends GetxController {
     dispenserController.updateTextField(pageIndex, cardIndex, '');
   }
 
-  String _formatNumberWithCommas(String number) {
+  static String _formatNumberWithCommas(String number) {
     number = number.replaceAll(',', '');
 
     if (number.isEmpty) return '';

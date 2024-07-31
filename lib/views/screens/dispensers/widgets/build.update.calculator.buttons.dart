@@ -5,8 +5,7 @@ import 'package:hand_held_shell/controllers/disepensers/modify.dispenser.control
 class UpdateCalculatorButtons extends GetView<ModifyDispenserController> {
   final int cardIndex;
 
-  const UpdateCalculatorButtons({Key? key, required this.cardIndex})
-      : super(key: key);
+  const UpdateCalculatorButtons({super.key, required this.cardIndex});
 
   @override
   Widget build(BuildContext context) {
@@ -36,15 +35,15 @@ class UpdateCalculatorButtons extends GetView<ModifyDispenserController> {
         padding: const EdgeInsets.all(4.0),
         child: ElevatedButton(
           onPressed: () => onButtonPressed(label),
-          child: Text(
-            label,
-            style: TextStyle(fontSize: 24),
-          ),
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.all(20),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(fontSize: 24),
           ),
         ),
       ),

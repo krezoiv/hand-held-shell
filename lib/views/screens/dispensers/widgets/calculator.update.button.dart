@@ -20,7 +20,7 @@ class CalculatorUpdateButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeController = Get.find<ThemeController>();
     final buttonStyle = TextButton.styleFrom(
-      foregroundColor: Colors.white,
+      foregroundColor: Colors.blue[100],
       backgroundColor: bgColor ??
           (themeController.isDarkMode ? const Color(0xff333333) : Colors.green),
       shape: const StadiumBorder(),

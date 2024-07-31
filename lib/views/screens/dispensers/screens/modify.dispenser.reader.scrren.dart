@@ -188,135 +188,151 @@ class _ModifyDispenserReaderScreenState
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return GetBuilder<ModifyDispenserController>(
-            builder: (modifyController) {
-          return DraggableScrollableSheet(
-            initialChildSize: 0.6,
-            minChildSize: 0.3,
-            maxChildSize: 0.9,
-            builder: (_, controller) {
-              return Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 5,
-                      width: 40,
-                      margin: EdgeInsets.symmetric(vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(2.5),
+          builder: (modifyController) {
+            return DraggableScrollableSheet(
+              initialChildSize: 0.6,
+              minChildSize: 0.3,
+              maxChildSize: 0.9,
+              builder: (_, controller) {
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        height: 5,
+                        width: 40,
+                        margin: EdgeInsets.symmetric(vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[300],
+                          borderRadius: BorderRadius.circular(2.5),
+                        ),
                       ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Actualización de: $title',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text('OK'),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        controller: controller,
-                        child: Column(
+                      Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
-                              child: Card(
-                                elevation: 4,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        title,
-                                        style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextField(
-                                        controller: modifyController
-                                            .previousControllers[cardIndex],
-                                        decoration: InputDecoration(
-                                          labelText: 'Lectura Anterior',
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        readOnly: true,
-                                        enabled: false,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      TextField(
-                                        controller: modifyController
-                                            .actualControllers[cardIndex],
-                                        decoration: InputDecoration(
-                                          labelText: 'Lectura Actual',
-                                          border: OutlineInputBorder(),
-                                        ),
-                                        readOnly: true,
-                                        showCursor: false,
-                                        enableInteractiveSelection: false,
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Obx(() => Text(
-                                          'Total: ${modifyController.totalValues[cardIndex].value}')),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: ElevatedButton.icon(
-                                              onPressed: () {
-                                                // Aquí puedes implementar la lógica para confirmar los cambios
-                                                // Por ejemplo:
-                                                // modifyController.confirmChanges(cardIndex);
-                                                Navigator.pop(context);
-                                              },
-                                              icon: Icon(Icons.check,
-                                                  color: Colors.white),
-                                              label: Text('Confirmar',
-                                                  style: TextStyle(
-                                                      color: Colors.white)),
-                                              style: ElevatedButton.styleFrom(
-                                                foregroundColor: Colors.white,
-                                                backgroundColor: Colors.purple,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
+                            Text(
+                              'Actualización de: $title',
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
                             ),
-                            SizedBox(height: 16),
-                            UpdateCalculatorButtons(cardIndex: cardIndex),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: Text('OK'),
+                            ),
                           ],
                         ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        });
+                      Expanded(
+                        child: SingleChildScrollView(
+                          controller: controller,
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 16),
+                                child: Card(
+                                  elevation: 4,
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          title,
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        TextField(
+                                          controller: TextEditingController(
+                                              text: modifyController
+                                                  .formatNumberWithCommas(
+                                                      modifyController
+                                                          .previousControllers[
+                                                              cardIndex]
+                                                          .text)),
+                                          decoration: InputDecoration(
+                                            labelText: 'Lectura Anterior',
+                                            border: OutlineInputBorder(),
+                                          ),
+                                          readOnly: true,
+                                          enabled: false,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        TextField(
+                                          controller: TextEditingController(
+                                              text: modifyController
+                                                  .formatNumberWithCommas(
+                                                      modifyController
+                                                          .actualControllers[
+                                                              cardIndex]
+                                                          .text)),
+                                          decoration: InputDecoration(
+                                            labelText: 'Lectura Actual',
+                                            border: OutlineInputBorder(),
+                                          ),
+                                          readOnly: true,
+                                          showCursor: false,
+                                          enableInteractiveSelection: false,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Obx(() => Text(
+                                              'Total: ${modifyController.totalValues[cardIndex].value}',
+                                              style: modifyController
+                                                  .getTotalTextStyle(cardIndex),
+                                            )),
+                                        const SizedBox(height: 8),
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: ElevatedButton.icon(
+                                                onPressed: () {
+                                                  // Aquí puedes implementar la lógica para confirmar los cambios
+                                                  // Por ejemplo:
+                                                  // modifyController.confirmChanges(cardIndex);
+                                                  Navigator.pop(context);
+                                                },
+                                                icon: Icon(Icons.check,
+                                                    color: Colors.white),
+                                                label: Text('Confirmar',
+                                                    style: TextStyle(
+                                                        color: Colors.white)),
+                                                style: ElevatedButton.styleFrom(
+                                                  foregroundColor: Colors.white,
+                                                  backgroundColor:
+                                                      Colors.purple,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 16),
+                              UpdateCalculatorButtons(cardIndex: cardIndex),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
       },
     );
   }
