@@ -189,156 +189,144 @@ class _ModifyDispenserReaderScreenState
 
   void _showBottomSheet(
       BuildContext context, String title, int cardIndex, String total) {
+    modifyController.resetBottomSheetState();
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return GetBuilder<ModifyDispenserController>(
-          builder: (modifyController) {
-            return DraggableScrollableSheet(
-              initialChildSize: 0.6,
-              minChildSize: 0.3,
-              maxChildSize: 0.9,
-              builder: (_, controller) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    borderRadius:
-                        BorderRadius.vertical(top: Radius.circular(20)),
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 5,
-                        width: 40,
-                        margin: EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(2.5),
-                        ),
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: GetBuilder<ModifyDispenserController>(
+            builder: (modifyController) {
+              return Container(
+                height: MediaQuery.of(context).size.height * 0.9,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 5,
+                      width: 40,
+                      margin: EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2.5),
                       ),
-                      Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Actualización de: $title',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          Obx(() => ElevatedButton(
+                                onPressed:
+                                    modifyController.isOkButtonEnabled.value
+                                        ? () => Navigator.of(context).pop()
+                                        : null,
+                                child: Text('OK'),
+                              )),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
                           children: [
-                            Text(
-                              'Actualización de: $title',
-                              style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
-                            ),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text('OK'),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          controller: controller,
-                          child: Column(
-                            children: [
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16),
-                                child: Card(
-                                  elevation: 4,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          title,
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16),
+                              child: Card(
+                                elevation: 4,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        title,
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextField(
+                                        controller: TextEditingController(
+                                            text: modifyController
+                                                .formatNumberWithCommas(
+                                                    modifyController
+                                                        .previousControllers[
+                                                            cardIndex]
+                                                        .text)),
+                                        decoration: InputDecoration(
+                                          labelText: 'Lectura Anterior',
+                                          border: OutlineInputBorder(),
                                         ),
-                                        const SizedBox(height: 8),
-                                        TextField(
-                                          controller: TextEditingController(
-                                              text: modifyController
-                                                  .formatNumberWithCommas(
-                                                      modifyController
-                                                          .previousControllers[
-                                                              cardIndex]
-                                                          .text)),
-                                          decoration: InputDecoration(
-                                            labelText: 'Lectura Anterior',
-                                            border: OutlineInputBorder(),
-                                          ),
-                                          readOnly: true,
-                                          enabled: false,
+                                        readOnly: true,
+                                        enabled: false,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextField(
+                                        controller: modifyController
+                                            .actualControllers[cardIndex],
+                                        decoration: InputDecoration(
+                                          labelText: 'Lectura Actual',
+                                          border: OutlineInputBorder(),
                                         ),
-                                        const SizedBox(height: 8),
-                                        TextField(
-                                          controller: TextEditingController(
-                                              text: modifyController
-                                                  .formatNumberWithCommas(
-                                                      modifyController
-                                                          .actualControllers[
-                                                              cardIndex]
-                                                          .text)),
-                                          decoration: InputDecoration(
-                                            labelText: 'Lectura Actual',
-                                            border: OutlineInputBorder(),
-                                          ),
-                                          readOnly: true,
-                                          showCursor: false,
-                                          enableInteractiveSelection: false,
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Obx(() => Text(
-                                              'Total: ${modifyController.totalValues[cardIndex].value}',
-                                              style: modifyController
-                                                  .getTotalTextStyle(cardIndex),
-                                            )),
-                                        const SizedBox(height: 8),
-                                        Row(
-                                          children: [
-                                            Expanded(
-                                              child: ElevatedButton.icon(
-                                                onPressed: () {
-                                                  // Aquí puedes implementar la lógica para confirmar los cambios
-                                                  // Por ejemplo:
-                                                  // modifyController.confirmChanges(cardIndex);
-                                                  Navigator.pop(context);
-                                                },
-                                                icon: Icon(Icons.check,
-                                                    color: Colors.white),
-                                                label: Text('Confirmar',
-                                                    style: TextStyle(
-                                                        color: Colors.white)),
-                                                style: ElevatedButton.styleFrom(
-                                                  foregroundColor: Colors.white,
-                                                  backgroundColor:
-                                                      Colors.purple,
-                                                ),
-                                              ),
+                                        readOnly: true,
+                                        showCursor: false,
+                                        enableInteractiveSelection: false,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Obx(() => Text(
+                                            'Total: ${modifyController.formatNumberWithCommas(modifyController.totalValues[cardIndex].value)}',
+                                            style: modifyController
+                                                .getTotalTextStyle(cardIndex),
+                                          )),
+                                      const SizedBox(height: 8),
+                                      Obx(() => ElevatedButton.icon(
+                                            onPressed: modifyController
+                                                    .isConfirmButtonEnabled
+                                                    .value
+                                                ? () => modifyController
+                                                    .validateAndConfirm(
+                                                        cardIndex)
+                                                : null,
+                                            icon: Icon(Icons.check,
+                                                color: Colors.white),
+                                            label: Text('Confirmar',
+                                                style: TextStyle(
+                                                    color: Colors.white)),
+                                            style: ElevatedButton.styleFrom(
+                                              foregroundColor: Colors.white,
+                                              backgroundColor: Colors.purple,
                                             ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                                          )),
+                                    ],
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 16),
-                              UpdateCalculatorButtons(cardIndex: cardIndex),
-                            ],
-                          ),
+                            ),
+                            SizedBox(height: 16),
+                            UpdateCalculatorButtons(cardIndex: cardIndex),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                );
-              },
-            );
-          },
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         );
       },
     );
