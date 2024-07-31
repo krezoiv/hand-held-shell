@@ -253,22 +253,39 @@ class _ModifyDispenserReaderScreenState
                                       const SizedBox(height: 8),
                                       TextField(
                                         controller: modifyController
+                                            .previousControllers[cardIndex],
+                                        decoration: InputDecoration(
+                                          labelText: 'Lectura Anterior',
+                                          border: OutlineInputBorder(),
+                                        ),
+                                        readOnly: true,
+                                        enabled: false,
+                                      ),
+                                      const SizedBox(height: 8),
+                                      TextField(
+                                        controller: modifyController
                                             .actualControllers[cardIndex],
                                         decoration: InputDecoration(
                                           labelText: 'Lectura Actual',
                                           border: OutlineInputBorder(),
                                         ),
                                         readOnly: true,
+                                        showCursor: false,
+                                        enableInteractiveSelection: false,
                                       ),
+                                      const SizedBox(height: 8),
+                                      Obx(() => Text(
+                                          'Total: ${modifyController.totalValues[cardIndex].value}')),
                                       const SizedBox(height: 8),
                                       Row(
                                         children: [
-                                          Text('Total: $total'),
-                                          const SizedBox(width: 8),
                                           Expanded(
                                             child: ElevatedButton.icon(
                                               onPressed: () {
-                                                // Lógica del botón Check
+                                                // Aquí puedes implementar la lógica para confirmar los cambios
+                                                // Por ejemplo:
+                                                // modifyController.confirmChanges(cardIndex);
+                                                Navigator.pop(context);
                                               },
                                               icon: Icon(Icons.check,
                                                   color: Colors.white),
@@ -289,7 +306,7 @@ class _ModifyDispenserReaderScreenState
                               ),
                             ),
                             SizedBox(height: 16),
-                            UpdateCalculatorButtons(cardIndex),
+                            UpdateCalculatorButtons(cardIndex: cardIndex),
                           ],
                         ),
                       ),

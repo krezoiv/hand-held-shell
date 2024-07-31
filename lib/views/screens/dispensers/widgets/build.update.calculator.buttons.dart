@@ -1,58 +1,57 @@
-// update_calculator_buttons.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/controllers/disepensers/modify.dispenser.controller.dart';
 
-import 'package:hand_held_shell/views/screens/dispensers/widgets/calculator.update.button.dart';
-
 class UpdateCalculatorButtons extends GetView<ModifyDispenserController> {
   final int cardIndex;
-  const UpdateCalculatorButtons(this.cardIndex, {super.key});
+
+  const UpdateCalculatorButtons({Key? key, required this.cardIndex})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        double spacing = constraints.maxWidth * 0.05;
-        double buttonSize = (constraints.maxWidth - (spacing * 5)) / 4;
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _buildCalculatorRow(['7', '8', '9'], buttonSize, spacing),
-            SizedBox(height: spacing),
-            _buildCalculatorRow(['4', '5', '6'], buttonSize, spacing),
-            SizedBox(height: spacing),
-            _buildCalculatorRow(['1', '2', '3'], buttonSize, spacing),
-            SizedBox(height: spacing),
-            _buildCalculatorRow(['0', '.', 'C'], buttonSize, spacing,
-                lastRow: true),
-          ],
-        );
-      },
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          _buildRow(['7', '8', '9']),
+          _buildRow(['4', '5', '6']),
+          _buildRow(['1', '2', '3']),
+          _buildRow(['0', '.', 'C']),
+        ],
+      ),
     );
   }
 
-  Widget _buildCalculatorRow(
-      List<String> numbers, double buttonSize, double spacing,
-      {bool lastRow = false}) {
+  Widget _buildRow(List<String> buttons) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: numbers.map((number) {
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: spacing / 2),
-          child: SizedBox(
-            width: buttonSize,
-            height: buttonSize,
-            child: CalculatorUpdateButton(
-              text: number,
-              onPressed: () {
-                controller.addNumber(number, controller.currentCardIndex.value);
-              },
-              bgColor: lastRow && number == 'C' ? Colors.orange : null,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: buttons.map((button) => _buildButton(button)).toList(),
+    );
+  }
+
+  Widget _buildButton(String label) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: ElevatedButton(
+          onPressed: () => onButtonPressed(label),
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 24),
+          ),
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.all(20),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
           ),
-        );
-      }).toList(),
+        ),
+      ),
     );
+  }
+
+  void onButtonPressed(String value) {
+    controller.addNumber(value, cardIndex);
   }
 }

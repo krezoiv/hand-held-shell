@@ -34,6 +34,21 @@ class ModifyDispenserController extends GetxController {
     totalValues[1].value = detail['totalNoMechanic']?.toString() ?? 'N/A';
     totalValues[2].value = detail['totalNoMoney']?.toString() ?? 'N/A';
 
+    for (int i = 0; i < 3; i++) {
+      actualControllers[i].addListener(() => calculateTotal(i));
+    }
+
+    update();
+  }
+
+  void calculateTotal(int index) {
+    double previous =
+        double.tryParse(previousControllers[index].text.replaceAll(',', '')) ??
+            0;
+    double actual =
+        double.tryParse(actualControllers[index].text.replaceAll(',', '')) ?? 0;
+    double total = actual - previous;
+    totalValues[index].value = total.toStringAsFixed(2);
     update();
   }
 
