@@ -18,9 +18,10 @@ class RegisterDispenserPage extends StatefulWidget {
   final RxBool showCalculatorButtons;
   final RxBool buttonsEnabled;
   final String? dispenserReaderId;
+  final VoidCallback? onBuild;
 
   const RegisterDispenserPage({
-    Key? key,
+    super.key,
     required this.pageIndex,
     required this.dispenserReader,
     required this.totalPages,
@@ -28,7 +29,8 @@ class RegisterDispenserPage extends StatefulWidget {
     required this.showCalculatorButtons,
     required this.buttonsEnabled,
     this.dispenserReaderId,
-  }) : super(key: key);
+    this.onBuild,
+  });
 
   @override
   _RegisterDispenserPageState createState() => _RegisterDispenserPageState();
@@ -47,15 +49,11 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
     calculatorCtrl.setDispenserController(dispenserController);
     verticalPageController = PageController();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.pageIndex < dispenserController.focusNodes.length &&
-          dispenserController.focusNodes[widget.pageIndex].isNotEmpty) {
-        FocusScope.of(context)
-            .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
-      }
-    });
-
     widget.mainPageController.addListener(_onPageChanged);
+
+    Future.microtask(() {
+      _setInitialFocus();
+    });
   }
 
   @override
@@ -65,44 +63,59 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
     super.dispose();
   }
 
+  void _setInitialFocus() {
+    if (mounted &&
+        widget.pageIndex < dispenserController.focusNodes.length &&
+        dispenserController.focusNodes[widget.pageIndex].isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          FocusScope.of(context).requestFocus(
+            dispenserController.focusNodes[widget.pageIndex][0],
+          );
+        }
+      });
+    }
+  }
+
   void _onPageChanged() {
     if (widget.mainPageController.page == widget.pageIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (widget.pageIndex < dispenserController.focusNodes.length &&
-            dispenserController.focusNodes[widget.pageIndex].isNotEmpty) {
-          FocusScope.of(context).requestFocus(
-              dispenserController.focusNodes[widget.pageIndex][0]);
-        }
+        _setInitialFocus();
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
-    final int pageIndex = widget.pageIndex;
-
-    final dispenserReader =
-        pageIndex < dispenserController.dispenserReaders.length
-            ? dispenserController.dispenserReaders[pageIndex]
-            : null;
-
-    if (dispenserReader == null) {
-      return Center(child: Text('No hay datos disponibles para este índice'));
+    if (widget.onBuild != null) {
+      widget.onBuild!();
     }
 
-    // Asegúrate de que las claves sean correctas
-    final String fuelName = dispenserReader['assignmentHoseId']?['hoseId']
-            ?['fuelId']?['fuelName'] ??
-        'Desconocido';
-    final String sideName = dispenserReader['assignmentHoseId']?['sideId']
-            ?['sideName'] ??
-        'Desconocido';
-    final String dispenserCode = dispenserReader['assignmentHoseId']
-            ?['assignmentId']?['dispenserId']?['dispenserCode'] ??
-        'Desconocido';
-    final String assignmentHoseId =
-        dispenserReader['assignmentHoseId']?['_id'] ?? 'Desconocido';
+    final scaffoldKey = GlobalKey<ScaffoldState>();
+
+    String fuelName = '';
+    String sideName = '';
+    String dispenserCode = '';
+    String assignmentHoseId = '';
+
+    final assignmentHoseIdMap = widget.dispenserReader['assignmentHoseId'];
+    if (assignmentHoseIdMap is Map) {
+      final hoseIdMap = assignmentHoseIdMap['hoseId'];
+      final sideIdMap = assignmentHoseIdMap['sideId'];
+      final assignmentIdMap = assignmentHoseIdMap['assignmentId'];
+
+      if (hoseIdMap is Map && sideIdMap is Map && assignmentIdMap is Map) {
+        final fuelIdMap = hoseIdMap['fuelId'];
+        final dispenserIdMap = assignmentIdMap['dispenserId'];
+
+        if (fuelIdMap is Map && dispenserIdMap is Map) {
+          fuelName = fuelIdMap['fuelName'] as String;
+          sideName = sideIdMap['sideName'] as String;
+          dispenserCode = dispenserIdMap['dispenserCode'] as String;
+          assignmentHoseId = assignmentHoseIdMap['_id'] as String;
+        }
+      }
+    }
 
     return Obx(() => Scaffold(
           key: scaffoldKey,
@@ -116,26 +129,12 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                 const SizedBox(width: 5),
                 Expanded(
                     child: Text(
-                        '${(fuelName)} | ${TextHelpers.capitalizeFirstLetterOfEachWord(dispenserCode)} -> ${TextHelpers.capitalizeFirstLetterOfEachWord((sideName))}',
+                        '$fuelName | ${TextHelpers.capitalizeFirstLetterOfEachWord(dispenserCode)} -> ${TextHelpers.capitalizeFirstLetterOfEachWord(sideName)}',
                         style: const TextStyle(fontSize: 14.0),
                         overflow: TextOverflow.ellipsis)),
-                Text('${pageIndex + 1}/${widget.totalPages}',
+                Text('${widget.pageIndex + 1}/${widget.totalPages}',
                     style: const TextStyle(
                         fontSize: 12, fontStyle: FontStyle.italic)),
-                Obx(() {
-                  final dispenserReaders = dispenserController.dispenserReaders;
-                  final String? dispenserReaderId =
-                      pageIndex < dispenserReaders.length
-                          ? dispenserReaders[pageIndex]['dispenserReaderId']
-                              ?.toString()
-                          : null;
-                  return dispenserReaderId != null
-                      ? Text(
-                          'ID: ...${dispenserReaderId.substring(math.max(0, dispenserReaderId.length - 10))}',
-                          style: const TextStyle(
-                              fontSize: 10, fontStyle: FontStyle.italic))
-                      : const SizedBox.shrink();
-                }),
               ],
             ),
           ),
@@ -151,85 +150,57 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       onPageChanged: (index) {
                         calculatorCtrl.setCurrentCardIndex(index);
                         if (index == 0) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            if (pageIndex <
-                                    dispenserController.focusNodes.length &&
-                                dispenserController
-                                    .focusNodes[pageIndex].isNotEmpty) {
-                              FocusScope.of(context).requestFocus(
-                                  dispenserController.focusNodes[pageIndex][0]);
-                            }
+                          Future.microtask(() {
+                            _setInitialFocus();
                           });
                         }
                       },
                       children: [
-                        if (pageIndex < dispenserController.differences.length)
-                          _buildCard(
-                            'Numeración en Galones',
-                            dispenserReader['actualNoGallons']?.toString() ??
-                                '0',
-                            0,
-                            titleColor: Colors.blue[900],
-                            difference: 0 <
-                                    dispenserController
-                                        .differences[pageIndex].length
-                                ? dispenserController
-                                    .differences[pageIndex][0].value
-                                : '0',
-                          ),
-                        if (pageIndex < dispenserController.differences.length)
-                          _buildCard(
-                            'Numeración Mecánica',
-                            dispenserReader['actualNoMechanic']?.toString() ??
-                                '0',
-                            1,
-                            titleColor: Colors.blue[900],
-                            difference: 1 <
-                                    dispenserController
-                                        .differences[pageIndex].length
-                                ? dispenserController
-                                    .differences[pageIndex][1].value
-                                : '0',
-                          ),
-                        if (pageIndex < dispenserController.differences.length)
-                          _buildCard(
-                            'Numeración en Dinero',
-                            dispenserReader['actualNoMoney']?.toString() ?? '0',
-                            2,
-                            titleColor: Colors.blue[900],
-                            difference: 2 <
-                                    dispenserController
-                                        .differences[pageIndex].length
-                                ? dispenserController
-                                    .differences[pageIndex][2].value
-                                : '0',
-                          ),
+                        _buildCard(
+                          'Numeración en Galones',
+                          widget.dispenserReader['actualNoGallons'].toString(),
+                          0,
+                          titleColor: Colors.blue[900],
+                          difference: dispenserController
+                              .differences[widget.pageIndex][0].value,
+                        ),
+                        _buildCard(
+                          'Numeración Mecánica',
+                          widget.dispenserReader['actualNoMechanic'].toString(),
+                          1,
+                          titleColor: Colors.blue[900],
+                          difference: dispenserController
+                              .differences[widget.pageIndex][1].value,
+                        ),
+                        _buildCard(
+                          'Numeración en Dinero',
+                          widget.dispenserReader['actualNoMoney'].toString(),
+                          2,
+                          titleColor: Colors.blue[900],
+                          difference: dispenserController
+                              .differences[widget.pageIndex][2].value,
+                        ),
                       ],
                     ),
                   ),
                   Obx(() => NavigationButtons(
                         mainPageController: widget.mainPageController,
-                        pageIndex: pageIndex,
+                        pageIndex: widget.pageIndex,
                         totalPages: widget.totalPages,
                         currentCardIndex: calculatorCtrl.currentCardIndex.value,
                         enabled: widget.buttonsEnabled.value &&
-                            pageIndex <
-                                dispenserController.dataSubmitted.length &&
                             !dispenserController
-                                .dataSubmitted[pageIndex].value &&
+                                .dataSubmitted[widget.pageIndex].value &&
                             !dispenserController.isLoading.value,
                         onThumbUpPressed: () {
                           if (dispenserController.sendButtonEnabled.value &&
-                              pageIndex <
-                                  dispenserController.dataSubmitted.length &&
                               !dispenserController
-                                  .dataSubmitted[pageIndex].value &&
+                                  .dataSubmitted[widget.pageIndex].value &&
                               !dispenserController.isLoading.value) {
-                            dispenserController.sendDataToDatabase(pageIndex);
-                          } else if (pageIndex <
-                                  dispenserController.dataSubmitted.length &&
-                              dispenserController
-                                  .dataSubmitted[pageIndex].value) {
+                            dispenserController
+                                .sendDataToDatabase(widget.pageIndex);
+                          } else if (dispenserController
+                              .dataSubmitted[widget.pageIndex].value) {
                             Get.snackbar('Información',
                                 'Los datos ya han sido enviados.');
                           } else if (dispenserController.isLoading.value) {
@@ -243,7 +214,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       )),
                   if (widget.showCalculatorButtons.value)
                     BuildCalculatorButtons(
-                      pageIndex: pageIndex,
+                      pageIndex: widget.pageIndex,
                     ),
                 ],
               ),
@@ -351,27 +322,10 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                         ),
                         const SizedBox(height: 5),
                         Obx(() => TextField(
-                              controller: widget.pageIndex <
-                                          dispenserController
-                                              .textControllers.length &&
-                                      cardIndex <
-                                          dispenserController
-                                              .textControllers[widget.pageIndex]
-                                              .length
-                                  ? dispenserController
-                                          .textControllers[widget.pageIndex]
-                                      [cardIndex]
-                                  : TextEditingController(),
-                              focusNode: widget.pageIndex <
-                                          dispenserController
-                                              .focusNodes.length &&
-                                      cardIndex <
-                                          dispenserController
-                                              .focusNodes[widget.pageIndex]
-                                              .length
-                                  ? dispenserController
-                                      .focusNodes[widget.pageIndex][cardIndex]
-                                  : FocusNode(),
+                              controller: dispenserController
+                                  .textControllers[widget.pageIndex][cardIndex],
+                              focusNode: dispenserController
+                                  .focusNodes[widget.pageIndex][cardIndex],
                               readOnly: true,
                               onChanged: (value) {
                                 dispenserController.updateTextField(
@@ -415,17 +369,9 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       width: double.infinity,
                       height: 120,
                       child: Obx(() => ElevatedButton(
-                            onPressed: widget.pageIndex <
-                                        dispenserController
-                                            .buttonsEnabled.length &&
-                                    cardIndex <
-                                        dispenserController
-                                            .buttonsEnabled[widget.pageIndex]
-                                            .length &&
-                                    dispenserController
-                                        .buttonsEnabled[widget.pageIndex]
-                                            [cardIndex]
-                                        .value
+                            onPressed: dispenserController
+                                    .buttonsEnabled[widget.pageIndex][cardIndex]
+                                    .value
                                 ? () => dispenserController
                                     .validateAndDisableFields(
                                         widget.pageIndex, cardIndex)
@@ -469,12 +415,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
             onPressed: () {
               Get.back();
               WidgetsBinding.instance.addPostFrameCallback((_) {
-                if (widget.pageIndex < dispenserController.focusNodes.length &&
-                    dispenserController
-                        .focusNodes[widget.pageIndex].isNotEmpty) {
-                  FocusScope.of(context).requestFocus(
-                      dispenserController.focusNodes[widget.pageIndex][0]);
-                }
+                _setInitialFocus();
               });
             },
             child: const Text("OK"),

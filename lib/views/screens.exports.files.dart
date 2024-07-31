@@ -1,3 +1,5 @@
+export 'package:hand_held_shell/views/screens/dispensers/screens/modify.dispenser.reader.scrren.dart';
+
 export 'package:hand_held_shell/views/screens/lubricants/screens/lubricants.home.screen.dart';
 export 'package:hand_held_shell/views/screens/settings/screens/change.password.screen.dart';
 export 'package:hand_held_shell/views/screens/settings/screens/change.prices.screen.dart';

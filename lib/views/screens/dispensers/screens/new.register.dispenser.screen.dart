@@ -8,7 +8,6 @@ import 'package:hand_held_shell/controllers/register.button.controller.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
 import 'package:hand_held_shell/shared/helpers/text.helpers.dart';
-import 'package:hand_held_shell/views/screens/dispensers/screens/register.dispenser.page.screen.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/build.calcutator.buttons.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/navigation.buttons.dart';
 
@@ -319,15 +318,12 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
           assignmentHoseId = assignmentHoseIdMap['_id'] as String;
         } else {
           // Manejar el caso donde fuelIdMap o dispenserIdMap no sean Map
-          print('fuelIdMap or dispenserIdMap is not a Map');
         }
       } else {
         // Manejar el caso donde hoseIdMap, sideIdMap o assignmentIdMap no sean Map
-        print('hoseIdMap, sideIdMap or assignmentIdMap is not a Map');
       }
     } else {
       // Manejar el caso donde assignmentHoseIdMap no sea Map
-      print('assignmentHoseIdMap is not a Map');
     }
 
     return Obx(() => Scaffold(
@@ -348,16 +344,14 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                 Text('${widget.pageIndex + 1}/${widget.totalPages}',
                     style: const TextStyle(
                         fontSize: 12, fontStyle: FontStyle.italic)),
-                Obx(() {
-                  final String? dispenserReaderId = dispenserController
-                      .dispenserReaders[widget.pageIndex]['dispenserReaderId'];
-                  return dispenserReaderId != null
-                      ? Text(
-                          'ID: ...${dispenserReaderId.substring(dispenserReaderId.length - 10)}',
-                          style: const TextStyle(
-                              fontSize: 10, fontStyle: FontStyle.italic))
-                      : const SizedBox.shrink();
-                }),
+                // Obx(() {
+                //   final String? dispenserReaderId = dispenserController
+                //       .dispenserReaders[widget.pageIndex]['dispenserReaderId'];
+                //   return dispenserReaderId != null
+                //       ? Text(
+                //           '')
+                //       : const SizedBox.shrink();
+                // }),
               ],
             ),
           ),

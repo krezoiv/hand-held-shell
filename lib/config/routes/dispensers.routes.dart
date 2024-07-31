@@ -24,7 +24,12 @@ class DispensersRoutes {
       name: RoutesPaths.deleteAllRegisterDispenserScreen,
       page: () => const DeleteAllRegisterDispenserScreen(),
     ),
+    GetPage(
+      name: RoutesPaths.modifyDispenserRaderScreen,
+      page: () => ModifyDispenserReaderScreen(),
+    ),
   ];
+
   static void goToDispensers() => Get.toNamed(RoutesPaths.dispensersHome);
   static void goToNewRegisterDispenser() =>
       Get.toNamed(RoutesPaths.newRegisterDispenserScreen);
@@ -34,4 +39,7 @@ class DispensersRoutes {
       Get.toNamed(RoutesPaths.deleteRegisterDispenserScreen);
   static void goToDeleteAllRegisterDispenser() =>
       Get.toNamed(RoutesPaths.deleteAllRegisterDispenserScreen);
+
+  static void goToModifyDispenserReader() =>
+      Get.toNamed(RoutesPaths.modifyDispenserRaderScreen);
 }

@@ -34,6 +34,8 @@ class RoutesPaths {
       '/delete-register-dispenser';
   static const String deleteAllRegisterDispenserScreen =
       '/delete-all-regiserter-dispenser';
+  static const String modifyDispenserRaderScreen =
+      '/modify-dispenser-reader/:dispenserReaderId';
 
 //sales
   static const String salesHome = '/sales';

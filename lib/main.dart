@@ -29,6 +29,7 @@ void main() async {
   Get.put(SocketService(), permanent: true);
   Get.put(UserService());
   Get.put(FieldsHelpers());
+
   Get.lazyPut(() => DispenserController());
 
   // Conecta el socket después de inicializar los servicios

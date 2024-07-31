@@ -13,19 +13,17 @@ class DispenserController extends GetxController {
       <List<TextEditingController>>[].obs;
   final RxList<List<FocusNode>> focusNodes = <List<FocusNode>>[].obs;
   final RxList<List<RxString>> differences = <List<RxString>>[].obs;
-
   final RxBool showCalculatorButtons = false.obs;
   final RxList<List<RxBool>> buttonsEnabled = <List<RxBool>>[].obs;
   final RxList<List<RxBool>> textFieldsEnabled = <List<RxBool>>[].obs;
   final RxBool sendButtonEnabled = false.obs;
   final RxBool hasSharedPreferencesData = false.obs;
   final RxBool isEditMode = false.obs;
-
   final RxList<RxBool> dataSubmitted = <RxBool>[].obs;
-
   final FocusNode focusNode = FocusNode();
-
   final RxBool isAnyButtonDisabled = false.obs;
+  final Rx<Map<String, dynamic>> dispenserReaderDetail =
+      Rx<Map<String, dynamic>>({});
 
   @override
   void onInit() {
@@ -683,9 +681,6 @@ class DispenserController extends GetxController {
           }
         }
 
-        // Obtener los últimos y penúltimos datos
-        await _fetchAndSetLastAndPenultimateNumerations(pageIndex);
-
         Get.snackbar('Éxito',
             'DispenserReader y GeneralDispenserReader actualizados correctamente.');
       } else {
@@ -701,38 +696,31 @@ class DispenserController extends GetxController {
     }
   }
 
-  Future<void> _fetchAndSetLastAndPenultimateNumerations(int pageIndex) async {
+  Future<void> fetchDispenserReaderDetail(String dispenserReaderId) async {
     try {
-      final lastNumeration = await DispenserReaderService.fetchLastNumeration();
-      final penultimateNumeration =
-          await DispenserReaderService.fetchPenultimateNumeration();
-
-      if (lastNumeration != null && penultimateNumeration != null) {
-        if (textControllers[pageIndex].length >= 6) {
-          textControllers[pageIndex][0].text =
-              penultimateNumeration['previousNoGallons'].toString();
-          textControllers[pageIndex][1].text =
-              lastNumeration['actualNoGallons'].toString();
-
-          textControllers[pageIndex][2].text =
-              penultimateNumeration['previousNoMechanic'].toString();
-          textControllers[pageIndex][3].text =
-              lastNumeration['actualNoMechanic'].toString();
-
-          textControllers[pageIndex][4].text =
-              penultimateNumeration['previousNoMoney'].toString();
-          textControllers[pageIndex][5].text =
-              lastNumeration['actualNoMoney'].toString();
-        } else {
-          throw Exception(
-              'Insufficient text controllers in pageIndex $pageIndex');
-        }
-      } else {
-        throw Exception('Invalid numeration data');
-      }
+      isLoading.value = true;
+      final detail = await DispenserReaderService.getDispenserReaderById(
+          dispenserReaderId);
+      dispenserReaderDetail.value = detail;
     } catch (e) {
-      print('Error fetching numerations: $e');
-      Get.snackbar('Error', 'Error al obtener los datos de numeración.');
+      print('Error fetching dispenser reader detail: $e');
+      Get.snackbar(
+          'Error', 'No se pudo cargar los detalles del DispenserReader');
+    } finally {
+      isLoading.value = false;
     }
+  }
+
+  void addNumberToActualField(int pageIndex, String number) {
+    String currentText = textControllers[pageIndex][1].text;
+    if (number == '.' && currentText.contains('.')) return;
+    textControllers[pageIndex][1].text = currentText + number;
+    textControllers[pageIndex][1].selection = TextSelection.fromPosition(
+      TextPosition(offset: textControllers[pageIndex][1].text.length),
+    );
+  }
+
+  void clearActualField(int pageIndex) {
+    textControllers[pageIndex][1].clear();
   }
 }

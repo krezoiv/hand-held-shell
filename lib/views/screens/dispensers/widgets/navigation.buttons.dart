@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hand_held_shell/config/global/routes.path.dart';
 import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
 import 'dart:math' as math;
 
@@ -15,7 +16,7 @@ class NavigationButtons extends StatefulWidget {
   final DispenserController dispenserController;
 
   const NavigationButtons({
-    super.key,
+    Key? key,
     required this.mainPageController,
     required this.pageIndex,
     required this.totalPages,
@@ -23,7 +24,7 @@ class NavigationButtons extends StatefulWidget {
     required this.enabled,
     required this.onThumbUpPressed,
     required this.dispenserController,
-  });
+  }) : super(key: key);
 
   @override
   _NavigationButtonsState createState() => _NavigationButtonsState();
@@ -76,16 +77,20 @@ class _NavigationButtonsState extends State<NavigationButtons>
               },
               child: IconButton(
                 icon: Icon(
-                  Icons
-                      .sync, //!boton que sera para enviar la data modificada del dispenserReader que anteriormente fue creada a la base de datos
+                  Icons.sync,
                   color: isEnabled
                       ? Colors.cyanAccent[700]
                       : (isDarkMode ? Colors.white : Colors.black),
                 ),
                 onPressed: isEnabled
                     ? () {
-                        widget.dispenserController
-                            .updateDispenserReader(widget.pageIndex);
+                        final dispenserReaderId = widget.dispenserController
+                                .dispenserReaders[widget.pageIndex]
+                            ['dispenserReaderId'];
+                        Get.toNamed(
+                          RoutesPaths.modifyDispenserRaderScreen,
+                          arguments: {'dispenserReaderId': dispenserReaderId},
+                        );
                       }
                     : null,
               ),

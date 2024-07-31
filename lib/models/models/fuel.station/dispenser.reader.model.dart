@@ -1,4 +1,5 @@
 class DispenserReader {
+  final Map<String, dynamic> assignmentHoseId;
   int previousNoGallons;
   int actualNoGallons;
   int totalNoGallons;
@@ -8,7 +9,7 @@ class DispenserReader {
   int previousNoMoney;
   int actualNoMoney;
   int totalNoMoney;
-  String assignmentHoseId;
+
   String generalDispenserReaderId;
   String dispenserReaderId;
 
@@ -38,7 +39,7 @@ class DispenserReader {
         previousNoMoney: json["previousNoMoney"],
         actualNoMoney: json["actualNoMoney"],
         totalNoMoney: json["totalNoMoney"],
-        assignmentHoseId: json["assignmentHoseId"],
+        assignmentHoseId: json["assignmentHoseId"] ?? {},
         generalDispenserReaderId: json["generalDispenserReaderId"],
         dispenserReaderId: json["dispenserReaderId"],
       );
