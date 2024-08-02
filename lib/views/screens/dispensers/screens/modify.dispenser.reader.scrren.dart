@@ -17,6 +17,7 @@ class _ModifyDispenserReaderScreenState
     extends State<ModifyDispenserReaderScreen> {
   late ModifyDispenserController modifyController;
   late DispenserController controller;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -32,7 +33,6 @@ class _ModifyDispenserReaderScreenState
 
   @override
   Widget build(BuildContext context) {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
     final Map<String, dynamic> args = Get.arguments ?? {};
     final String dispenserReaderId = args['dispenserReaderId'] ?? 'No ID';
 
@@ -95,36 +95,34 @@ class _ModifyDispenserReaderScreenState
                   child: Text(detail),
                 )),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () async {
-                  final dispenserController = Get.find<DispenserController>();
-                  final Map<String, dynamic> args = Get.arguments ?? {};
-                  final String dispenserReaderId =
-                      args['dispenserReaderId'] ?? 'No ID';
-
-                  // Find the index of the current dispenser reader in the list
-                  final int pageIndex = dispenserController.dispenserReaders
-                      .indexWhere((reader) =>
-                          reader['dispenserReaderId'] == dispenserReaderId);
-
-                  if (pageIndex != -1) {
-                    await dispenserController.updateDispenserReader(pageIndex);
-                    Get.snackbar('Éxito', 'Cambios guardados correctamente');
-                  } else {
-                    Get.snackbar(
-                        'Error', 'No se pudo encontrar el DispenserReader');
-                  }
-                },
-                icon: Icon(Icons.save_as_outlined, color: Colors.white),
-                label: Text('Guardar Cambios',
-                    style: TextStyle(color: Colors.white)),
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.tealAccent[700],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    // Lógica para actualizar
+                  },
+                  icon: Icon(Icons.save_as_outlined, color: Colors.white),
+                  label: Text('Guardar Cambios',
+                      style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.tealAccent[700],
+                  ),
                 ),
-              ),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Get.toNamed('/new-register-dispenser');
+                  },
+                  icon: Icon(Icons.cancel, color: Colors.white),
+                  label:
+                      Text('Cancelar', style: TextStyle(color: Colors.white)),
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.red,
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -169,6 +167,12 @@ class _ModifyDispenserReaderScreenState
                   border: OutlineInputBorder(),
                 ),
                 readOnly: true,
+                showCursor: false,
+                enableInteractiveSelection: false,
+                onTap: () {
+                  _showBottomSheet(context, title, cardIndex,
+                      detail[totalKey]?.toString() ?? 'N/A');
+                },
               ),
               const SizedBox(height: 8),
               Obx(() => Text(
@@ -178,23 +182,6 @@ class _ModifyDispenserReaderScreenState
               const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () => _showBottomSheet(context, title, cardIndex,
-                        detail[totalKey]?.toString() ?? 'N/A'),
-                    icon: Icon(Icons.sync),
-                    label: Text('Modificar'),
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Colors.purple,
-                    ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: null,
-                    icon: Icon(Icons.save),
-                    label: Text('Save'),
-                  ),
-                ],
               ),
             ],
           ),
@@ -205,7 +192,13 @@ class _ModifyDispenserReaderScreenState
 
   void _showBottomSheet(
       BuildContext context, String title, int cardIndex, String total) {
-    modifyController.resetBottomSheetState();
+    // Almacenar los valores originales antes de mostrar el BottomSheet
+    final originalPreviousText =
+        modifyController.previousControllers[cardIndex].text;
+    final originalActualText =
+        modifyController.actualControllers[cardIndex].text;
+    final originalTotal = modifyController.totalValues[cardIndex].value;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -213,11 +206,11 @@ class _ModifyDispenserReaderScreenState
       enableDrag: false,
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
-        return WillPopScope(
-          onWillPop: () async => false,
-          child: GetBuilder<ModifyDispenserController>(
-            builder: (modifyController) {
-              return Container(
+        return GetBuilder<ModifyDispenserController>(
+          builder: (modifyController) {
+            return GestureDetector(
+              onVerticalDragUpdate: (_) {}, // Disable vertical drag to close
+              child: Container(
                 height: MediaQuery.of(context).size.height * 0.9,
                 decoration: BoxDecoration(
                   color: Theme.of(context).scaffoldBackgroundColor,
@@ -244,13 +237,23 @@ class _ModifyDispenserReaderScreenState
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                          Obx(() => ElevatedButton(
-                                onPressed:
-                                    modifyController.isOkButtonEnabled.value
-                                        ? () => Navigator.of(context).pop()
-                                        : null,
-                                child: Text('OK'),
-                              )),
+                          ElevatedButton(
+                            onPressed: () {
+                              // Restaurar los valores originales y cerrar el BottomSheet
+                              modifyController.previousControllers[cardIndex]
+                                  .text = originalPreviousText;
+                              modifyController.actualControllers[cardIndex]
+                                  .text = originalActualText;
+                              modifyController.totalValues[cardIndex].value =
+                                  originalTotal;
+                              Navigator.pop(context);
+                            },
+                            child: Text('Cancelar'),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.red,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -292,8 +295,13 @@ class _ModifyDispenserReaderScreenState
                                       ),
                                       const SizedBox(height: 8),
                                       TextField(
-                                        controller: modifyController
-                                            .actualControllers[cardIndex],
+                                        controller: TextEditingController(
+                                            text: modifyController
+                                                .formatNumberWithCommas(
+                                                    modifyController
+                                                        .actualControllers[
+                                                            cardIndex]
+                                                        .text)),
                                         decoration: InputDecoration(
                                           labelText: 'Lectura Actual',
                                           border: OutlineInputBorder(),
@@ -304,29 +312,34 @@ class _ModifyDispenserReaderScreenState
                                       ),
                                       const SizedBox(height: 8),
                                       Obx(() => Text(
-                                            'Total: ${modifyController.formatNumberWithCommas(modifyController.totalValues[cardIndex].value)}',
+                                            'Total: ${modifyController.totalValues[cardIndex].value}',
                                             style: modifyController
                                                 .getTotalTextStyle(cardIndex),
                                           )),
                                       const SizedBox(height: 8),
-                                      Obx(() => ElevatedButton.icon(
-                                            onPressed: modifyController
-                                                    .isConfirmButtonEnabled
-                                                    .value
-                                                ? () => modifyController
-                                                    .validateAndConfirm(
-                                                        cardIndex)
-                                                : null,
-                                            icon: Icon(Icons.check,
-                                                color: Colors.white),
-                                            label: Text('Confirmar',
-                                                style: TextStyle(
-                                                    color: Colors.white)),
-                                            style: ElevatedButton.styleFrom(
-                                              foregroundColor: Colors.white,
-                                              backgroundColor: Colors.purple,
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: ElevatedButton.icon(
+                                              onPressed: () {
+                                                _validateFields(
+                                                    context,
+                                                    modifyController,
+                                                    cardIndex);
+                                              },
+                                              icon: Icon(Icons.check,
+                                                  color: Colors.white),
+                                              label: Text('Confirmar',
+                                                  style: TextStyle(
+                                                      color: Colors.white)),
+                                              style: ElevatedButton.styleFrom(
+                                                foregroundColor: Colors.white,
+                                                backgroundColor: Colors.purple,
+                                              ),
                                             ),
-                                          )),
+                                          ),
+                                        ],
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -340,11 +353,46 @@ class _ModifyDispenserReaderScreenState
                     ),
                   ],
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         );
       },
+    );
+  }
+
+  void _validateFields(BuildContext context,
+      ModifyDispenserController modifyController, int cardIndex) {
+    String actualReading = modifyController.actualControllers[cardIndex].text;
+    double totalValue = double.tryParse(modifyController
+            .totalValues[cardIndex].value
+            .replaceAll(',', '')) ??
+        0;
+
+    if (totalValue < 0) {
+      _showErrorDialog(context, 'La numeración no puede estar negativa');
+    } else if (actualReading.isEmpty) {
+      _showErrorDialog(context, 'La Lectura Actual no puede estar vacía');
+    } else {
+      Navigator.pop(context); // Cerrar el BottomSheet si las validaciones pasan
+    }
+  }
+
+  void _showErrorDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
     );
   }
 }

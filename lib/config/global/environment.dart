@@ -9,7 +9,7 @@ class Environment {
 
   static String get apiUrl {
     if (Platform.isAndroid) {
-      return 'http://192.168.0.103:3000/api'; // Asegúrate de que esta IP es correcta
+      return 'http:/192.168.1.148 :3000/api'; // Asegúrate de que esta IP es correcta
     } else if (Platform.isIOS) {
       return 'http://localhost:3000/api';
     }
@@ -18,7 +18,7 @@ class Environment {
 
   static String get socketUrl {
     if (Platform.isAndroid) {
-      return 'http://192.168.0.103:3000'; // Para emulador de Android
+      return 'http:/192.168.1.148 :3000'; // Para emulador de Android
     } else if (Platform.isIOS) {
       return 'http://localhost:3000';
     }

@@ -9,8 +9,6 @@ class ModifyDispenserController extends GetxController {
       List.generate(3, (_) => TextEditingController());
   RxInt currentCardIndex = 0.obs;
   final List<RxString> totalValues = List.generate(3, (_) => RxString(''));
-  RxBool isConfirmButtonEnabled = true.obs;
-  RxBool isOkButtonEnabled = false.obs;
 
   @override
   void onInit() {
@@ -150,47 +148,5 @@ class ModifyDispenserController extends GetxController {
       controller.dispose();
     }
     super.onClose();
-  }
-
-  void validateAndConfirm(int cardIndex) {
-    String actualValue = actualControllers[cardIndex].text.replaceAll(',', '');
-    double? total = double.tryParse(totalValues[cardIndex].value);
-
-    if (actualValue.isEmpty) {
-      Get.dialog(
-        AlertDialog(
-          title: Text('Error'),
-          content: Text('La lectura actual no puede estar vacía.'),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () => Get.back(),
-            ),
-          ],
-        ),
-      );
-    } else if (total != null && total < 0) {
-      Get.dialog(
-        AlertDialog(
-          title: Text('Error'),
-          content: Text('La lectura no puede ser negativa.'),
-          actions: [
-            TextButton(
-              child: Text('OK'),
-              onPressed: () => Get.back(),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // Validación exitosa
-      isConfirmButtonEnabled.value = false;
-      isOkButtonEnabled.value = true;
-    }
-  }
-
-  void resetBottomSheetState() {
-    isConfirmButtonEnabled.value = true;
-    isOkButtonEnabled.value = false;
   }
 }

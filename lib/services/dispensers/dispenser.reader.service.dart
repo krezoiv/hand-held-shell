@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class DispenserReaderService {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
+  static const String baseUrl = 'http://192.168.1.148:3000/api';
 
   static Future<List<dynamic>> fetchDispenserReaders(String token) async {
     try {
