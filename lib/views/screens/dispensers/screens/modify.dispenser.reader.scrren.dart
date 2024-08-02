@@ -98,8 +98,24 @@ class _ModifyDispenserReaderScreenState
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  // Lógica para actualizar
+                onPressed: () async {
+                  final dispenserController = Get.find<DispenserController>();
+                  final Map<String, dynamic> args = Get.arguments ?? {};
+                  final String dispenserReaderId =
+                      args['dispenserReaderId'] ?? 'No ID';
+
+                  // Find the index of the current dispenser reader in the list
+                  final int pageIndex = dispenserController.dispenserReaders
+                      .indexWhere((reader) =>
+                          reader['dispenserReaderId'] == dispenserReaderId);
+
+                  if (pageIndex != -1) {
+                    await dispenserController.updateDispenserReader(pageIndex);
+                    Get.snackbar('Éxito', 'Cambios guardados correctamente');
+                  } else {
+                    Get.snackbar(
+                        'Error', 'No se pudo encontrar el DispenserReader');
+                  }
                 },
                 icon: Icon(Icons.save_as_outlined, color: Colors.white),
                 label: Text('Guardar Cambios',
