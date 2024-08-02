@@ -1,6 +1,8 @@
 // modify_dispenser_controller.dart
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
+import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
 
 class ModifyDispenserController extends GetxController {
   final List<TextEditingController> previousControllers =
@@ -9,6 +11,7 @@ class ModifyDispenserController extends GetxController {
       List.generate(3, (_) => TextEditingController());
   RxInt currentCardIndex = 0.obs;
   final List<RxString> totalValues = List.generate(3, (_) => RxString(''));
+  final RxBool isLoading = false.obs;
 
   @override
   void onInit() {
@@ -43,10 +46,9 @@ class ModifyDispenserController extends GetxController {
 
   void calculateTotal(int index) {
     double previous =
-        double.tryParse(previousControllers[index].text.replaceAll(',', '')) ??
-            0;
+        double.tryParse(sanitizeNumber(previousControllers[index].text)) ?? 0;
     double actual =
-        double.tryParse(actualControllers[index].text.replaceAll(',', '')) ?? 0;
+        double.tryParse(sanitizeNumber(actualControllers[index].text)) ?? 0;
     double total = actual - previous;
     totalValues[index].value = total.toStringAsFixed(2);
     update();
@@ -118,6 +120,51 @@ class ModifyDispenserController extends GetxController {
     }
 
     return formattedInteger + decimalPart;
+  }
+
+  String sanitizeNumber(String value) {
+    // Elimina todas las comas y espacios
+    return value.replaceAll(',', '').replaceAll(' ', '');
+  }
+
+  Future<void> updateDispenserReader(String dispenserReaderId) async {
+    try {
+      isLoading.value = true;
+
+      Map<String, dynamic> updateData = {
+        'dispenserReaderId': dispenserReaderId,
+        'newPreviousNoGallons':
+            num.parse(sanitizeNumber(previousControllers[0].text)),
+        'newActualNoGallons':
+            num.parse(sanitizeNumber(actualControllers[0].text)),
+        'newPreviousNoMechanic':
+            num.parse(sanitizeNumber(previousControllers[1].text)),
+        'newActualNoMechanic':
+            num.parse(sanitizeNumber(actualControllers[1].text)),
+        'newPreviousNoMoney':
+            num.parse(sanitizeNumber(previousControllers[2].text)),
+        'newActualNoMoney':
+            num.parse(sanitizeNumber(actualControllers[2].text)),
+      };
+
+      UpdateReaderDispenserResponse response =
+          await DispenserReaderService.updateDispenserReader(
+        dispenserReaderId,
+        updateData,
+      );
+
+      if (response.ok) {
+        Get.snackbar('Éxito', 'Dispenser Reader actualizado correctamente');
+        // You might want to update the local data with the response
+        // or navigate back to the previous screen
+      } else {
+        Get.snackbar('Error', 'No se pudo actualizar el Dispenser Reader');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Ocurrió un error al actualizar: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   TextStyle getTotalTextStyle(int cardIndex) {

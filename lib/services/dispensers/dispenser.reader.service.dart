@@ -1,3 +1,4 @@
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -198,55 +199,6 @@ class DispenserReaderService {
     }
   }
 
-  static Future<Map<String, dynamic>> updateDispenserReader(
-    String dispenserReaderId,
-    String newPreviousNoGallons,
-    String newActualNoGallons,
-    String newPreviousNoMechanic,
-    String newActualNoMechanic,
-    String newPreviousNoMoney,
-    String newActualNoMoney,
-  ) async {
-    try {
-      final String? token = await AuthService.getToken();
-      if (token == null) throw Exception('Token is null');
-
-      final response = await http.put(
-        Uri.parse('$baseUrl/dispenser-Reader/updateDispenserReader'),
-        headers: {
-          'Content-Type': 'application/json',
-          'x-token': token,
-        },
-        body: json.encode({
-          'dispenserReaderId': dispenserReaderId,
-          'newPreviousNoGallons': newPreviousNoGallons,
-          'newActualNoGallons': newActualNoGallons,
-          'newPreviousNoMechanic': newPreviousNoMechanic,
-          'newActualNoMechanic': newActualNoMechanic,
-          'newPreviousNoMoney': newPreviousNoMoney,
-          'newActualNoMoney': newActualNoMoney,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        return {
-          'success': responseData['ok'] ?? false,
-          'updatedDispenserReader': responseData['updatedDispenserReader'],
-          'updatedGeneralDispenserReader':
-              responseData['updatedGeneralDispenserReader'],
-        };
-      } else {
-        print('Server responded with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
-        return {'success': false};
-      }
-    } catch (e) {
-      print('Error in updateDispenserReader: $e');
-      return {'success': false};
-    }
-  }
-
   static Future<Map<String, dynamic>> getDispenserReaderById(
       String dispenserReaderId) async {
     try {
@@ -271,6 +223,36 @@ class DispenserReaderService {
       }
     } catch (e) {
       throw Exception('Failed to load dispenser reader: $e');
+    }
+  }
+
+  static Future<UpdateReaderDispenserResponse> updateDispenserReader(
+    String dispenserReaderId,
+    Map<String, dynamic> updateData,
+  ) async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) throw Exception('Token is null');
+
+      final response = await http.put(
+        Uri.parse('$baseUrl/dispenser-reader/updateDispenserReader'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+        body: json.encode({
+          'dispenserReaderId': dispenserReaderId,
+          ...updateData,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return updateReaderDispenserResponseFromJson(response.body);
+      } else {
+        throw Exception('Failed to update dispenser reader: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error updating dispenser reader: $e');
     }
   }
 }

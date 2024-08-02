@@ -18,16 +18,20 @@ class _ModifyDispenserReaderScreenState
   late ModifyDispenserController modifyController;
   late DispenserController controller;
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  final ModifyDispenserController controllers =
+      Get.put(ModifyDispenserController());
+  String? dispenserReaderId;
 
   @override
   void initState() {
     super.initState();
     modifyController = Get.put(ModifyDispenserController());
+
     controller = Get.find<DispenserController>();
     final Map<String, dynamic> args = Get.arguments ?? {};
-    final String dispenserReaderId = args['dispenserReaderId'] ?? 'No ID';
+    dispenserReaderId = args['dispenserReaderId'] as String?;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.fetchDispenserReaderDetail(dispenserReaderId);
+      controller.fetchDispenserReaderDetail(dispenserReaderId!);
     });
   }
 
@@ -98,17 +102,15 @@ class _ModifyDispenserReaderScreenState
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Lógica para actualizar
-                  },
-                  icon: Icon(Icons.save_as_outlined, color: Colors.white),
-                  label: Text('Guardar Cambios',
-                      style: TextStyle(color: Colors.white)),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.tealAccent[700],
-                  ),
+                ElevatedButton(
+                  onPressed: (controller.isLoading.value ||
+                          dispenserReaderId == null)
+                      ? null
+                      : () =>
+                          controllers.updateDispenserReader(dispenserReaderId!),
+                  child: controller.isLoading.value
+                      ? CircularProgressIndicator()
+                      : Text('Guardar Cambios'),
                 ),
                 ElevatedButton.icon(
                   onPressed: () {

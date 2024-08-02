@@ -1,13 +1,13 @@
 class DispenserReader {
-  int previousNoGallons;
-  int actualNoGallons;
-  int totalNoGallons;
-  double previousNoMechanic;
-  double actualNoMechanic;
-  double totalNoMechanic;
-  double previousNoMoney;
-  double actualNoMoney;
-  double totalNoMoney;
+  num previousNoGallons;
+  num actualNoGallons;
+  num totalNoGallons;
+  num previousNoMechanic;
+  num actualNoMechanic;
+  num totalNoMechanic;
+  num previousNoMoney;
+  num actualNoMoney;
+  num totalNoMoney;
   AssignmentHoseId assignmentHoseId;
   String generalDispenserReaderId;
   String dispenserReaderId;
@@ -32,14 +32,13 @@ class DispenserReader {
         previousNoGallons: json["previousNoGallons"] ?? 0,
         actualNoGallons: json["actualNoGallons"] ?? 0,
         totalNoGallons: json["totalNoGallons"] ?? 0,
-        previousNoMechanic: (json["previousNoMechanic"] ?? 0).toDouble(),
-        actualNoMechanic: (json["actualNoMechanic"] ?? 0).toDouble(),
-        totalNoMechanic: (json["totalNoMechanic"] ?? 0).toDouble(),
-        previousNoMoney: (json["previousNoMoney"] ?? 0).toDouble(),
-        actualNoMoney: (json["actualNoMoney"] ?? 0).toDouble(),
-        totalNoMoney: (json["totalNoMoney"] ?? 0).toDouble(),
-        assignmentHoseId:
-            AssignmentHoseId.fromJson(json["assignmentHoseId"] ?? {}),
+        previousNoMechanic: json["previousNoMechanic"] ?? 0,
+        actualNoMechanic: json["actualNoMechanic"] ?? 0,
+        totalNoMechanic: json["totalNoMechanic"] ?? 0,
+        previousNoMoney: json["previousNoMoney"] ?? 0,
+        actualNoMoney: json["actualNoMoney"] ?? 0,
+        totalNoMoney: json["totalNoMoney"] ?? 0,
+        assignmentHoseId: json["assignmentHoseId"] ?? '',
         generalDispenserReaderId: json["generalDispenserReaderId"] ?? '',
         dispenserReaderId: json["dispenserReaderId"] ?? '',
       );
@@ -211,15 +210,15 @@ class SideId {
 }
 
 class UpdatedDispenserReader {
-  int previousNoGallons;
-  int actualNoGallons;
-  int totalNoGallons;
-  double previousNoMechanic;
-  int actualNoMechanic;
-  double totalNoMechanic;
-  double previousNoMoney;
-  int actualNoMoney;
-  double totalNoMoney;
+  num previousNoGallons;
+  num actualNoGallons;
+  num totalNoGallons;
+  num previousNoMechanic;
+  num actualNoMechanic;
+  num totalNoMechanic;
+  num previousNoMoney;
+  num actualNoMoney;
+  num totalNoMoney;
   String assignmentHoseId;
   String generalDispenserReaderId;
 
