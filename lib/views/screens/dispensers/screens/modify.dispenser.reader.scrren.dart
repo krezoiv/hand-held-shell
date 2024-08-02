@@ -161,9 +161,8 @@ class _ModifyDispenserReaderScreenState
               ),
               SizedBox(height: 8),
               TextField(
-                controller: TextEditingController(
-                    text: modifyController.formatNumberWithCommas(
-                        modifyController.actualControllers[cardIndex].text)),
+                controller: modifyController
+                    .actualControllers[cardIndex], // Usar el controlador aquí
                 decoration: InputDecoration(
                   labelText: 'Lectura Actual',
                   border: OutlineInputBorder(),

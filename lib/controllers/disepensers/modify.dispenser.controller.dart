@@ -1,6 +1,7 @@
 // modify_dispenser_controller.dart
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
 
@@ -127,7 +128,7 @@ class ModifyDispenserController extends GetxController {
     return value.replaceAll(',', '').replaceAll(' ', '');
   }
 
-  Future<void> updateDispenserReader(String dispenserReaderId) async {
+  void updateDispenserReader(String dispenserReaderId) async {
     try {
       isLoading.value = true;
 
@@ -154,9 +155,20 @@ class ModifyDispenserController extends GetxController {
       );
 
       if (response.ok) {
+        // Actualizar los TextFields en RegisterDispenserPage
+        final registerDispenserController = Get.find<DispenserController>();
+
+        registerDispenserController.updateTextField(
+            0, 0, formatNumber(actualControllers[0].text)); // Galones
+        registerDispenserController.updateTextField(
+            0, 1, formatNumber(actualControllers[1].text)); // Mecanica
+        registerDispenserController.updateTextField(
+            0, 2, formatNumber(actualControllers[2].text)); // Dinero
+
         Get.snackbar('Éxito', 'Dispenser Reader actualizado correctamente');
-        // You might want to update the local data with the response
-        // or navigate back to the previous screen
+
+        // Navegar a la ruta /new-register-dispenser
+        Get.toNamed('/new-register-dispenser');
       } else {
         Get.snackbar('Error', 'No se pudo actualizar el Dispenser Reader');
       }
@@ -165,6 +177,25 @@ class ModifyDispenserController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  String formatNumber(String number) {
+    if (number.isEmpty) return '0';
+
+    List<String> parts = number.split('.');
+    String integerPart = parts[0];
+    String decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
+
+    String formattedInteger = '';
+    for (int i = integerPart.length - 1; i >= 0; i--) {
+      if ((integerPart.length - 1 - i) % 3 == 0 &&
+          i != integerPart.length - 1) {
+        formattedInteger = ',$formattedInteger';
+      }
+      formattedInteger = integerPart[i] + formattedInteger;
+    }
+
+    return formattedInteger + decimalPart;
   }
 
   TextStyle getTotalTextStyle(int cardIndex) {

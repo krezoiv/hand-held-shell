@@ -249,10 +249,12 @@ class DispenserController extends GetxController {
   }
 
   void updateTextField(int pageIndex, int cardIndex, String value) {
-    textControllers[pageIndex][cardIndex].text = value;
+    String formattedValue =
+        formatNumber(value); // Formatear el número con separadores de millares
+    textControllers[pageIndex][cardIndex].text = formattedValue;
     textControllers[pageIndex][cardIndex].selection =
         TextSelection.fromPosition(
-      TextPosition(offset: value.length),
+      TextPosition(offset: formattedValue.length),
     );
     calculateDifference(pageIndex, cardIndex);
     saveState();
