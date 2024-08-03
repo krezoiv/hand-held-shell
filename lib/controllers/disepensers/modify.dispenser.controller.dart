@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
+import 'package:hand_held_shell/shared/helpers/show.error.dialog.dart';
 
 class ModifyDispenserController extends GetxController {
   final List<TextEditingController> previousControllers =
@@ -226,6 +227,23 @@ class ModifyDispenserController extends GetxController {
   String formatTotalValue(String value) {
     Decimal decimal = Decimal.parse(value);
     return decimal.toString();
+  }
+
+  void validateFields(BuildContext context,
+      ModifyDispenserController modifyController, int cardIndex) {
+    String actualReading = modifyController.actualControllers[cardIndex].text;
+    double totalValue = double.tryParse(modifyController
+            .totalValues[cardIndex].value
+            .replaceAll(',', '')) ??
+        0;
+
+    if (totalValue < 0) {
+      showErrorDialog(context, 'La numeración no puede estar negativa');
+    } else if (actualReading.isEmpty) {
+      showErrorDialog(context, 'La Lectura Actual no puede estar vacía');
+    } else {
+      Navigator.pop(context);
+    }
   }
 
   @override

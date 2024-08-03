@@ -8,8 +8,9 @@ import 'package:hand_held_shell/controllers/register.button.controller.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
 import 'package:hand_held_shell/shared/helpers/text.helpers.dart';
-import 'package:hand_held_shell/views/screens/dispensers/widgets/build.calcutator.buttons.dart';
-import 'package:hand_held_shell/views/screens/dispensers/widgets/navigation.buttons.dart';
+import 'package:hand_held_shell/views/screens/dispensers/widgets/register.dispenser/build.calcutator.buttons.dart';
+import 'package:hand_held_shell/views/screens/dispensers/widgets/register.dispenser/navigation.buttons.dart';
+import 'package:hand_held_shell/views/screens/dispensers/widgets/side.menu.dispenser.dart';
 
 class NewRegisterDispenserScreen extends StatefulWidget {
   const NewRegisterDispenserScreen({super.key});
@@ -24,6 +25,8 @@ class _NewRegisterDispenserScreenState
   late DispenserController dispenserController;
   late PageController _pageController;
   final RxInt currentPageIndex = 0.obs;
+  final GlobalKey<ScaffoldState> scaffoldKey =
+      GlobalKey<ScaffoldState>(); // Definir scaffoldKey
 
   @override
   void initState() {
@@ -55,9 +58,16 @@ class _NewRegisterDispenserScreenState
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      key: scaffoldKey, // Utilizar scaffoldKey
+      drawer: SideMenuDispenser(scaffoldKey: scaffoldKey),
       appBar: AppBar(
-        title: const Text('Digitar Bombas'),
+        title: Text(
+          'Digitar de Bomba',
+          style: TextStyle(
+              fontSize: screenWidth * 0.05), // Ajuste de tamaño de fuente
+        ),
         actions: [
           Obx(() => CupertinoButton(
                 onPressed: dispenserController.hasSharedPreferencesData.value &&
@@ -340,14 +350,6 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                 Text('${widget.pageIndex + 1}/${widget.totalPages}',
                     style: const TextStyle(
                         fontSize: 12, fontStyle: FontStyle.italic)),
-                // Obx(() {
-                //   final String? dispenserReaderId = dispenserController
-                //       .dispenserReaders[widget.pageIndex]['dispenserReaderId'];
-                //   return dispenserReaderId != null
-                //       ? Text(
-                //           '')
-                //       : const SizedBox.shrink();
-                // }),
               ],
             ),
           ),
@@ -435,7 +437,6 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
               ),
             ),
           ),
-          // bottomNavigationBar: const CustomBottomNavigation(),
         ));
   }
 
@@ -469,170 +470,193 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
       return formattedInteger + decimalPart;
     }
 
+    final devicePadding = MediaQuery.of(context).size.width * 0.05;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: devicePadding),
       child: Card(
-        elevation: 1,
-        color: themeController.isDarkMode ? null : Colors.white70,
-        child: Padding(
-          padding: const EdgeInsets.all(3.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          title,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: titleColor ??
-                                (themeController.isDarkMode
-                                    ? Colors.white
-                                    : Colors.black87),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          reverse: true,
-                          child: Text(
-                            difference,
+        elevation: 12, // Incrementa aún más la sombra
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: Colors.black, width: 1), // Borde negro
+        ),
+        shadowColor: Colors.blue, // Sombra más oscura
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {},
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(devicePadding, 5, devicePadding, 10),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 15,
                               fontWeight: FontWeight.bold,
-                              color: getDifferenceColor(),
+                              color: titleColor ??
+                                  (themeController.isDarkMode
+                                      ? Colors.white
+                                      : Colors.black87),
                             ),
-                            textAlign: TextAlign.right,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller:
-                              TextEditingController(text: formatNumber(value)),
-                          readOnly: true,
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 8),
-                            fillColor: themeController.isDarkMode
-                                ? Colors.grey[800]
-                                : Colors.white,
-                            filled: true,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            reverse: true,
+                            child: Text(
+                              difference,
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: getDifferenceColor(),
+                              ),
+                              textAlign: TextAlign.right,
+                            ),
                           ),
-                          style: TextStyle(
-                            fontSize: 25.0,
-                            fontWeight: FontWeight.w700,
-                            color: themeController.isDarkMode
-                                ? Colors.white
-                                : Colors.black87,
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 5),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: TextEditingController(
+                                text: formatNumber(value)),
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(
+                                    color: Colors.black,
+                                    width: 2), // Borde negro
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 8, horizontal: 8),
+                              fillColor: themeController.isDarkMode
+                                  ? Colors.grey[800]
+                                  : Colors.white,
+                              filled: true,
+                            ),
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: themeController.isDarkMode
+                                  ? Colors.white
+                                  : Colors.black87,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 5),
-                        Obx(() => TextField(
-                              controller: dispenserController
-                                  .textControllers[widget.pageIndex][cardIndex],
-                              focusNode: dispenserController
-                                  .focusNodes[widget.pageIndex][cardIndex],
-                              readOnly: true,
-                              onChanged: (value) {
-                                dispenserController.updateTextField(
-                                    widget.pageIndex, cardIndex, value);
-                              },
-                              decoration: InputDecoration(
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 10),
-                                hintText: 'Ingrese numeración de la bomba',
-                                fillColor: themeController.isDarkMode
-                                    ? Colors.grey[800]
-                                    : Colors.white,
-                                filled: true,
-                                hintStyle: TextStyle(
-                                  fontSize: 12,
+                          const SizedBox(height: 5),
+                          Obx(() => TextField(
+                                controller: dispenserController
+                                        .textControllers[widget.pageIndex]
+                                    [cardIndex],
+                                focusNode: dispenserController
+                                    .focusNodes[widget.pageIndex][cardIndex],
+                                readOnly: true,
+                                onChanged: (value) {
+                                  dispenserController.updateTextField(
+                                      widget.pageIndex, cardIndex, value);
+                                },
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    borderSide: BorderSide(
+                                        color: Colors.black,
+                                        width: 2), // Borde negro
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 10, horizontal: 10),
+                                  hintText: 'Ingrese numeración de la bomba',
+                                  fillColor: themeController.isDarkMode
+                                      ? Colors.grey[800]
+                                      : Colors.white,
+                                  filled: true,
+                                  hintStyle: TextStyle(
+                                    fontSize: 12,
+                                    color: themeController.isDarkMode
+                                        ? Colors.grey[400]
+                                        : Colors.grey[600],
+                                  ),
+                                ),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 20,
                                   color: themeController.isDarkMode
-                                      ? Colors.grey[400]
-                                      : Colors.grey[600],
+                                      ? Colors.white
+                                      : Colors.black87,
+                                ),
+                                textAlign: TextAlign.center,
+                                onTap: () {
+                                  // Do nothing to prevent keyboard from showing
+                                },
+                              )),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 1,
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 100,
+                        child: Obx(() => ElevatedButton(
+                              onPressed: dispenserController
+                                      .buttonsEnabled[widget.pageIndex]
+                                          [cardIndex]
+                                      .value
+                                  ? () => dispenserController
+                                      .validateAndDisableFields(
+                                          widget.pageIndex, cardIndex)
+                                  : null,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.purple[800],
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 16),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 25.0,
-                                color: themeController.isDarkMode
-                                    ? Colors.white
-                                    : Colors.black87,
+                              child: const FittedBox(
+                                fit: BoxFit.scaleDown,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(CupertinoIcons.hand_thumbsup,
+                                        color: Colors.white),
+                                  ],
+                                ),
                               ),
-                              textAlign: TextAlign.center,
-                              onTap: () {
-                                // Do nothing to prevent keyboard from showing
-                              },
                             )),
-                      ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    flex: 1,
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 120,
-                      child: Obx(() => ElevatedButton(
-                            onPressed: dispenserController
-                                    .buttonsEnabled[widget.pageIndex][cardIndex]
-                                    .value
-                                ? () => dispenserController
-                                    .validateAndDisableFields(
-                                        widget.pageIndex, cardIndex)
-                                : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple[800],
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: const FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(CupertinoIcons.hand_thumbsup,
-                                      color: Colors.white),
-                                ],
-                              ),
-                            ),
-                          )),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

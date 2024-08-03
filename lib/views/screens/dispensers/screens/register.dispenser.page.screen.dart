@@ -6,8 +6,9 @@ import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.da
 import 'package:hand_held_shell/shared/helpers/text.helpers.dart';
 import 'package:hand_held_shell/controllers/register.button.controller.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
-import 'package:hand_held_shell/views/screens/dispensers/widgets/build.calcutator.buttons.dart';
-import 'package:hand_held_shell/views/screens/dispensers/widgets/navigation.buttons.dart';
+import 'package:hand_held_shell/views/screens/dispensers/widgets/register.dispenser/build.calcutator.buttons.dart';
+import 'package:hand_held_shell/views/screens/dispensers/widgets/register.dispenser/navigation.buttons.dart';
+import 'package:hand_held_shell/views/screens/dispensers/widgets/side.menu.dispenser.dart';
 
 class RegisterDispenserPage extends StatefulWidget {
   final int pageIndex;
@@ -140,6 +141,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
               ],
             ),
           ),
+          drawer: SideMenuDispenser(scaffoldKey: scaffoldKey),
           body: SafeArea(
             child: SingleChildScrollView(
               child: Column(

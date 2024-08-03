@@ -1,3 +1,5 @@
+export 'package:hand_held_shell/views/screens/dispensers/widgets/modify.dispenser/modify.dispenser.bottom.sheet.dart';
+
 export 'package:hand_held_shell/views/screens/dispensers/screens/modify.dispenser.reader.scrren.dart';
 
 export 'package:hand_held_shell/views/screens/lubricants/screens/lubricants.home.screen.dart';

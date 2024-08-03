@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/controllers/register.button.controller.dart';
 import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
-import 'package:hand_held_shell/views/screens/dispensers/widgets/calculator.button.dart';
+import 'package:hand_held_shell/views/screens/dispensers/widgets/register.dispenser/calculator.button.dart';
 
 class BuildCalculatorButtons extends GetView<RegisterButtonsController> {
   final int pageIndex;
