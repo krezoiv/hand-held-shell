@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/controllers/register.button.controller.dart';
+import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/calculator.button.dart';
 
 class BuildCalculatorButtons extends GetView<RegisterButtonsController> {
@@ -13,20 +14,31 @@ class BuildCalculatorButtons extends GetView<RegisterButtonsController> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(5.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildCalculatorRow(['7', '8', '9']),
-          SizedBox(height: 5),
-          _buildCalculatorRow(['4', '5', '6']),
-          SizedBox(height: 5),
-          _buildCalculatorRow(['1', '2', '3']),
-          _buildCalculatorRow(['0', '.', 'C'], lastRow: true),
-        ],
-      ),
-    );
+    final dispenserController = Get.find<DispenserController>();
+
+    return Obx(() {
+      if (dispenserController.showCalculatorButtonsPerPage.isEmpty ||
+          pageIndex >=
+              dispenserController.showCalculatorButtonsPerPage.length ||
+          !dispenserController.showCalculatorButtonsPerPage[pageIndex].value) {
+        return SizedBox.shrink();
+      }
+
+      return Padding(
+        padding: const EdgeInsets.all(5.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildCalculatorRow(['7', '8', '9']),
+            SizedBox(height: 5),
+            _buildCalculatorRow(['4', '5', '6']),
+            SizedBox(height: 5),
+            _buildCalculatorRow(['1', '2', '3']),
+            _buildCalculatorRow(['0', '.', 'C'], lastRow: true),
+          ],
+        ),
+      );
+    });
   }
 
   Widget _buildCalculatorRow(List<String> numbers, {bool lastRow = false}) {

@@ -23,6 +23,7 @@ class DispenserController extends GetxController {
   final RxList<RxBool> dataSubmitted = <RxBool>[].obs;
   final FocusNode focusNode = FocusNode();
   final RxBool isAnyButtonDisabled = false.obs;
+  final RxList<RxBool> showCalculatorButtonsPerPage = <RxBool>[].obs;
 
   final Rx<Map<String, dynamic>> dispenserReaderDetail =
       Rx<Map<String, dynamic>>({});
@@ -32,6 +33,9 @@ class DispenserController extends GetxController {
     super.onInit();
     ever(buttonsEnabled, _updateIsAnyButtonDisabled);
     loadState();
+    showCalculatorButtonsPerPage.assignAll(
+      List.generate(dispenserReaders.length, (_) => true.obs),
+    );
   }
 
   void _updateIsAnyButtonDisabled(_) {
@@ -78,6 +82,8 @@ class DispenserController extends GetxController {
         'differences': differences
             .map((list) => list.map((rx) => rx.value).toList())
             .toList(),
+        'showCalculatorButtonsPerPage':
+            showCalculatorButtonsPerPage.map((rx) => rx.value).toList(),
       };
       await prefs.setString('dispenserState', json.encode(state));
       hasSharedPreferencesData.value = true;
@@ -92,6 +98,11 @@ class DispenserController extends GetxController {
       final savedState = prefs.getString('dispenserState');
       if (savedState != null) {
         final state = json.decode(savedState);
+
+        showCalculatorButtonsPerPage.assignAll(
+            (state['showCalculatorButtonsPerPage'] as List)
+                .map((v) => RxBool(v as bool))
+                .toList());
 
         dispenserReaders.assignAll(
             state['dispenserReaders'].map((r) => json.decode(r)).toList());
@@ -187,6 +198,10 @@ class DispenserController extends GetxController {
 
       final readers = await DispenserReaderService.fetchDispenserReaders(token);
       dispenserReaders.assignAll(readers);
+
+      showCalculatorButtonsPerPage.assignAll(
+        List.generate(readers.length, (_) => true.obs),
+      );
 
       textControllers.assignAll(
         List.generate(
@@ -470,6 +485,8 @@ class DispenserController extends GetxController {
           }
 
           sendButtonEnabled.value = false;
+          showCalculatorButtonsPerPage[pageIndex].value = false;
+          update();
 
           if (pageIndex < dispenserReaders.length - 1) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -554,6 +571,7 @@ class DispenserController extends GetxController {
     sendButtonEnabled.value = false;
     dataSubmitted.clear();
     differences.clear();
+    showCalculatorButtonsPerPage.clear();
   }
 
   @override

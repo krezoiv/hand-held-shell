@@ -214,10 +214,26 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                         },
                         dispenserController: dispenserController,
                       )),
-                  if (widget.showCalculatorButtons.value)
-                    BuildCalculatorButtons(
-                      pageIndex: widget.pageIndex,
-                    ),
+                  Obx(() {
+                    if (widget.showCalculatorButtons.value &&
+                        dispenserController
+                            .showCalculatorButtonsPerPage.isNotEmpty &&
+                        widget.pageIndex <
+                            dispenserController
+                                .showCalculatorButtonsPerPage.length &&
+                        dispenserController
+                            .showCalculatorButtonsPerPage[widget.pageIndex]
+                            .value) {
+                      return BuildCalculatorButtons(
+                        pageIndex: widget.pageIndex,
+                      );
+                    } else {
+                      return SizedBox.shrink();
+                    }
+                  }),
+                  BuildCalculatorButtons(
+                    pageIndex: widget.pageIndex,
+                  ),
                 ],
               ),
             ),
