@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 void showConfirmationDialog({
   String title = '',
   String message = '',
-  String confirmText = 'OK',
+  String confirmText = 'Aceptar',
   String cancelText = 'Cancelar',
   VoidCallback? onConfirm,
   VoidCallback? onCancel,

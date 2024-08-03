@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
 import 'package:hand_held_shell/controllers/disepensers/modify.dispenser.controller.dart';
+import 'package:hand_held_shell/shared/helpers/show.confirm.alert.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/build.update.calculator.buttons.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/side.menu.dispenser.dart';
 
@@ -100,29 +101,71 @@ class _ModifyDispenserReaderScreenState
                 )),
             const SizedBox(height: 16),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton(
-                  onPressed: (controller.isLoading.value ||
-                          dispenserReaderId == null)
-                      ? null
-                      : () =>
-                          controllers.updateDispenserReader(dispenserReaderId!),
-                  child: controller.isLoading.value
-                      ? CircularProgressIndicator()
-                      : Text('Guardar Cambios'),
+                Column(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.save, color: Colors.white),
+                      onPressed: (controller.isLoading.value ||
+                              dispenserReaderId == null)
+                          ? null
+                          : () {
+                              showConfirmationDialog(
+                                title: 'Confirmación',
+                                message: '¿Deseas guardar los cambios?',
+                                onConfirm: () async {
+                                  controllers.updateDispenserReader(
+                                      dispenserReaderId!);
+                                  for (int i = 0; i < 3; i++) {
+                                    controller.updateTextField(
+                                        0,
+                                        i,
+                                        modifyController
+                                            .actualControllers[i].text);
+                                  }
+                                  Get.toNamed('/new-register-dispenser');
+                                },
+                              );
+                            },
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.blue),
+                      ),
+                    ),
+                    Text(
+                      'Guardar',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
                 ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Get.toNamed('/new-register-dispenser');
-                  },
-                  icon: Icon(Icons.cancel, color: Colors.white),
-                  label:
-                      Text('Cancelar', style: TextStyle(color: Colors.white)),
-                  style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.red,
-                  ),
+                Column(
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.close, color: Colors.white),
+                      onPressed: () {
+                        showConfirmationDialog(
+                          title: 'Salir',
+                          message: '¿Saldrás sin guardar cambios?',
+                          onConfirm: () async {
+                            // controllers
+                            //     .updateDispenserReader(dispenserReaderId!);
+                            // for (int i = 0; i < 3; i++) {
+                            //   controller.updateTextField(0, i,
+                            //       modifyController.actualControllers[i].text);
+                            // }
+                            Get.toNamed('/new-register-dispenser');
+                          },
+                        );
+                      },
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.all(Colors.red),
+                      ),
+                    ),
+                    Text(
+                      'Cancelar',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -161,8 +204,9 @@ class _ModifyDispenserReaderScreenState
               ),
               SizedBox(height: 8),
               TextField(
-                controller: modifyController
-                    .actualControllers[cardIndex], // Usar el controlador aquí
+                controller: TextEditingController(
+                    text: modifyController.formatNumberWithCommas(
+                        modifyController.actualControllers[cardIndex].text)),
                 decoration: InputDecoration(
                   labelText: 'Lectura Actual',
                   border: OutlineInputBorder(),
@@ -193,7 +237,6 @@ class _ModifyDispenserReaderScreenState
 
   void _showBottomSheet(
       BuildContext context, String title, int cardIndex, String total) {
-    // Almacenar los valores originales antes de mostrar el BottomSheet
     final originalPreviousText =
         modifyController.previousControllers[cardIndex].text;
     final originalActualText =
@@ -210,7 +253,7 @@ class _ModifyDispenserReaderScreenState
         return GetBuilder<ModifyDispenserController>(
           builder: (modifyController) {
             return GestureDetector(
-              onVerticalDragUpdate: (_) {}, // Disable vertical drag to close
+              onVerticalDragUpdate: (_) {},
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.9,
                 decoration: BoxDecoration(
@@ -230,32 +273,10 @@ class _ModifyDispenserReaderScreenState
                     ),
                     Padding(
                       padding: EdgeInsets.all(16),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Actualización de: $title',
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          ElevatedButton(
-                            onPressed: () {
-                              // Restaurar los valores originales y cerrar el BottomSheet
-                              modifyController.previousControllers[cardIndex]
-                                  .text = originalPreviousText;
-                              modifyController.actualControllers[cardIndex]
-                                  .text = originalActualText;
-                              modifyController.totalValues[cardIndex].value =
-                                  originalTotal;
-                              Navigator.pop(context);
-                            },
-                            child: Text('Cancelar'),
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: Colors.white,
-                              backgroundColor: Colors.red,
-                            ),
-                          ),
-                        ],
+                      child: Text(
+                        'Actualización de: $title',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
                       ),
                     ),
                     Expanded(
@@ -317,27 +338,66 @@ class _ModifyDispenserReaderScreenState
                                             style: modifyController
                                                 .getTotalTextStyle(cardIndex),
                                           )),
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: 16),
                                       Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
                                         children: [
-                                          Expanded(
-                                            child: ElevatedButton.icon(
-                                              onPressed: () {
-                                                _validateFields(
-                                                    context,
-                                                    modifyController,
-                                                    cardIndex);
-                                              },
-                                              icon: Icon(Icons.check,
-                                                  color: Colors.white),
-                                              label: Text('Confirmar',
-                                                  style: TextStyle(
-                                                      color: Colors.white)),
-                                              style: ElevatedButton.styleFrom(
-                                                foregroundColor: Colors.white,
-                                                backgroundColor: Colors.purple,
+                                          Column(
+                                            children: [
+                                              IconButton(
+                                                icon: Icon(Icons.check,
+                                                    color: Colors.white),
+                                                onPressed: () {
+                                                  _validateFields(
+                                                      context,
+                                                      modifyController,
+                                                      cardIndex);
+                                                },
+                                                style: ButtonStyle(
+                                                  backgroundColor:
+                                                      MaterialStateProperty.all(
+                                                          Colors.purple),
+                                                ),
                                               ),
-                                            ),
+                                              Text(
+                                                'Confirmar',
+                                                style: TextStyle(fontSize: 12),
+                                              ),
+                                            ],
+                                          ),
+                                          Column(
+                                            children: [
+                                              IconButton(
+                                                icon: Icon(Icons.close,
+                                                    color: Colors.white),
+                                                onPressed: () {
+                                                  modifyController
+                                                          .previousControllers[
+                                                              cardIndex]
+                                                          .text =
+                                                      originalPreviousText;
+                                                  modifyController
+                                                          .actualControllers[
+                                                              cardIndex]
+                                                          .text =
+                                                      originalActualText;
+                                                  modifyController
+                                                      .totalValues[cardIndex]
+                                                      .value = originalTotal;
+                                                  Navigator.pop(context);
+                                                },
+                                                style: ButtonStyle(
+                                                  backgroundColor:
+                                                      WidgetStateProperty.all(
+                                                          Colors.red),
+                                                ),
+                                              ),
+                                              Text(
+                                                'Cancelar',
+                                                style: TextStyle(fontSize: 12),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
@@ -375,7 +435,7 @@ class _ModifyDispenserReaderScreenState
     } else if (actualReading.isEmpty) {
       _showErrorDialog(context, 'La Lectura Actual no puede estar vacía');
     } else {
-      Navigator.pop(context); // Cerrar el BottomSheet si las validaciones pasan
+      Navigator.pop(context);
     }
   }
 

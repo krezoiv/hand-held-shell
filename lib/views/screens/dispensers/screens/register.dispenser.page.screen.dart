@@ -65,9 +65,12 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   void _setInitialFocus() {
     if (mounted &&
         widget.pageIndex < dispenserController.focusNodes.length &&
-        dispenserController.focusNodes[widget.pageIndex].isNotEmpty) {
+        dispenserController.focusNodes[widget.pageIndex].isNotEmpty &&
+        dispenserController.focusNodes[widget.pageIndex][0].context != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
+        if (mounted &&
+            dispenserController.focusNodes[widget.pageIndex][0].context !=
+                null) {
           FocusScope.of(context).requestFocus(
             dispenserController.focusNodes[widget.pageIndex][0],
           );
@@ -263,33 +266,18 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: titleColor ??
-                            (themeController.isDarkMode
-                                ? Colors.white
-                                : Colors.black87),
-                      ),
-                    ),
-                  ),
-                  Text(
-                    difference,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: getDifferenceColor(),
-                    ),
-                  ),
-                ],
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: titleColor ??
+                      (themeController.isDarkMode
+                          ? Colors.white
+                          : Colors.black87),
+                ),
               ),
-              const SizedBox(height: 1),
+              const SizedBox(height: 4),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -301,6 +289,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                           controller:
                               TextEditingController(text: formatNumber(value)),
                           readOnly: true,
+                          enabled: false, // Siempre deshabilitado
                           decoration: InputDecoration(
                             border: const OutlineInputBorder(),
                             contentPadding: const EdgeInsets.symmetric(
@@ -326,6 +315,9 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                               focusNode: dispenserController
                                   .focusNodes[widget.pageIndex][cardIndex],
                               readOnly: true,
+                              enabled: dispenserController
+                                  .buttonsEnabled[widget.pageIndex][cardIndex]
+                                  .value,
                               onChanged: (value) {
                                 dispenserController.updateTextField(
                                     widget.pageIndex, cardIndex, value);
@@ -396,6 +388,23 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 4),
+              Align(
+                alignment: Alignment.centerRight,
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  reverse: true,
+                  child: Text(
+                    difference,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: getDifferenceColor(),
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
               ),
             ],
           ),

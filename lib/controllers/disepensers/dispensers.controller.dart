@@ -249,15 +249,18 @@ class DispenserController extends GetxController {
   }
 
   void updateTextField(int pageIndex, int cardIndex, String value) {
-    String formattedValue =
-        formatNumber(value); // Formatear el número con separadores de millares
-    textControllers[pageIndex][cardIndex].text = formattedValue;
-    textControllers[pageIndex][cardIndex].selection =
-        TextSelection.fromPosition(
-      TextPosition(offset: formattedValue.length),
-    );
-    calculateDifference(pageIndex, cardIndex);
-    saveState();
+    if (pageIndex < textControllers.length &&
+        cardIndex < textControllers[pageIndex].length) {
+      String formattedValue = formatNumber(
+          value); // Formatear el número con separadores de millares
+      textControllers[pageIndex][cardIndex].text = formattedValue;
+      textControllers[pageIndex][cardIndex].selection =
+          TextSelection.fromPosition(
+        TextPosition(offset: formattedValue.length),
+      );
+      calculateDifference(pageIndex, cardIndex);
+      saveState();
+    }
   }
 
   String _sanitizeTextField(String text) {
@@ -610,9 +613,8 @@ class DispenserController extends GetxController {
       Get.find<ModifyDispenserController>()
           .setValues(detail); // Cambiado de setActualValues a setValues
     } catch (e) {
-      print('Error fetching dispenser reader detail: $e');
-      Get.snackbar(
-          'Error', 'No se pudo cargar los detalles del DispenserReader');
+      // Get.snackbar(
+      //     'Error', 'No se pudo cargar los detalles del DispenserReader');
     } finally {
       isLoading.value = false;
     }

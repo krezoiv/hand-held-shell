@@ -376,7 +376,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       },
                       children: [
                         _buildCard(
-                          'Numeración en Galones',
+                          'No. en Galones',
                           widget.dispenserReader['actualNoGallons'].toString(),
                           0,
                           titleColor: Colors.blue[900],
@@ -384,7 +384,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                               .differences[widget.pageIndex][0].value,
                         ),
                         _buildCard(
-                          'Numeración Mecánica',
+                          'No. Mecánica',
                           widget.dispenserReader['actualNoMechanic'].toString(),
                           1,
                           titleColor: Colors.blue[900],
@@ -392,7 +392,7 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                               .differences[widget.pageIndex][1].value,
                         ),
                         _buildCard(
-                          'Numeración en Dinero',
+                          'No. en Dinero',
                           widget.dispenserReader['actualNoMoney'].toString(),
                           2,
                           titleColor: Colors.blue[900],
@@ -486,31 +486,49 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: titleColor ??
-                            (themeController.isDarkMode
-                                ? Colors.white
-                                : Colors.black87),
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: titleColor ??
+                                (themeController.isDarkMode
+                                    ? Colors.white
+                                    : Colors.black87),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Text(
-                    difference,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: getDifferenceColor(),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          reverse: true,
+                          child: Text(
+                            difference,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: getDifferenceColor(),
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 1),
+              const SizedBox(height: 4),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

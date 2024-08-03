@@ -5,6 +5,7 @@ import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.da
 import 'dart:math' as math;
 
 import 'package:hand_held_shell/controllers/theme.controller.dart';
+import 'package:hand_held_shell/shared/helpers/show.confirm.alert.dart';
 
 class NavigationButtons extends StatefulWidget {
   final PageController mainPageController;
@@ -104,7 +105,21 @@ class _NavigationButtonsState extends State<NavigationButtons>
                     onPressed: widget.enabled &&
                             !widget.dispenserController
                                 .dataSubmitted[widget.pageIndex].value
-                        ? widget.onThumbUpPressed
+                        ? () {
+                            showConfirmationDialog(
+                              title: 'Guadar Numeración',
+                              message:
+                                  '¿Estás seguro de que deseas enviar la información?',
+                              confirmText: 'Guardar',
+                              cancelText: 'Cancelar',
+                              onConfirm: () {
+                                widget.onThumbUpPressed();
+                              },
+                              onCancel: () {
+                                // Puedes agregar alguna acción aquí si es necesario
+                              },
+                            );
+                          }
                         : null,
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
@@ -132,8 +147,7 @@ class _NavigationButtonsState extends State<NavigationButtons>
                               ),
                             ],
                           )
-                        : const Icon(Icons
-                            .cloud_done_outlined), //!boton que sirve para crear un nuevo dispenserReader a la base de datos
+                        : const Icon(Icons.cloud_done_outlined),
                   )),
             ),
           ),

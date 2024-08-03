@@ -244,12 +244,12 @@ class UpdatedDispenserReader {
         previousNoGallons: json["previousNoGallons"] ?? 0,
         actualNoGallons: json["actualNoGallons"] ?? 0,
         totalNoGallons: json["totalNoGallons"] ?? 0,
-        previousNoMechanic: (json["previousNoMechanic"] ?? 0).toDouble(),
+        previousNoMechanic: json["previousNoMechanic"] ?? 0,
         actualNoMechanic: json["actualNoMechanic"] ?? 0,
-        totalNoMechanic: (json["totalNoMechanic"] ?? 0).toDouble(),
-        previousNoMoney: (json["previousNoMoney"] ?? 0).toDouble(),
+        totalNoMechanic: json["totalNoMechanic"] ?? 0,
+        previousNoMoney: json["previousNoMoney"] ?? 0,
         actualNoMoney: json["actualNoMoney"] ?? 0,
-        totalNoMoney: (json["totalNoMoney"] ?? 0).toDouble(),
+        totalNoMoney: json["totalNoMoney"] ?? 0,
         assignmentHoseId: json["assignmentHoseId"] ?? '',
         generalDispenserReaderId: json["generalDispenserReaderId"] ?? '',
         dispenserReaderId: json["dispenserReaderId"] ?? '',
@@ -273,18 +273,18 @@ class UpdatedDispenserReader {
 
 class UpdatedGeneralDispenserReader {
   bool applied;
-  int totalGallonRegular;
-  double totalMechanicRegular;
-  double totalMoneyRegular;
-  int totalGallonSuper;
-  int totalMechanicSuper;
-  int totalMoneySuper;
-  int totalGallonDiesel;
-  int totalMechanicDiesel;
-  int totalMoneyDiesel;
-  int totalGallonVpower;
-  int totalMechanicVpower;
-  int totalMoneyVpower;
+  num totalGallonRegular;
+  num totalMechanicRegular;
+  num totalMoneyRegular;
+  num totalGallonSuper;
+  num totalMechanicSuper;
+  num totalMoneySuper;
+  num totalGallonDiesel;
+  num totalMechanicDiesel;
+  num totalMoneyDiesel;
+  num totalGallonVpower;
+  num totalMechanicVpower;
+  num totalMoneyVpower;
   DateTime readingDate;
 
   String generalDispenserReaderId;
@@ -311,8 +311,8 @@ class UpdatedGeneralDispenserReader {
       UpdatedGeneralDispenserReader(
         applied: json["applied"] ?? false,
         totalGallonRegular: json["totalGallonRegular"] ?? 0,
-        totalMechanicRegular: (json["totalMechanicRegular"] ?? 0).toDouble(),
-        totalMoneyRegular: (json["totalMoneyRegular"] ?? 0).toDouble(),
+        totalMechanicRegular: json["totalMechanicRegular"] ?? 0,
+        totalMoneyRegular: json["totalMoneyRegular"] ?? 0,
         totalGallonSuper: json["totalGallonSuper"] ?? 0,
         totalMechanicSuper: json["totalMechanicSuper"] ?? 0,
         totalMoneySuper: json["totalMoneySuper"] ?? 0,
