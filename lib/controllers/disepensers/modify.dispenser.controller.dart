@@ -1,5 +1,6 @@
 // modify_dispenser_controller.dart
 import 'package:get/get.dart';
+import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
@@ -46,12 +47,12 @@ class ModifyDispenserController extends GetxController {
   }
 
   void calculateTotal(int index) {
-    double previous =
-        double.tryParse(sanitizeNumber(previousControllers[index].text)) ?? 0;
-    double actual =
-        double.tryParse(sanitizeNumber(actualControllers[index].text)) ?? 0;
-    double total = actual - previous;
-    totalValues[index].value = total.toStringAsFixed(2);
+    Decimal previous =
+        Decimal.parse(sanitizeNumber(previousControllers[index].text));
+    Decimal actual =
+        Decimal.parse(sanitizeNumber(actualControllers[index].text));
+    Decimal total = actual - previous;
+    totalValues[index].value = total.toString();
     update();
   }
 
@@ -125,7 +126,9 @@ class ModifyDispenserController extends GetxController {
 
   String sanitizeNumber(String value) {
     // Elimina todas las comas y espacios
-    return value.replaceAll(',', '').replaceAll(' ', '');
+    String sanitized = value.replaceAll(',', '').replaceAll(' ', '');
+    // Si el resultado está vacío, devuelve '0'
+    return sanitized.isEmpty ? '0' : sanitized;
   }
 
   void updateDispenserReader(String dispenserReaderId) async {
@@ -218,6 +221,11 @@ class ModifyDispenserController extends GetxController {
       fontWeight: FontWeight.bold,
       fontSize: 16,
     );
+  }
+
+  String formatTotalValue(String value) {
+    Decimal decimal = Decimal.parse(value);
+    return decimal.toString();
   }
 
   @override

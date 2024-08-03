@@ -334,7 +334,7 @@ class _ModifyDispenserReaderScreenState
                                       ),
                                       const SizedBox(height: 8),
                                       Obx(() => Text(
-                                            'Total: ${modifyController.totalValues[cardIndex].value}',
+                                            'Total: ${modifyController.formatTotalValue(modifyController.totalValues[cardIndex].value)}',
                                             style: modifyController
                                                 .getTotalTextStyle(cardIndex),
                                           )),
@@ -356,7 +356,7 @@ class _ModifyDispenserReaderScreenState
                                                 },
                                                 style: ButtonStyle(
                                                   backgroundColor:
-                                                      MaterialStateProperty.all(
+                                                      WidgetStateProperty.all(
                                                           Colors.purple),
                                                 ),
                                               ),
