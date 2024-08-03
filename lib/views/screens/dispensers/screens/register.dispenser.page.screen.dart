@@ -1,14 +1,14 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:decimal/decimal.dart';
+
 import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
+import 'package:hand_held_shell/shared/helpers/show.missing.data.dart';
 import 'package:hand_held_shell/shared/helpers/text.helpers.dart';
 import 'package:hand_held_shell/controllers/register.button.controller.dart';
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/register.dispenser/build.calcutator.buttons.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/register.dispenser/navigation.buttons.dart';
-import 'package:hand_held_shell/views/screens/dispensers/widgets/side.menu.dispenser.dart';
+import 'package:hand_held_shell/views/screens/dispensers/widgets/register.dispenser/register.card.dart';
 
 class RegisterDispenserPage extends StatefulWidget {
   final int pageIndex;
@@ -18,7 +18,6 @@ class RegisterDispenserPage extends StatefulWidget {
   final RxBool showCalculatorButtons;
   final RxBool buttonsEnabled;
   final String? dispenserReaderId;
-  final VoidCallback? onBuild;
 
   const RegisterDispenserPage({
     super.key,
@@ -29,7 +28,6 @@ class RegisterDispenserPage extends StatefulWidget {
     required this.showCalculatorButtons,
     required this.buttonsEnabled,
     this.dispenserReaderId,
-    this.onBuild,
   });
 
   @override
@@ -49,11 +47,12 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
     calculatorCtrl.setDispenserController(dispenserController);
     verticalPageController = PageController();
 
-    widget.mainPageController.addListener(_onPageChanged);
-
-    Future.microtask(() {
-      _setInitialFocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context)
+          .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
     });
+
+    widget.mainPageController.addListener(_onPageChanged);
   }
 
   @override
@@ -63,37 +62,17 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
     super.dispose();
   }
 
-  void _setInitialFocus() {
-    if (mounted &&
-        widget.pageIndex < dispenserController.focusNodes.length &&
-        dispenserController.focusNodes[widget.pageIndex].isNotEmpty &&
-        dispenserController.focusNodes[widget.pageIndex][0].context != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted &&
-            dispenserController.focusNodes[widget.pageIndex][0].context !=
-                null) {
-          FocusScope.of(context).requestFocus(
-            dispenserController.focusNodes[widget.pageIndex][0],
-          );
-        }
-      });
-    }
-  }
-
   void _onPageChanged() {
     if (widget.mainPageController.page == widget.pageIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _setInitialFocus();
+        FocusScope.of(context)
+            .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
       });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.onBuild != null) {
-      widget.onBuild!();
-    }
-
     final scaffoldKey = GlobalKey<ScaffoldState>();
 
     String fuelName = '';
@@ -116,8 +95,14 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
           sideName = sideIdMap['sideName'] as String;
           dispenserCode = dispenserIdMap['dispenserCode'] as String;
           assignmentHoseId = assignmentHoseIdMap['_id'] as String;
+        } else {
+          // Manejar el caso donde fuelIdMap o dispenserIdMap no sean Map
         }
+      } else {
+        // Manejar el caso donde hoseIdMap, sideIdMap o assignmentIdMap no sean Map
       }
+    } else {
+      // Manejar el caso donde assignmentHoseIdMap no sea Map
     }
 
     return Obx(() => Scaffold(
@@ -141,7 +126,6 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
               ],
             ),
           ),
-          drawer: SideMenuDispenser(scaffoldKey: scaffoldKey),
           body: SafeArea(
             child: SingleChildScrollView(
               child: Column(
@@ -154,35 +138,49 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                       onPageChanged: (index) {
                         calculatorCtrl.setCurrentCardIndex(index);
                         if (index == 0) {
-                          Future.microtask(() {
-                            _setInitialFocus();
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            FocusScope.of(context).requestFocus(
+                                dispenserController.focusNodes[widget.pageIndex]
+                                    [0]);
                           });
                         }
                       },
                       children: [
-                        _buildCard(
-                          'Numeración en Galones',
-                          widget.dispenserReader['actualNoGallons'].toString(),
-                          0,
-                          titleColor: Colors.blue[900],
+                        RegisterCard(
+                          title: 'No. en Galones',
+                          value: widget.dispenserReader['actualNoGallons']
+                              .toString(),
+                          cardIndex: 0,
                           difference: dispenserController
                               .differences[widget.pageIndex][0].value,
-                        ),
-                        _buildCard(
-                          'Numeración Mecánica',
-                          widget.dispenserReader['actualNoMechanic'].toString(),
-                          1,
                           titleColor: Colors.blue[900],
+                          themeController: themeController,
+                          dispenserController: dispenserController,
+                          pageIndex: widget.pageIndex,
+                        ),
+                        RegisterCard(
+                          title: 'No. Mecánica',
+                          value: widget.dispenserReader['actualNoMechanic']
+                              .toString(),
+                          cardIndex: 1,
                           difference: dispenserController
                               .differences[widget.pageIndex][1].value,
-                        ),
-                        _buildCard(
-                          'Numeración en Dinero',
-                          widget.dispenserReader['actualNoMoney'].toString(),
-                          2,
                           titleColor: Colors.blue[900],
+                          themeController: themeController,
+                          dispenserController: dispenserController,
+                          pageIndex: widget.pageIndex,
+                        ),
+                        RegisterCard(
+                          title: 'No. en Dinero',
+                          value: widget.dispenserReader['actualNoMoney']
+                              .toString(),
+                          cardIndex: 2,
                           difference: dispenserController
                               .differences[widget.pageIndex][2].value,
+                          titleColor: Colors.blue[900],
+                          themeController: themeController,
+                          dispenserController: dispenserController,
+                          pageIndex: widget.pageIndex,
                         ),
                       ],
                     ),
@@ -201,8 +199,8 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                               !dispenserController
                                   .dataSubmitted[widget.pageIndex].value &&
                               !dispenserController.isLoading.value) {
-                            dispenserController
-                                .sendDataToDatabase(widget.pageIndex);
+                            dispenserController.sendDataToDatabase(widget
+                                .pageIndex); // !se manade a guardar el nuevo dispenserReader
                           } else if (dispenserController
                               .dataSubmitted[widget.pageIndex].value) {
                             Get.snackbar('Información',
@@ -211,243 +209,20 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                             Get.snackbar('Información',
                                 'Enviando datos, por favor espere...');
                           } else {
-                            _showMissingDataDialog();
+                            ShowMissingDataDialog.show(
+                                context, dispenserController, widget.pageIndex);
                           }
                         },
                         dispenserController: dispenserController,
                       )),
-                  Obx(() {
-                    if (widget.showCalculatorButtons.value &&
-                        dispenserController
-                            .showCalculatorButtonsPerPage.isNotEmpty &&
-                        widget.pageIndex <
-                            dispenserController
-                                .showCalculatorButtonsPerPage.length &&
-                        dispenserController
-                            .showCalculatorButtonsPerPage[widget.pageIndex]
-                            .value) {
-                      return BuildCalculatorButtons(
-                        pageIndex: widget.pageIndex,
-                      );
-                    } else {
-                      return SizedBox.shrink();
-                    }
-                  }),
-                  BuildCalculatorButtons(
-                    pageIndex: widget.pageIndex,
-                  ),
+                  if (widget.showCalculatorButtons.value)
+                    BuildCalculatorButtons(
+                      pageIndex: widget.pageIndex,
+                    ),
                 ],
               ),
             ),
           ),
         ));
-  }
-
-  Widget _buildCard(String title, String value, int cardIndex,
-      {Color? titleColor, required String difference}) {
-    Color getDifferenceColor() {
-      if (difference == 'Error') return Colors.red;
-      final numDifference = Decimal.tryParse(difference.replaceAll(',', ''));
-      if (numDifference == null) return Colors.black;
-      if (numDifference < Decimal.zero) return Colors.red;
-      if (numDifference > Decimal.zero) return Colors.green;
-      return Colors.blue;
-    }
-
-    String formatNumber(String number) {
-      if (number.isEmpty) return '0';
-
-      List<String> parts = number.split('.');
-      String integerPart = parts[0];
-      String decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
-
-      String formattedInteger = '';
-      for (int i = integerPart.length - 1; i >= 0; i--) {
-        if ((integerPart.length - 1 - i) % 3 == 0 &&
-            i != integerPart.length - 1) {
-          formattedInteger = ',$formattedInteger';
-        }
-        formattedInteger = integerPart[i] + formattedInteger;
-      }
-
-      return formattedInteger + decimalPart;
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-      child: Card(
-        elevation: 1,
-        color: themeController.isDarkMode ? null : Colors.white70,
-        child: Padding(
-          padding: const EdgeInsets.all(3.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: titleColor ??
-                      (themeController.isDarkMode
-                          ? Colors.white
-                          : Colors.black87),
-                ),
-              ),
-              const SizedBox(height: 4),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller:
-                              TextEditingController(text: formatNumber(value)),
-                          readOnly: true,
-                          enabled: false, // Siempre deshabilitado
-                          decoration: InputDecoration(
-                            border: const OutlineInputBorder(),
-                            contentPadding: const EdgeInsets.symmetric(
-                                vertical: 8, horizontal: 8),
-                            fillColor: themeController.isDarkMode
-                                ? Colors.grey[800]
-                                : Colors.white,
-                            filled: true,
-                          ),
-                          style: TextStyle(
-                            fontSize: 25.0,
-                            fontWeight: FontWeight.w700,
-                            color: themeController.isDarkMode
-                                ? Colors.white
-                                : Colors.black87,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 5),
-                        Obx(() => TextField(
-                              controller: dispenserController
-                                  .textControllers[widget.pageIndex][cardIndex],
-                              focusNode: dispenserController
-                                  .focusNodes[widget.pageIndex][cardIndex],
-                              readOnly: true,
-                              enabled: dispenserController
-                                  .buttonsEnabled[widget.pageIndex][cardIndex]
-                                  .value,
-                              onChanged: (value) {
-                                dispenserController.updateTextField(
-                                    widget.pageIndex, cardIndex, value);
-                              },
-                              decoration: InputDecoration(
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 10),
-                                hintText: 'Ingrese numeración de la bomba',
-                                fillColor: themeController.isDarkMode
-                                    ? Colors.grey[800]
-                                    : Colors.white,
-                                filled: true,
-                                hintStyle: TextStyle(
-                                  fontSize: 12,
-                                  color: themeController.isDarkMode
-                                      ? Colors.grey[400]
-                                      : Colors.grey[600],
-                                ),
-                              ),
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 25.0,
-                                color: themeController.isDarkMode
-                                    ? Colors.white
-                                    : Colors.black87,
-                              ),
-                              textAlign: TextAlign.center,
-                              onTap: () {
-                                // Do nothing to prevent keyboard from showing
-                              },
-                            )),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 5),
-                  Expanded(
-                    flex: 1,
-                    child: SizedBox(
-                      width: double.infinity,
-                      height: 120,
-                      child: Obx(() => ElevatedButton(
-                            onPressed: dispenserController
-                                    .buttonsEnabled[widget.pageIndex][cardIndex]
-                                    .value
-                                ? () => dispenserController
-                                    .validateAndDisableFields(
-                                        widget.pageIndex, cardIndex)
-                                : null,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.purple[800],
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: const FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(CupertinoIcons.hand_thumbsup,
-                                      color: Colors.white),
-                                ],
-                              ),
-                            ),
-                          )),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Align(
-                alignment: Alignment.centerRight,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  reverse: true,
-                  child: Text(
-                    difference,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: getDifferenceColor(),
-                    ),
-                    textAlign: TextAlign.right,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showMissingDataDialog() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text("Falta de datos"),
-        content: const Text("Faltan datos por ingresar."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                _setInitialFocus();
-              });
-            },
-            child: const Text("OK"),
-          ),
-        ],
-      ),
-    );
   }
 }

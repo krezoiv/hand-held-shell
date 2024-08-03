@@ -1,15 +1,11 @@
-import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:hand_held_shell/config/global/routes.path.dart';
 import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
-import 'package:hand_held_shell/controllers/register.button.controller.dart';
-import 'package:hand_held_shell/controllers/theme.controller.dart';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
-import 'package:hand_held_shell/shared/helpers/text.helpers.dart';
-import 'package:hand_held_shell/views/screens/dispensers/widgets/register.dispenser/build.calcutator.buttons.dart';
-import 'package:hand_held_shell/views/screens/dispensers/widgets/register.dispenser/navigation.buttons.dart';
+import 'package:hand_held_shell/shared/helpers/show.confirm.alert.dart';
+import 'package:hand_held_shell/views/screens/dispensers/screens/register.dispenser.page.screen.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/side.menu.dispenser.dart';
 
 class NewRegisterDispenserScreen extends StatefulWidget {
@@ -190,497 +186,221 @@ class _NewRegisterDispenserScreenState
       ),
     );
   }
-
-  void showConfirmationDialog({
-    required String title,
-    required String message,
-    required String confirmText,
-    required String cancelText,
-    required VoidCallback onConfirm,
-    required VoidCallback onCancel,
-  }) {
-    if (GetPlatform.isIOS) {
-      Get.dialog(
-        CupertinoAlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: onCancel,
-              child: Text(cancelText),
-            ),
-            CupertinoDialogAction(
-              onPressed: onConfirm,
-              child: Text(confirmText),
-            ),
-          ],
-        ),
-        barrierDismissible: false,
-      );
-    } else {
-      Get.defaultDialog(
-        title: title,
-        middleText: message,
-        textConfirm: confirmText,
-        textCancel: cancelText,
-        onConfirm: onConfirm,
-        onCancel: onCancel,
-        barrierDismissible: false,
-        confirmTextColor: Colors.black,
-        cancelTextColor: Colors.black,
-        buttonColor: Colors.blue,
-        backgroundColor: Colors.white,
-        contentPadding: EdgeInsets.zero,
-        titlePadding: EdgeInsets.only(top: 20, bottom: 20),
-      );
-    }
-  }
 }
 
-class RegisterDispenserPage extends StatefulWidget {
-  final int pageIndex;
-  final dynamic dispenserReader;
-  final int totalPages;
-  final PageController mainPageController;
-  final RxBool showCalculatorButtons;
-  final RxBool buttonsEnabled;
-  final String? dispenserReaderId;
+// class RegisterDispenserPage extends StatefulWidget {
+//   final int pageIndex;
+//   final dynamic dispenserReader;
+//   final int totalPages;
+//   final PageController mainPageController;
+//   final RxBool showCalculatorButtons;
+//   final RxBool buttonsEnabled;
+//   final String? dispenserReaderId;
 
-  const RegisterDispenserPage({
-    super.key,
-    required this.pageIndex,
-    required this.dispenserReader,
-    required this.totalPages,
-    required this.mainPageController,
-    required this.showCalculatorButtons,
-    required this.buttonsEnabled,
-    this.dispenserReaderId,
-  });
+//   const RegisterDispenserPage({
+//     super.key,
+//     required this.pageIndex,
+//     required this.dispenserReader,
+//     required this.totalPages,
+//     required this.mainPageController,
+//     required this.showCalculatorButtons,
+//     required this.buttonsEnabled,
+//     this.dispenserReaderId,
+//   });
 
-  @override
-  _RegisterDispenserPageState createState() => _RegisterDispenserPageState();
-}
+//   @override
+//   _RegisterDispenserPageState createState() => _RegisterDispenserPageState();
+// }
 
-class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
-  final themeController = Get.find<ThemeController>();
-  final dispenserController = Get.find<DispenserController>();
-  late RegisterButtonsController calculatorCtrl;
-  late PageController verticalPageController;
+// class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
+//   final themeController = Get.find<ThemeController>();
+//   final dispenserController = Get.find<DispenserController>();
+//   late RegisterButtonsController calculatorCtrl;
+//   late PageController verticalPageController;
 
-  @override
-  void initState() {
-    super.initState();
-    calculatorCtrl = Get.put(RegisterButtonsController());
-    calculatorCtrl.setDispenserController(dispenserController);
-    verticalPageController = PageController();
+//   @override
+//   void initState() {
+//     super.initState();
+//     calculatorCtrl = Get.put(RegisterButtonsController());
+//     calculatorCtrl.setDispenserController(dispenserController);
+//     verticalPageController = PageController();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context)
-          .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
-    });
+//     WidgetsBinding.instance.addPostFrameCallback((_) {
+//       FocusScope.of(context)
+//           .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
+//     });
 
-    widget.mainPageController.addListener(_onPageChanged);
-  }
+//     widget.mainPageController.addListener(_onPageChanged);
+//   }
 
-  @override
-  void dispose() {
-    verticalPageController.dispose();
-    widget.mainPageController.removeListener(_onPageChanged);
-    super.dispose();
-  }
+//   @override
+//   void dispose() {
+//     verticalPageController.dispose();
+//     widget.mainPageController.removeListener(_onPageChanged);
+//     super.dispose();
+//   }
 
-  void _onPageChanged() {
-    if (widget.mainPageController.page == widget.pageIndex) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context)
-            .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
-      });
-    }
-  }
+//   void _onPageChanged() {
+//     if (widget.mainPageController.page == widget.pageIndex) {
+//       WidgetsBinding.instance.addPostFrameCallback((_) {
+//         FocusScope.of(context)
+//             .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
+//       });
+//     }
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    final scaffoldKey = GlobalKey<ScaffoldState>();
+//   @override
+//   Widget build(BuildContext context) {
+//     final scaffoldKey = GlobalKey<ScaffoldState>();
 
-    String fuelName = '';
-    String sideName = '';
-    String dispenserCode = '';
-    String assignmentHoseId = '';
+//     String fuelName = '';
+//     String sideName = '';
+//     String dispenserCode = '';
+//     String assignmentHoseId = '';
 
-    final assignmentHoseIdMap = widget.dispenserReader['assignmentHoseId'];
-    if (assignmentHoseIdMap is Map) {
-      final hoseIdMap = assignmentHoseIdMap['hoseId'];
-      final sideIdMap = assignmentHoseIdMap['sideId'];
-      final assignmentIdMap = assignmentHoseIdMap['assignmentId'];
+//     final assignmentHoseIdMap = widget.dispenserReader['assignmentHoseId'];
+//     if (assignmentHoseIdMap is Map) {
+//       final hoseIdMap = assignmentHoseIdMap['hoseId'];
+//       final sideIdMap = assignmentHoseIdMap['sideId'];
+//       final assignmentIdMap = assignmentHoseIdMap['assignmentId'];
 
-      if (hoseIdMap is Map && sideIdMap is Map && assignmentIdMap is Map) {
-        final fuelIdMap = hoseIdMap['fuelId'];
-        final dispenserIdMap = assignmentIdMap['dispenserId'];
+//       if (hoseIdMap is Map && sideIdMap is Map && assignmentIdMap is Map) {
+//         final fuelIdMap = hoseIdMap['fuelId'];
+//         final dispenserIdMap = assignmentIdMap['dispenserId'];
 
-        if (fuelIdMap is Map && dispenserIdMap is Map) {
-          fuelName = fuelIdMap['fuelName'] as String;
-          sideName = sideIdMap['sideName'] as String;
-          dispenserCode = dispenserIdMap['dispenserCode'] as String;
-          assignmentHoseId = assignmentHoseIdMap['_id'] as String;
-        } else {
-          // Manejar el caso donde fuelIdMap o dispenserIdMap no sean Map
-        }
-      } else {
-        // Manejar el caso donde hoseIdMap, sideIdMap o assignmentIdMap no sean Map
-      }
-    } else {
-      // Manejar el caso donde assignmentHoseIdMap no sea Map
-    }
+//         if (fuelIdMap is Map && dispenserIdMap is Map) {
+//           fuelName = fuelIdMap['fuelName'] as String;
+//           sideName = sideIdMap['sideName'] as String;
+//           dispenserCode = dispenserIdMap['dispenserCode'] as String;
+//           assignmentHoseId = assignmentHoseIdMap['_id'] as String;
+//         } else {
+//           // Manejar el caso donde fuelIdMap o dispenserIdMap no sean Map
+//         }
+//       } else {
+//         // Manejar el caso donde hoseIdMap, sideIdMap o assignmentIdMap no sean Map
+//       }
+//     } else {
+//       // Manejar el caso donde assignmentHoseIdMap no sea Map
+//     }
 
-    return Obx(() => Scaffold(
-          key: scaffoldKey,
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            toolbarHeight: 20,
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Icon(Icons.local_gas_station),
-                const SizedBox(width: 5),
-                Expanded(
-                    child: Text(
-                        '$fuelName | ${TextHelpers.capitalizeFirstLetterOfEachWord(dispenserCode)} -> ${TextHelpers.capitalizeFirstLetterOfEachWord(sideName)}',
-                        style: const TextStyle(fontSize: 14.0),
-                        overflow: TextOverflow.ellipsis)),
-                Text('${widget.pageIndex + 1}/${widget.totalPages}',
-                    style: const TextStyle(
-                        fontSize: 12, fontStyle: FontStyle.italic)),
-              ],
-            ),
-          ),
-          body: SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.22,
-                    child: PageView(
-                      scrollDirection: Axis.vertical,
-                      controller: verticalPageController,
-                      onPageChanged: (index) {
-                        calculatorCtrl.setCurrentCardIndex(index);
-                        if (index == 0) {
-                          WidgetsBinding.instance.addPostFrameCallback((_) {
-                            FocusScope.of(context).requestFocus(
-                                dispenserController.focusNodes[widget.pageIndex]
-                                    [0]);
-                          });
-                        }
-                      },
-                      children: [
-                        _buildCard(
-                          'No. en Galones',
-                          widget.dispenserReader['actualNoGallons'].toString(),
-                          0,
-                          titleColor: Colors.blue[900],
-                          difference: dispenserController
-                              .differences[widget.pageIndex][0].value,
-                        ),
-                        _buildCard(
-                          'No. Mecánica',
-                          widget.dispenserReader['actualNoMechanic'].toString(),
-                          1,
-                          titleColor: Colors.blue[900],
-                          difference: dispenserController
-                              .differences[widget.pageIndex][1].value,
-                        ),
-                        _buildCard(
-                          'No. en Dinero',
-                          widget.dispenserReader['actualNoMoney'].toString(),
-                          2,
-                          titleColor: Colors.blue[900],
-                          difference: dispenserController
-                              .differences[widget.pageIndex][2].value,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Obx(() => NavigationButtons(
-                        mainPageController: widget.mainPageController,
-                        pageIndex: widget.pageIndex,
-                        totalPages: widget.totalPages,
-                        currentCardIndex: calculatorCtrl.currentCardIndex.value,
-                        enabled: widget.buttonsEnabled.value &&
-                            !dispenserController
-                                .dataSubmitted[widget.pageIndex].value &&
-                            !dispenserController.isLoading.value,
-                        onThumbUpPressed: () {
-                          if (dispenserController.sendButtonEnabled.value &&
-                              !dispenserController
-                                  .dataSubmitted[widget.pageIndex].value &&
-                              !dispenserController.isLoading.value) {
-                            dispenserController.sendDataToDatabase(widget
-                                .pageIndex); // !se manade a guardar el nuevo dispenserReader
-                          } else if (dispenserController
-                              .dataSubmitted[widget.pageIndex].value) {
-                            Get.snackbar('Información',
-                                'Los datos ya han sido enviados.');
-                          } else if (dispenserController.isLoading.value) {
-                            Get.snackbar('Información',
-                                'Enviando datos, por favor espere...');
-                          } else {
-                            _showMissingDataDialog();
-                          }
-                        },
-                        dispenserController: dispenserController,
-                      )),
-                  if (widget.showCalculatorButtons.value)
-                    BuildCalculatorButtons(
-                      pageIndex: widget.pageIndex,
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ));
-  }
-
-  Widget _buildCard(String title, String value, int cardIndex,
-      {Color? titleColor, required String difference}) {
-    Color getDifferenceColor() {
-      if (difference == 'Error') return Colors.red;
-      final numDifference = Decimal.tryParse(difference.replaceAll(',', ''));
-      if (numDifference == null) return Colors.black;
-      if (numDifference < Decimal.zero) return Colors.red;
-      if (numDifference > Decimal.zero) return Colors.green;
-      return Colors.blue;
-    }
-
-    String formatNumber(String number) {
-      if (number.isEmpty) return '0';
-
-      List<String> parts = number.split('.');
-      String integerPart = parts[0];
-      String decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
-
-      String formattedInteger = '';
-      for (int i = integerPart.length - 1; i >= 0; i--) {
-        if ((integerPart.length - 1 - i) % 3 == 0 &&
-            i != integerPart.length - 1) {
-          formattedInteger = ',$formattedInteger';
-        }
-        formattedInteger = integerPart[i] + formattedInteger;
-      }
-
-      return formattedInteger + decimalPart;
-    }
-
-    final devicePadding = MediaQuery.of(context).size.width * 0.05;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: devicePadding),
-      child: Card(
-        elevation: 12, // Incrementa aún más la sombra
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: Colors.black, width: 1), // Borde negro
-        ),
-        shadowColor: Colors.blue, // Sombra más oscura
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: () {},
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(devicePadding, 5, devicePadding, 10),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: titleColor ??
-                                  (themeController.isDarkMode
-                                      ? Colors.white
-                                      : Colors.black87),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            reverse: true,
-                            child: Text(
-                              difference,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: getDifferenceColor(),
-                              ),
-                              textAlign: TextAlign.right,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      flex: 4,
-                      child: Column(
-                        children: [
-                          TextField(
-                            controller: TextEditingController(
-                                text: formatNumber(value)),
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide(
-                                    color: Colors.black,
-                                    width: 2), // Borde negro
-                              ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 8),
-                              fillColor: themeController.isDarkMode
-                                  ? Colors.grey[800]
-                                  : Colors.white,
-                              filled: true,
-                            ),
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: themeController.isDarkMode
-                                  ? Colors.white
-                                  : Colors.black87,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 5),
-                          Obx(() => TextField(
-                                controller: dispenserController
-                                        .textControllers[widget.pageIndex]
-                                    [cardIndex],
-                                focusNode: dispenserController
-                                    .focusNodes[widget.pageIndex][cardIndex],
-                                readOnly: true,
-                                onChanged: (value) {
-                                  dispenserController.updateTextField(
-                                      widget.pageIndex, cardIndex, value);
-                                },
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(
-                                        color: Colors.black,
-                                        width: 2), // Borde negro
-                                  ),
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 10),
-                                  hintText: 'Ingrese numeración de la bomba',
-                                  fillColor: themeController.isDarkMode
-                                      ? Colors.grey[800]
-                                      : Colors.white,
-                                  filled: true,
-                                  hintStyle: TextStyle(
-                                    fontSize: 12,
-                                    color: themeController.isDarkMode
-                                        ? Colors.grey[400]
-                                        : Colors.grey[600],
-                                  ),
-                                ),
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 20,
-                                  color: themeController.isDarkMode
-                                      ? Colors.white
-                                      : Colors.black87,
-                                ),
-                                textAlign: TextAlign.center,
-                                onTap: () {
-                                  // Do nothing to prevent keyboard from showing
-                                },
-                              )),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      flex: 1,
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 100,
-                        child: Obx(() => ElevatedButton(
-                              onPressed: dispenserController
-                                      .buttonsEnabled[widget.pageIndex]
-                                          [cardIndex]
-                                      .value
-                                  ? () => dispenserController
-                                      .validateAndDisableFields(
-                                          widget.pageIndex, cardIndex)
-                                  : null,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.purple[800],
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: const FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(CupertinoIcons.hand_thumbsup,
-                                        color: Colors.white),
-                                  ],
-                                ),
-                              ),
-                            )),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showMissingDataDialog() {
-    Get.dialog(
-      AlertDialog(
-        title: const Text("Falta de datos"),
-        content: const Text("Faltan datos por ingresar."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Get.back();
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                FocusScope.of(context).requestFocus(
-                    dispenserController.focusNodes[widget.pageIndex][0]);
-              });
-            },
-            child: const Text("OK"),
-          ),
-        ],
-      ),
-    );
-  }
-}
+//     return Obx(() => Scaffold(
+//           key: scaffoldKey,
+//           appBar: AppBar(
+//             automaticallyImplyLeading: false,
+//             toolbarHeight: 20,
+//             title: Row(
+//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//               children: [
+//                 const Icon(Icons.local_gas_station),
+//                 const SizedBox(width: 5),
+//                 Expanded(
+//                     child: Text(
+//                         '$fuelName | ${TextHelpers.capitalizeFirstLetterOfEachWord(dispenserCode)} -> ${TextHelpers.capitalizeFirstLetterOfEachWord(sideName)}',
+//                         style: const TextStyle(fontSize: 14.0),
+//                         overflow: TextOverflow.ellipsis)),
+//                 Text('${widget.pageIndex + 1}/${widget.totalPages}',
+//                     style: const TextStyle(
+//                         fontSize: 12, fontStyle: FontStyle.italic)),
+//               ],
+//             ),
+//           ),
+//           body: SafeArea(
+//             child: SingleChildScrollView(
+//               child: Column(
+//                 children: [
+//                   SizedBox(
+//                     height: MediaQuery.of(context).size.height * 0.22,
+//                     child: PageView(
+//                       scrollDirection: Axis.vertical,
+//                       controller: verticalPageController,
+//                       onPageChanged: (index) {
+//                         calculatorCtrl.setCurrentCardIndex(index);
+//                         if (index == 0) {
+//                           WidgetsBinding.instance.addPostFrameCallback((_) {
+//                             FocusScope.of(context).requestFocus(
+//                                 dispenserController.focusNodes[widget.pageIndex]
+//                                     [0]);
+//                           });
+//                         }
+//                       },
+//                       children: [
+//                         RegisterCard(
+//                           title: 'No. en Galones',
+//                           value: widget.dispenserReader['actualNoGallons']
+//                               .toString(),
+//                           cardIndex: 0,
+//                           difference: dispenserController
+//                               .differences[widget.pageIndex][0].value,
+//                           titleColor: Colors.blue[900],
+//                           themeController: themeController,
+//                           dispenserController: dispenserController,
+//                           pageIndex: widget.pageIndex,
+//                         ),
+//                         RegisterCard(
+//                           title: 'No. Mecánica',
+//                           value: widget.dispenserReader['actualNoMechanic']
+//                               .toString(),
+//                           cardIndex: 1,
+//                           difference: dispenserController
+//                               .differences[widget.pageIndex][1].value,
+//                           titleColor: Colors.blue[900],
+//                           themeController: themeController,
+//                           dispenserController: dispenserController,
+//                           pageIndex: widget.pageIndex,
+//                         ),
+//                         RegisterCard(
+//                           title: 'No. en Dinero',
+//                           value: widget.dispenserReader['actualNoMoney']
+//                               .toString(),
+//                           cardIndex: 2,
+//                           difference: dispenserController
+//                               .differences[widget.pageIndex][2].value,
+//                           titleColor: Colors.blue[900],
+//                           themeController: themeController,
+//                           dispenserController: dispenserController,
+//                           pageIndex: widget.pageIndex,
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                   Obx(() => NavigationButtons(
+//                         mainPageController: widget.mainPageController,
+//                         pageIndex: widget.pageIndex,
+//                         totalPages: widget.totalPages,
+//                         currentCardIndex: calculatorCtrl.currentCardIndex.value,
+//                         enabled: widget.buttonsEnabled.value &&
+//                             !dispenserController
+//                                 .dataSubmitted[widget.pageIndex].value &&
+//                             !dispenserController.isLoading.value,
+//                         onThumbUpPressed: () {
+//                           if (dispenserController.sendButtonEnabled.value &&
+//                               !dispenserController
+//                                   .dataSubmitted[widget.pageIndex].value &&
+//                               !dispenserController.isLoading.value) {
+//                             dispenserController.sendDataToDatabase(widget
+//                                 .pageIndex); // !se manade a guardar el nuevo dispenserReader
+//                           } else if (dispenserController
+//                               .dataSubmitted[widget.pageIndex].value) {
+//                             Get.snackbar('Información',
+//                                 'Los datos ya han sido enviados.');
+//                           } else if (dispenserController.isLoading.value) {
+//                             Get.snackbar('Información',
+//                                 'Enviando datos, por favor espere...');
+//                           } else {
+//                             ShowMissingDataDialog.show(
+//                                 context, dispenserController, widget.pageIndex);
+//                           }
+//                         },
+//                         dispenserController: dispenserController,
+//                       )),
+//                   if (widget.showCalculatorButtons.value)
+//                     BuildCalculatorButtons(
+//                       pageIndex: widget.pageIndex,
+//                     ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         ));
+//   }
+// }
