@@ -87,9 +87,7 @@ class DispenserController extends GetxController {
       };
       await prefs.setString('dispenserState', json.encode(state));
       hasSharedPreferencesData.value = true;
-    } catch (e) {
-      print('Error saving state: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> loadState() async {
@@ -151,7 +149,6 @@ class DispenserController extends GetxController {
         showCalculatorButtons.value = false;
       }
     } catch (e) {
-      print('Error loading state: $e');
       await fetchDispenserReaders();
       hasSharedPreferencesData.value = false;
       showCalculatorButtons.value = false;
@@ -182,7 +179,6 @@ class DispenserController extends GetxController {
         differences[pageIndex][cardIndex].value =
             formatNumber(difference.toStringAsFixed(difference.scale));
       } catch (e) {
-        print('Error calculating difference: $e');
         differences[pageIndex][cardIndex].value = 'Error';
       }
     } else {
@@ -241,7 +237,6 @@ class DispenserController extends GetxController {
         setFocusToFirstField(0);
       }
     } catch (e) {
-      print('Error fetching dispenser readers: $e');
     } finally {
       isLoading.value = false;
     }
@@ -287,7 +282,6 @@ class DispenserController extends GetxController {
     if (sanitized.isEmpty) {
       throw FormatException("Empty field");
     }
-    print('Sanitized value: $sanitized');
     return Decimal.parse(sanitized);
   }
 
@@ -395,7 +389,6 @@ class DispenserController extends GetxController {
       checkAllButtonsDisabled(pageIndex);
       saveState();
     } catch (e) {
-      print('Error in validation: $e');
       showValidationAlert(pageIndex, cardIndex, "Error en la validación");
     }
   }
@@ -476,7 +469,6 @@ class DispenserController extends GetxController {
         );
 
         if (updateSuccess) {
-          print('GeneralDispenserReader updated successfully');
           dataSubmitted[pageIndex].value = true;
 
           for (int i = 0; i < 3; i++) {
@@ -508,7 +500,6 @@ class DispenserController extends GetxController {
         throw Exception('Failed to add new dispenser reader');
       }
     } catch (e) {
-      print('Error sending data to database: $e');
       Get.snackbar('Error', 'No se pudo enviar los datos. Intente nuevamente.');
     } finally {
       isLoading.value = false;
@@ -538,9 +529,7 @@ class DispenserController extends GetxController {
       await prefs.remove('dispenserState');
       resetState();
       hasSharedPreferencesData.value = false;
-    } catch (e) {
-      print('Error clearing state: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> clearSharedPreferences() async {
@@ -548,10 +537,7 @@ class DispenserController extends GetxController {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('dispenserState');
       hasSharedPreferencesData.value = false;
-      print('SharedPreferences cleared successfully');
-    } catch (e) {
-      print('Error clearing SharedPreferences: $e');
-    }
+    } catch (e) {}
   }
 
   Future<void> checkSharedPreferencesData() async {

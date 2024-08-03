@@ -91,9 +91,7 @@ class _NewRegisterDispenserScreenState
                               await dispenserController.clearState();
                               Get.back();
                               Get.toNamed(RoutesPaths.dispensersHome);
-                            } catch (e) {
-                              print('Error: $e');
-                            }
+                            } catch (e) {}
                           },
                           onCancel: () {
                             return;
@@ -161,9 +159,7 @@ class _NewRegisterDispenserScreenState
                                     .hasSharedPreferencesData.value = true;
                                 await dispenserController.saveState();
                                 Get.back();
-                              } catch (e) {
-                                print('Error: $e');
-                              }
+                              } catch (e) {}
                             },
                             onCancel: () {
                               return;

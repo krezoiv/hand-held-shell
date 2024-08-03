@@ -98,7 +98,6 @@ class DispenserReaderService {
             'Failed to get last GeneralDispenserReader - StatusCode: ${response.statusCode}, Body: ${response.body}');
       }
     } catch (e) {
-      print('Error getting last GeneralDispenserReader: $e');
       return null;
     }
   }
@@ -148,12 +147,9 @@ class DispenserReaderService {
           'dispenserReaderId': responseData['dispenserReaderId'],
         };
       } else {
-        print('Server responded with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return {'success': false, 'dispenserReaderId': null};
       }
     } catch (e) {
-      print('Error in addNewDispenserReader: $e');
       return {'success': false, 'dispenserReaderId': null};
     }
   }
@@ -189,12 +185,9 @@ class DispenserReaderService {
         final responseData = json.decode(response.body);
         return responseData['ok'] ?? false;
       } else {
-        print('Server responded with status code: ${response.statusCode}');
-        print('Response body: ${response.body}');
         return false;
       }
     } catch (e) {
-      print('Error in updateGeneralDispenserReader: $e');
       return false;
     }
   }

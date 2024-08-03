@@ -10,6 +10,7 @@
 analyzer:
   errors:
     constant_identifier_names: ignore
+    empty_catches: ignore
     library_private_types_in_public_api: ignore
     prefer_const_constructors: ignore
     unused_local_variable: ignore

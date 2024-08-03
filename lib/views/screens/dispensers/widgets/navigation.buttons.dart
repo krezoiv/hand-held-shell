@@ -17,7 +17,7 @@ class NavigationButtons extends StatefulWidget {
   final DispenserController dispenserController;
 
   const NavigationButtons({
-    Key? key,
+    super.key,
     required this.mainPageController,
     required this.pageIndex,
     required this.totalPages,
@@ -25,7 +25,7 @@ class NavigationButtons extends StatefulWidget {
     required this.enabled,
     required this.onThumbUpPressed,
     required this.dispenserController,
-  }) : super(key: key);
+  });
 
   @override
   _NavigationButtonsState createState() => _NavigationButtonsState();
