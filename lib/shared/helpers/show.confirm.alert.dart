@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
 void showConfirmationDialog({
-  String title = '',
+  required String title,
   String message = '',
   String confirmText = 'Aceptar',
   String cancelText = 'Cancelar',

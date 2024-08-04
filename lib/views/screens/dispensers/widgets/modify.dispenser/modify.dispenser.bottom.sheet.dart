@@ -80,8 +80,12 @@ class ModifyDispenserBottomSheet extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               TextField(
-                                controller: modifyController
-                                    .previousControllers[cardIndex],
+                                controller: TextEditingController(
+                                  text: modifyController.formatNumberWithCommas(
+                                    modifyController
+                                        .previousControllers[cardIndex].text,
+                                  ),
+                                ),
                                 decoration: InputDecoration(
                                   labelText: 'Lectura Anterior',
                                   border: OutlineInputBorder(
@@ -96,8 +100,12 @@ class ModifyDispenserBottomSheet extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               TextField(
-                                controller: modifyController
-                                    .actualControllers[cardIndex],
+                                controller: TextEditingController(
+                                  text: modifyController.formatNumberWithCommas(
+                                    modifyController
+                                        .actualControllers[cardIndex].text,
+                                  ),
+                                ),
                                 decoration: InputDecoration(
                                   labelText: 'Lectura Actual',
                                   border: OutlineInputBorder(

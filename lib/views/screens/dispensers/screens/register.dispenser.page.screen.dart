@@ -20,7 +20,7 @@ class RegisterDispenserPage extends StatefulWidget {
   final String? dispenserReaderId;
 
   const RegisterDispenserPage({
-    Key? key,
+    super.key,
     required this.pageIndex,
     required this.dispenserReader,
     required this.totalPages,
@@ -28,7 +28,7 @@ class RegisterDispenserPage extends StatefulWidget {
     required this.showCalculatorButtons,
     required this.buttonsEnabled,
     this.dispenserReaderId,
-  }) : super(key: key);
+  });
 
   @override
   _RegisterDispenserPageState createState() => _RegisterDispenserPageState();
@@ -43,25 +43,20 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted &&
-          dispenserController.focusNodes.isNotEmpty &&
-          dispenserController.focusNodes[widget.pageIndex].isNotEmpty &&
-          dispenserController.focusNodes[widget.pageIndex][0].canRequestFocus) {
-        FocusScope.of(context)
-            .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
-      }
-    });
     calculatorCtrl = Get.put(RegisterButtonsController());
     calculatorCtrl.setDispenserController(dispenserController);
     verticalPageController = PageController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context)
+          .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
+    });
 
     widget.mainPageController.addListener(_onPageChanged);
   }
 
   @override
   void dispose() {
-    dispenserController.cleanupFocusNodes();
     verticalPageController.dispose();
     widget.mainPageController.removeListener(_onPageChanged);
     super.dispose();
@@ -70,12 +65,8 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   void _onPageChanged() {
     if (widget.mainPageController.page == widget.pageIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          final focusNode = dispenserController.focusNodes[widget.pageIndex][0];
-          if (focusNode.canRequestFocus) {
-            FocusScope.of(context).requestFocus(focusNode);
-          }
-        }
+        FocusScope.of(context)
+            .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
       });
     }
   }
@@ -104,8 +95,14 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
           sideName = sideIdMap['sideName'] as String;
           dispenserCode = dispenserIdMap['dispenserCode'] as String;
           assignmentHoseId = assignmentHoseIdMap['_id'] as String;
+        } else {
+          // Manejar el caso donde fuelIdMap o dispenserIdMap no sean Map
         }
+      } else {
+        // Manejar el caso donde hoseIdMap, sideIdMap o assignmentIdMap no sean Map
       }
+    } else {
+      // Manejar el caso donde assignmentHoseIdMap no sea Map
     }
 
     return Obx(() => Scaffold(
@@ -129,102 +126,101 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
               ],
             ),
           ),
-          body: SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(
-                  height: MediaQuery.of(context).size.height * 0.3,
-                  child: PageView(
-                    scrollDirection: Axis.vertical,
-                    controller: verticalPageController,
-                    onPageChanged: (index) {
-                      calculatorCtrl.setCurrentCardIndex(index);
-                      if (index == 0) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          FocusScope.of(context).requestFocus(
-                              dispenserController.focusNodes[widget.pageIndex]
-                                  [0]);
-                        });
-                      }
-                    },
-                    children: [
-                      RegisterCard(
-                        title: 'No. en Galones',
-                        value: widget.dispenserReader['actualNoGallons']
-                            .toString(),
-                        cardIndex: 0,
-                        difference: dispenserController
-                            .differences[widget.pageIndex][0].value,
-                        titleColor: Colors.blue[900],
-                        themeController: themeController,
-                        dispenserController: dispenserController,
-                        pageIndex: widget.pageIndex,
-                      ),
-                      RegisterCard(
-                        title: 'No. Mecánica',
-                        value: widget.dispenserReader['actualNoMechanic']
-                            .toString(),
-                        cardIndex: 1,
-                        difference: dispenserController
-                            .differences[widget.pageIndex][1].value,
-                        titleColor: Colors.blue[900],
-                        themeController: themeController,
-                        dispenserController: dispenserController,
-                        pageIndex: widget.pageIndex,
-                      ),
-                      RegisterCard(
-                        title: 'No. en Dinero',
-                        value:
-                            widget.dispenserReader['actualNoMoney'].toString(),
-                        cardIndex: 2,
-                        difference: dispenserController
-                            .differences[widget.pageIndex][2].value,
-                        titleColor: Colors.blue[900],
-                        themeController: themeController,
-                        dispenserController: dispenserController,
-                        pageIndex: widget.pageIndex,
-                      ),
-                    ],
-                  ),
-                ),
-                NavigationButtons(
-                  mainPageController: widget.mainPageController,
-                  pageIndex: widget.pageIndex,
-                  totalPages: widget.totalPages,
-                  currentCardIndex: calculatorCtrl.currentCardIndex.value,
-                  enabled: widget.buttonsEnabled.value &&
-                      !dispenserController
-                          .dataSubmitted[widget.pageIndex].value &&
-                      !dispenserController.isLoading.value,
-                  onThumbUpPressed: () {
-                    if (dispenserController.sendButtonEnabled.value &&
-                        !dispenserController
-                            .dataSubmitted[widget.pageIndex].value &&
-                        !dispenserController.isLoading.value) {
-                      dispenserController.sendDataToDatabase(widget.pageIndex);
-                    } else if (dispenserController
-                        .dataSubmitted[widget.pageIndex].value) {
-                      Get.snackbar(
-                          'Información', 'Los datos ya han sido enviados.');
-                    } else if (dispenserController.isLoading.value) {
-                      Get.snackbar(
-                          'Información', 'Enviando datos, por favor espere...');
-                    } else {
-                      ShowMissingDataDialog.show(
-                          context, dispenserController, widget.pageIndex);
-                    }
-                  },
-                  dispenserController: dispenserController,
-                ),
-                if (widget.showCalculatorButtons.value)
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
                   SizedBox(
-                    height: MediaQuery.of(context).size.height *
-                        0.5, // Ajusta este valor según sea necesario
-                    child: BuildCalculatorButtons(
-                      pageIndex: widget.pageIndex,
+                    height: MediaQuery.of(context).size.height * 0.22,
+                    child: PageView(
+                      scrollDirection: Axis.vertical,
+                      controller: verticalPageController,
+                      onPageChanged: (index) {
+                        calculatorCtrl.setCurrentCardIndex(index);
+                        if (index == 0) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            FocusScope.of(context).requestFocus(
+                                dispenserController.focusNodes[widget.pageIndex]
+                                    [0]);
+                          });
+                        }
+                      },
+                      children: [
+                        RegisterCard(
+                          title: 'No. en Galones',
+                          value: widget.dispenserReader['actualNoGallons']
+                              .toString(),
+                          cardIndex: 0,
+                          difference: dispenserController
+                              .differences[widget.pageIndex][0].value,
+                          titleColor: Colors.blue[900],
+                          themeController: themeController,
+                          dispenserController: dispenserController,
+                          pageIndex: widget.pageIndex,
+                        ),
+                        RegisterCard(
+                          title: 'No. Mecánica',
+                          value: widget.dispenserReader['actualNoMechanic']
+                              .toString(),
+                          cardIndex: 1,
+                          difference: dispenserController
+                              .differences[widget.pageIndex][1].value,
+                          titleColor: Colors.blue[900],
+                          themeController: themeController,
+                          dispenserController: dispenserController,
+                          pageIndex: widget.pageIndex,
+                        ),
+                        RegisterCard(
+                          title: 'No. en Dinero',
+                          value: widget.dispenserReader['actualNoMoney']
+                              .toString(),
+                          cardIndex: 2,
+                          difference: dispenserController
+                              .differences[widget.pageIndex][2].value,
+                          titleColor: Colors.blue[900],
+                          themeController: themeController,
+                          dispenserController: dispenserController,
+                          pageIndex: widget.pageIndex,
+                        ),
+                      ],
                     ),
                   ),
-              ],
+                  Obx(() => NavigationButtons(
+                        mainPageController: widget.mainPageController,
+                        pageIndex: widget.pageIndex,
+                        totalPages: widget.totalPages,
+                        currentCardIndex: calculatorCtrl.currentCardIndex.value,
+                        enabled: widget.buttonsEnabled.value &&
+                            !dispenserController
+                                .dataSubmitted[widget.pageIndex].value &&
+                            !dispenserController.isLoading.value,
+                        onThumbUpPressed: () {
+                          if (dispenserController.sendButtonEnabled.value &&
+                              !dispenserController
+                                  .dataSubmitted[widget.pageIndex].value &&
+                              !dispenserController.isLoading.value) {
+                            dispenserController.sendDataToDatabase(widget
+                                .pageIndex); // !se manade a guardar el nuevo dispenserReader
+                          } else if (dispenserController
+                              .dataSubmitted[widget.pageIndex].value) {
+                            Get.snackbar('Información',
+                                'Los datos ya han sido enviados.');
+                          } else if (dispenserController.isLoading.value) {
+                            Get.snackbar('Información',
+                                'Enviando datos, por favor espere...');
+                          } else {
+                            ShowMissingDataDialog.show(
+                                context, dispenserController, widget.pageIndex);
+                          }
+                        },
+                        dispenserController: dispenserController,
+                      )),
+                  if (widget.showCalculatorButtons.value)
+                    BuildCalculatorButtons(
+                      pageIndex: widget.pageIndex,
+                    ),
+                ],
+              ),
             ),
           ),
         ));

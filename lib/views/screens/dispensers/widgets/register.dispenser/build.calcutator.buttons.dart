@@ -24,41 +24,26 @@ class BuildCalculatorButtons extends GetView<RegisterButtonsController> {
         return SizedBox.shrink();
       }
 
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          return SingleChildScrollView(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight: constraints.maxHeight,
-              ),
-              child: IntrinsicHeight(
-                child: Padding(
-                  padding: const EdgeInsets.all(5.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Expanded(child: _buildCalculatorRow(['7', '8', '9'])),
-                      SizedBox(height: 5),
-                      Expanded(child: _buildCalculatorRow(['4', '5', '6'])),
-                      SizedBox(height: 5),
-                      Expanded(child: _buildCalculatorRow(['1', '2', '3'])),
-                      Expanded(
-                          child: _buildCalculatorRow(['0', '.', 'C'],
-                              lastRow: true)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
+      return Padding(
+        padding: const EdgeInsets.all(5.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildCalculatorRow(['7', '8', '9']),
+            SizedBox(height: 5),
+            _buildCalculatorRow(['4', '5', '6']),
+            SizedBox(height: 5),
+            _buildCalculatorRow(['1', '2', '3']),
+            _buildCalculatorRow(['0', '.', 'C'], lastRow: true),
+          ],
+        ),
       );
     });
   }
 
   Widget _buildCalculatorRow(List<String> numbers, {bool lastRow = false}) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: numbers
           .map((number) => Expanded(
                 child: Padding(
