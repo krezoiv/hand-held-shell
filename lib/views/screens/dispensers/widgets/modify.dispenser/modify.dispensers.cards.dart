@@ -63,7 +63,7 @@ class ModifyDispenserCards {
                                     modifyController.updateDispenserReader(
                                         dispenserReaderId!);
                                     for (int i = 0; i < 3; i++) {
-                                      controller.updateTextField(
+                                      controller.methods.updateTextField(
                                           0,
                                           i,
                                           modifyController

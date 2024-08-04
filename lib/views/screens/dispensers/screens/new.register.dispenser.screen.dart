@@ -27,7 +27,7 @@ class _NewRegisterDispenserScreenState
   @override
   void initState() {
     super.initState();
-
+    dispenserController = Get.put(DispenserController(), permanent: true);
     _pageController = PageController();
     Get.put(_pageController, tag: 'dispenser_page_controller');
 
@@ -43,13 +43,22 @@ class _NewRegisterDispenserScreenState
     _pageController.addListener(() {
       currentPageIndex.value = _pageController.page?.round() ?? 0;
     });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      dispenserController.methods.setFocusToFirstField(0);
+    });
   }
 
   @override
   void dispose() {
     Get.delete<PageController>(tag: 'dispenser_page_controller');
     _pageController.dispose();
+
     super.dispose();
+    for (var nodelist in dispenserController.focusNodes) {
+      for (var node in nodelist) {
+        node.dispose();
+      }
+    }
   }
 
   @override
@@ -69,7 +78,7 @@ class _NewRegisterDispenserScreenState
                 onPressed: dispenserController.hasSharedPreferencesData.value &&
                         dispenserController.isAnyButtonDisabledInCards
                     ? () {
-                        dispenserController
+                        dispenserController.methods
                             .toggleEditMode(currentPageIndex.value);
                       }
                     : null,
@@ -122,7 +131,7 @@ class _NewRegisterDispenserScreenState
                 controller: _pageController,
                 itemCount: dispenserController.dispenserReaders.length,
                 onPageChanged: (index) {
-                  dispenserController.setFocusToFirstField(index);
+                  dispenserController.methods.setFocusToFirstField(index);
                   currentPageIndex.value = index;
                 },
                 itemBuilder: (context, index) {
@@ -164,8 +173,25 @@ class _NewRegisterDispenserScreenState
                                 dispenserController
                                     .hasSharedPreferencesData.value = true;
                                 await dispenserController.saveState();
+                                await dispenserController
+                                    .fetchDispenserReaders();
+
+                                // Forzar actualización de la UI
+                                setState(() {});
+
+                                // Cerrar el diálogo
                                 Get.back();
-                              } catch (e) {}
+
+                                // Forzar la permanencia en la ruta actual
+                                WidgetsBinding.instance
+                                    .addPostFrameCallback((_) {
+                                  Get.offNamed(
+                                      RoutesPaths.newRegisterDispenserScreen);
+                                });
+                              } catch (e) {
+                                print('Error: $e');
+                                Get.back(); // Cerrar el diálogo en caso de error
+                              }
                             },
                             onCancel: () {
                               return;
@@ -187,220 +213,3 @@ class _NewRegisterDispenserScreenState
     );
   }
 }
-
-// class RegisterDispenserPage extends StatefulWidget {
-//   final int pageIndex;
-//   final dynamic dispenserReader;
-//   final int totalPages;
-//   final PageController mainPageController;
-//   final RxBool showCalculatorButtons;
-//   final RxBool buttonsEnabled;
-//   final String? dispenserReaderId;
-
-//   const RegisterDispenserPage({
-//     super.key,
-//     required this.pageIndex,
-//     required this.dispenserReader,
-//     required this.totalPages,
-//     required this.mainPageController,
-//     required this.showCalculatorButtons,
-//     required this.buttonsEnabled,
-//     this.dispenserReaderId,
-//   });
-
-//   @override
-//   _RegisterDispenserPageState createState() => _RegisterDispenserPageState();
-// }
-
-// class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
-//   final themeController = Get.find<ThemeController>();
-//   final dispenserController = Get.find<DispenserController>();
-//   late RegisterButtonsController calculatorCtrl;
-//   late PageController verticalPageController;
-
-//   @override
-//   void initState() {
-//     super.initState();
-//     calculatorCtrl = Get.put(RegisterButtonsController());
-//     calculatorCtrl.setDispenserController(dispenserController);
-//     verticalPageController = PageController();
-
-//     WidgetsBinding.instance.addPostFrameCallback((_) {
-//       FocusScope.of(context)
-//           .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
-//     });
-
-//     widget.mainPageController.addListener(_onPageChanged);
-//   }
-
-//   @override
-//   void dispose() {
-//     verticalPageController.dispose();
-//     widget.mainPageController.removeListener(_onPageChanged);
-//     super.dispose();
-//   }
-
-//   void _onPageChanged() {
-//     if (widget.mainPageController.page == widget.pageIndex) {
-//       WidgetsBinding.instance.addPostFrameCallback((_) {
-//         FocusScope.of(context)
-//             .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
-//       });
-//     }
-//   }
-
-//   @override
-//   Widget build(BuildContext context) {
-//     final scaffoldKey = GlobalKey<ScaffoldState>();
-
-//     String fuelName = '';
-//     String sideName = '';
-//     String dispenserCode = '';
-//     String assignmentHoseId = '';
-
-//     final assignmentHoseIdMap = widget.dispenserReader['assignmentHoseId'];
-//     if (assignmentHoseIdMap is Map) {
-//       final hoseIdMap = assignmentHoseIdMap['hoseId'];
-//       final sideIdMap = assignmentHoseIdMap['sideId'];
-//       final assignmentIdMap = assignmentHoseIdMap['assignmentId'];
-
-//       if (hoseIdMap is Map && sideIdMap is Map && assignmentIdMap is Map) {
-//         final fuelIdMap = hoseIdMap['fuelId'];
-//         final dispenserIdMap = assignmentIdMap['dispenserId'];
-
-//         if (fuelIdMap is Map && dispenserIdMap is Map) {
-//           fuelName = fuelIdMap['fuelName'] as String;
-//           sideName = sideIdMap['sideName'] as String;
-//           dispenserCode = dispenserIdMap['dispenserCode'] as String;
-//           assignmentHoseId = assignmentHoseIdMap['_id'] as String;
-//         } else {
-//           // Manejar el caso donde fuelIdMap o dispenserIdMap no sean Map
-//         }
-//       } else {
-//         // Manejar el caso donde hoseIdMap, sideIdMap o assignmentIdMap no sean Map
-//       }
-//     } else {
-//       // Manejar el caso donde assignmentHoseIdMap no sea Map
-//     }
-
-//     return Obx(() => Scaffold(
-//           key: scaffoldKey,
-//           appBar: AppBar(
-//             automaticallyImplyLeading: false,
-//             toolbarHeight: 20,
-//             title: Row(
-//               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//               children: [
-//                 const Icon(Icons.local_gas_station),
-//                 const SizedBox(width: 5),
-//                 Expanded(
-//                     child: Text(
-//                         '$fuelName | ${TextHelpers.capitalizeFirstLetterOfEachWord(dispenserCode)} -> ${TextHelpers.capitalizeFirstLetterOfEachWord(sideName)}',
-//                         style: const TextStyle(fontSize: 14.0),
-//                         overflow: TextOverflow.ellipsis)),
-//                 Text('${widget.pageIndex + 1}/${widget.totalPages}',
-//                     style: const TextStyle(
-//                         fontSize: 12, fontStyle: FontStyle.italic)),
-//               ],
-//             ),
-//           ),
-//           body: SafeArea(
-//             child: SingleChildScrollView(
-//               child: Column(
-//                 children: [
-//                   SizedBox(
-//                     height: MediaQuery.of(context).size.height * 0.22,
-//                     child: PageView(
-//                       scrollDirection: Axis.vertical,
-//                       controller: verticalPageController,
-//                       onPageChanged: (index) {
-//                         calculatorCtrl.setCurrentCardIndex(index);
-//                         if (index == 0) {
-//                           WidgetsBinding.instance.addPostFrameCallback((_) {
-//                             FocusScope.of(context).requestFocus(
-//                                 dispenserController.focusNodes[widget.pageIndex]
-//                                     [0]);
-//                           });
-//                         }
-//                       },
-//                       children: [
-//                         RegisterCard(
-//                           title: 'No. en Galones',
-//                           value: widget.dispenserReader['actualNoGallons']
-//                               .toString(),
-//                           cardIndex: 0,
-//                           difference: dispenserController
-//                               .differences[widget.pageIndex][0].value,
-//                           titleColor: Colors.blue[900],
-//                           themeController: themeController,
-//                           dispenserController: dispenserController,
-//                           pageIndex: widget.pageIndex,
-//                         ),
-//                         RegisterCard(
-//                           title: 'No. Mecánica',
-//                           value: widget.dispenserReader['actualNoMechanic']
-//                               .toString(),
-//                           cardIndex: 1,
-//                           difference: dispenserController
-//                               .differences[widget.pageIndex][1].value,
-//                           titleColor: Colors.blue[900],
-//                           themeController: themeController,
-//                           dispenserController: dispenserController,
-//                           pageIndex: widget.pageIndex,
-//                         ),
-//                         RegisterCard(
-//                           title: 'No. en Dinero',
-//                           value: widget.dispenserReader['actualNoMoney']
-//                               .toString(),
-//                           cardIndex: 2,
-//                           difference: dispenserController
-//                               .differences[widget.pageIndex][2].value,
-//                           titleColor: Colors.blue[900],
-//                           themeController: themeController,
-//                           dispenserController: dispenserController,
-//                           pageIndex: widget.pageIndex,
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                   Obx(() => NavigationButtons(
-//                         mainPageController: widget.mainPageController,
-//                         pageIndex: widget.pageIndex,
-//                         totalPages: widget.totalPages,
-//                         currentCardIndex: calculatorCtrl.currentCardIndex.value,
-//                         enabled: widget.buttonsEnabled.value &&
-//                             !dispenserController
-//                                 .dataSubmitted[widget.pageIndex].value &&
-//                             !dispenserController.isLoading.value,
-//                         onThumbUpPressed: () {
-//                           if (dispenserController.sendButtonEnabled.value &&
-//                               !dispenserController
-//                                   .dataSubmitted[widget.pageIndex].value &&
-//                               !dispenserController.isLoading.value) {
-//                             dispenserController.sendDataToDatabase(widget
-//                                 .pageIndex); // !se manade a guardar el nuevo dispenserReader
-//                           } else if (dispenserController
-//                               .dataSubmitted[widget.pageIndex].value) {
-//                             Get.snackbar('Información',
-//                                 'Los datos ya han sido enviados.');
-//                           } else if (dispenserController.isLoading.value) {
-//                             Get.snackbar('Información',
-//                                 'Enviando datos, por favor espere...');
-//                           } else {
-//                             ShowMissingDataDialog.show(
-//                                 context, dispenserController, widget.pageIndex);
-//                           }
-//                         },
-//                         dispenserController: dispenserController,
-//                       )),
-//                   if (widget.showCalculatorButtons.value)
-//                     BuildCalculatorButtons(
-//                       pageIndex: widget.pageIndex,
-//                     ),
-//                 ],
-//               ),
-//             ),
-//           ),
-//         ));
-//   }
-// }

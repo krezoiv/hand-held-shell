@@ -164,7 +164,7 @@ class RegisterCard extends StatelessWidget {
                                     .focusNodes[pageIndex][cardIndex],
                                 readOnly: true,
                                 onChanged: (value) {
-                                  dispenserController.updateTextField(
+                                  dispenserController.methods.updateTextField(
                                       pageIndex, cardIndex, value);
                                 },
                                 decoration: InputDecoration(
@@ -213,7 +213,7 @@ class RegisterCard extends StatelessWidget {
                               onPressed: dispenserController
                                       .buttonsEnabled[pageIndex][cardIndex]
                                       .value
-                                  ? () => dispenserController
+                                  ? () => dispenserController.methods
                                       .validateAndDisableFields(
                                           pageIndex, cardIndex)
                                   : null,

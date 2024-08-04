@@ -1,4 +1,3 @@
-// modify_dispenser_controller.dart
 import 'package:get/get.dart';
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
@@ -162,11 +161,11 @@ class ModifyDispenserController extends GetxController {
         // Actualizar los TextFields en RegisterDispenserPage
         final registerDispenserController = Get.find<DispenserController>();
 
-        registerDispenserController.updateTextField(
+        registerDispenserController.methods.updateTextField(
             0, 0, formatNumber(actualControllers[0].text)); // Galones
-        registerDispenserController.updateTextField(
+        registerDispenserController.methods.updateTextField(
             0, 1, formatNumber(actualControllers[1].text)); // Mecanica
-        registerDispenserController.updateTextField(
+        registerDispenserController.methods.updateTextField(
             0, 2, formatNumber(actualControllers[2].text)); // Dinero
 
         Get.snackbar('Éxito', 'Dispenser Reader actualizado correctamente');

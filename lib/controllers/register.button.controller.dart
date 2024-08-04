@@ -36,7 +36,7 @@ class RegisterButtonsController extends GetxController {
 
     String newText = currentText + number;
     newText = _formatNumberWithCommas(newText);
-    dispenserController.updateTextField(pageIndex, cardIndex, newText);
+    dispenserController.methods.updateTextField(pageIndex, cardIndex, newText);
   }
 
   void backspaceTextField(int pageIndex, int cardIndex) {
@@ -52,12 +52,13 @@ class RegisterButtonsController extends GetxController {
 
       currentText = _formatNumberWithCommas(currentText);
 
-      dispenserController.updateTextField(pageIndex, cardIndex, currentText);
+      dispenserController.methods
+          .updateTextField(pageIndex, cardIndex, currentText);
     }
   }
 
   void clearTextField(int pageIndex, int cardIndex) {
-    dispenserController.updateTextField(pageIndex, cardIndex, '');
+    dispenserController.methods.updateTextField(pageIndex, cardIndex, '');
   }
 
   static String _formatNumberWithCommas(String number) {

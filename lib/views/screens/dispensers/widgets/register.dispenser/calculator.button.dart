@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'package:hand_held_shell/controllers/theme.controller.dart';
 
 class CalculatorButton extends StatelessWidget {
   final Color? bgColor;
-  final bool big;
   final String text;
   final VoidCallback onPressed;
 
   const CalculatorButton({
     super.key,
     this.bgColor,
-    this.big = false,
     required this.text,
     required this.onPressed,
   });
@@ -19,36 +18,27 @@ class CalculatorButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeController = Get.find<ThemeController>();
-    final buttonStyle = TextButton.styleFrom(
+    final buttonStyle = ElevatedButton.styleFrom(
       foregroundColor: Colors.white,
       backgroundColor: bgColor ??
           (themeController.isDarkMode
               ? const Color(0xff333333)
-              : Colors.blue[900]),
-      shape: const StadiumBorder(),
+              : Colors.blue[300]),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(50),
+      ),
+      padding: EdgeInsets.zero,
     );
 
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-      child: PhysicalModel(
-        color: Colors.transparent,
-        shadowColor: Colors.black,
-        elevation: 5.0,
-        shape: BoxShape.rectangle,
-        borderRadius: BorderRadius.circular(30),
-        child: TextButton(
-          style: buttonStyle,
-          onPressed: onPressed,
-          child: SizedBox(
-            width: big ? 150 : 65,
-            height: 75,
-            child: Center(
-              child: Text(
-                text,
-                style:
-                    const TextStyle(fontSize: 30, fontWeight: FontWeight.w700),
-              ),
-            ),
+    return SizedBox.expand(
+      child: ElevatedButton(
+        style: buttonStyle,
+        onPressed: onPressed,
+        child: FittedBox(
+          fit: BoxFit.contain,
+          child: Text(
+            text,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 25),
           ),
         ),
       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:decimal/decimal.dart';
+import 'package:hand_held_shell/controllers/disepensers/dispenser.controller.methods.dart';
 import 'package:hand_held_shell/controllers/disepensers/modify.dispenser.controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -24,13 +24,15 @@ class DispenserController extends GetxController {
   final FocusNode focusNode = FocusNode();
   final RxBool isAnyButtonDisabled = false.obs;
   final RxList<RxBool> showCalculatorButtonsPerPage = <RxBool>[].obs;
-
   final Rx<Map<String, dynamic>> dispenserReaderDetail =
       Rx<Map<String, dynamic>>({});
+
+  late final DispenserControllerMethods methods;
 
   @override
   void onInit() {
     super.onInit();
+    methods = DispenserControllerMethods(this);
     ever(buttonsEnabled, _updateIsAnyButtonDisabled);
     loadState();
     showCalculatorButtonsPerPage.assignAll(
@@ -54,7 +56,6 @@ class DispenserController extends GetxController {
     return false;
   }
 
-// En DispenserController
   bool canUpdateFields(int pageIndex) {
     return dataSubmitted[pageIndex].value &&
         !isLoading.value &&
@@ -87,7 +88,9 @@ class DispenserController extends GetxController {
       };
       await prefs.setString('dispenserState', json.encode(state));
       hasSharedPreferencesData.value = true;
-    } catch (e) {}
+    } catch (e) {
+      // Manejar el error si es necesario
+    }
   }
 
   Future<void> loadState() async {
@@ -155,37 +158,6 @@ class DispenserController extends GetxController {
     }
   }
 
-  void initializeDifferences() {
-    differences.assignAll(
-      List.generate(
-          dispenserReaders.length, (_) => List.generate(3, (_) => '0'.obs)),
-    );
-  }
-
-  void calculateDifference(int pageIndex, int cardIndex) {
-    final previousValue = _sanitizeTextField(dispenserReaders[pageIndex][[
-      'actualNoGallons',
-      'actualNoMechanic',
-      'actualNoMoney'
-    ][cardIndex]]
-        .toString());
-    final currentValue =
-        _sanitizeTextField(textControllers[pageIndex][cardIndex].text);
-
-    if (currentValue.isNotEmpty && previousValue.isNotEmpty) {
-      try {
-        final difference =
-            Decimal.parse(currentValue) - Decimal.parse(previousValue);
-        differences[pageIndex][cardIndex].value =
-            formatNumber(difference.toStringAsFixed(difference.scale));
-      } catch (e) {
-        differences[pageIndex][cardIndex].value = 'Error';
-      }
-    } else {
-      differences[pageIndex][cardIndex].value = '0';
-    }
-  }
-
   Future<void> fetchDispenserReaders() async {
     try {
       isLoading.value = true;
@@ -231,172 +203,15 @@ class DispenserController extends GetxController {
         List.generate(readers.length, (_) => false.obs),
       );
 
-      initializeDifferences();
+      methods.initializeDifferences();
 
       if (readers.isNotEmpty) {
-        setFocusToFirstField(0);
+        methods.setFocusToFirstField(0);
       }
     } catch (e) {
     } finally {
       isLoading.value = false;
     }
-  }
-
-  void setFocusToFirstField(int pageIndex) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (focusNodes.isNotEmpty &&
-          focusNodes[pageIndex].isNotEmpty &&
-          focusNodes[pageIndex][0].canRequestFocus) {
-        if (!dataSubmitted[pageIndex].value) {
-          for (int i = 0; i < 3; i++) {
-            textFieldsEnabled[pageIndex][i].value = true;
-            buttonsEnabled[pageIndex][i].value = true;
-          }
-        }
-        focusNodes[pageIndex][0].requestFocus();
-      }
-    });
-  }
-
-  void updateTextField(int pageIndex, int cardIndex, String value) {
-    if (pageIndex < textControllers.length &&
-        cardIndex < textControllers[pageIndex].length) {
-      String formattedValue = formatNumber(
-          value); // Formatear el número con separadores de millares
-      textControllers[pageIndex][cardIndex].text = formattedValue;
-      textControllers[pageIndex][cardIndex].selection =
-          TextSelection.fromPosition(
-        TextPosition(offset: formattedValue.length),
-      );
-      calculateDifference(pageIndex, cardIndex);
-      saveState();
-    }
-  }
-
-  String _sanitizeTextField(String text) {
-    return text.replaceAll(',', '').replaceAll(' ', '').trim();
-  }
-
-  Decimal sanitizeAndParse(String value) {
-    String sanitized = _sanitizeTextField(value);
-    if (sanitized.isEmpty) {
-      throw FormatException("Empty field");
-    }
-    return Decimal.parse(sanitized);
-  }
-
-  String formatNumber(String number) {
-    String cleanNumber = number.replaceAll(',', '');
-    List<String> parts = cleanNumber.split('.');
-    String integerPart = parts[0];
-    String decimalPart = parts.length > 1 ? '.${parts[1]}' : '';
-
-    String formattedInteger = '';
-    for (int i = integerPart.length - 1; i >= 0; i--) {
-      if ((integerPart.length - 1 - i) % 3 == 0 &&
-          i != integerPart.length - 1) {
-        formattedInteger = ',$formattedInteger';
-      }
-      formattedInteger = integerPart[i] + formattedInteger;
-    }
-
-    return formattedInteger + decimalPart;
-  }
-
-  void validateAndDisableFields(int pageIndex, int cardIndex) {
-    if (!isEditMode.value && dataSubmitted[pageIndex].value) return;
-
-    final dispenserReader = dispenserReaders[pageIndex];
-
-    try {
-      if (cardIndex == 0) {
-        String previousNoGallons =
-            _sanitizeTextField(dispenserReader['actualNoGallons'].toString());
-        String actualNoGallons =
-            _sanitizeTextField(textControllers[pageIndex][0].text);
-
-        if (actualNoGallons.isEmpty) {
-          showValidationAlert(
-              pageIndex, cardIndex, "El campo no puede estar vacío");
-          return;
-        }
-
-        Decimal prevGallons = sanitizeAndParse(previousNoGallons);
-        Decimal currGallons = sanitizeAndParse(actualNoGallons);
-
-        if (currGallons < prevGallons) {
-          showValidationAlert(
-              pageIndex, cardIndex, "El campo no puede ser menor al anterior");
-          return;
-        }
-
-        buttonsEnabled[pageIndex][cardIndex].value = false;
-        textFieldsEnabled[pageIndex][0].value = false;
-        focusNextField(pageIndex, 1);
-      }
-
-      if (cardIndex == 1) {
-        String previousNoMechanic =
-            _sanitizeTextField(dispenserReader['actualNoMechanic'].toString());
-        String actualNoMechanic =
-            _sanitizeTextField(textControllers[pageIndex][1].text);
-
-        if (actualNoMechanic.isEmpty) {
-          showValidationAlert(
-              pageIndex, cardIndex, "El campo no puede estar vacío");
-          return;
-        }
-
-        Decimal prevMechanic = sanitizeAndParse(previousNoMechanic);
-        Decimal currMechanic = sanitizeAndParse(actualNoMechanic);
-
-        if (currMechanic < prevMechanic) {
-          showValidationAlert(
-              pageIndex, cardIndex, "El campo no puede ser menor al anterior");
-          return;
-        }
-
-        buttonsEnabled[pageIndex][cardIndex].value = false;
-        textFieldsEnabled[pageIndex][1].value = false;
-        focusNextField(pageIndex, 2);
-      }
-
-      if (cardIndex == 2) {
-        String previousNoMoney =
-            _sanitizeTextField(dispenserReader['actualNoMoney'].toString());
-        String actualNoMoney =
-            _sanitizeTextField(textControllers[pageIndex][2].text);
-
-        if (actualNoMoney.isEmpty) {
-          showValidationAlert(
-              pageIndex, cardIndex, "El campo no puede estar vacío");
-          return;
-        }
-
-        Decimal prevMoney = sanitizeAndParse(previousNoMoney);
-        Decimal currMoney = sanitizeAndParse(actualNoMoney);
-
-        if (currMoney < prevMoney) {
-          showValidationAlert(
-              pageIndex, cardIndex, "El campo no puede ser menor al anterior");
-          return;
-        }
-
-        buttonsEnabled[pageIndex][cardIndex].value = false;
-        textFieldsEnabled[pageIndex][2].value = false;
-      }
-
-      checkAllButtonsDisabled(pageIndex);
-      saveState();
-    } catch (e) {
-      showValidationAlert(pageIndex, cardIndex, "Error en la validación");
-    }
-  }
-
-  void checkAllButtonsDisabled(int pageIndex) {
-    bool allDisabled =
-        buttonsEnabled[pageIndex].every((button) => !button.value);
-    sendButtonEnabled.value = allDisabled;
   }
 
   Future<void> sendDataToDatabase(int pageIndex) async {
@@ -416,25 +231,26 @@ class DispenserController extends GetxController {
       final String assignmentHoseId =
           dispenserReader['assignmentHoseId']['_id'];
 
-      String previousNoGallons =
-          _sanitizeTextField(dispenserReader['actualNoGallons'].toString());
+      String previousNoGallons = methods
+          .sanitizeTextField(dispenserReader['actualNoGallons'].toString());
       String actualNoGallons =
-          _sanitizeTextField(textControllers[pageIndex][0].text);
+          methods.sanitizeTextField(textControllers[pageIndex][0].text);
       String totalNoGallons =
-          subtractPrecise(actualNoGallons, previousNoGallons);
+          methods.subtractPrecise(actualNoGallons, previousNoGallons);
 
-      String previousNoMechanic =
-          _sanitizeTextField(dispenserReader['actualNoMechanic'].toString());
+      String previousNoMechanic = methods
+          .sanitizeTextField(dispenserReader['actualNoMechanic'].toString());
       String actualNoMechanic =
-          _sanitizeTextField(textControllers[pageIndex][1].text);
+          methods.sanitizeTextField(textControllers[pageIndex][1].text);
       String totalNoMechanic =
-          subtractPrecise(actualNoMechanic, previousNoMechanic);
+          methods.subtractPrecise(actualNoMechanic, previousNoMechanic);
 
-      String previousNoMoney =
-          _sanitizeTextField(dispenserReader['actualNoMoney'].toString());
+      String previousNoMoney = methods
+          .sanitizeTextField(dispenserReader['actualNoMoney'].toString());
       String actualNoMoney =
-          _sanitizeTextField(textControllers[pageIndex][2].text);
-      String totalNoMoney = subtractPrecise(actualNoMoney, previousNoMoney);
+          methods.sanitizeTextField(textControllers[pageIndex][2].text);
+      String totalNoMoney =
+          methods.subtractPrecise(actualNoMoney, previousNoMoney);
 
       final result = await DispenserReaderService.addNewDispenserReader(
         previousNoGallons,
@@ -507,22 +323,6 @@ class DispenserController extends GetxController {
     }
   }
 
-  void focusNextField(int pageIndex, int cardIndex) {
-    if (cardIndex < 2) {
-      focusNodes[pageIndex][cardIndex + 1].requestFocus();
-    }
-  }
-
-  void showValidationAlert(int pageIndex, int cardIndex, String message) {
-    Get.snackbar(
-      "Validación fallida",
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      duration: Duration(seconds: 3),
-    );
-    focusNodes[pageIndex][cardIndex].requestFocus();
-  }
-
   Future<void> clearState() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -575,39 +375,6 @@ class DispenserController extends GetxController {
     super.onClose();
   }
 
-  void toggleEditMode(int pageIndex) {
-    isEditMode.value = !isEditMode.value;
-    if (isEditMode.value) {
-      enableEditMode(pageIndex);
-    } else {
-      disableEditMode(pageIndex);
-    }
-  }
-
-  void enableEditMode(int pageIndex) {
-    for (int i = 0; i < 3; i++) {
-      if (!buttonsEnabled[pageIndex][i].value) {
-        textFieldsEnabled[pageIndex][i].value = true;
-        buttonsEnabled[pageIndex][i].value = true;
-      }
-    }
-  }
-
-  void disableEditMode(int pageIndex) {
-    for (int i = 0; i < 3; i++) {
-      if (textFieldsEnabled[pageIndex][i].value) {
-        textFieldsEnabled[pageIndex][i].value = false;
-      }
-    }
-    isEditMode.value = false;
-  }
-
-  String subtractPrecise(String a, String b) {
-    var numA = sanitizeAndParse(a);
-    var numB = sanitizeAndParse(b);
-    return (numA - numB).toString();
-  }
-
   Future<void> fetchDispenserReaderDetail(String dispenserReaderId) async {
     try {
       isLoading.value = true;
@@ -624,16 +391,13 @@ class DispenserController extends GetxController {
     }
   }
 
-  void addNumberToActualField(int pageIndex, String number) {
-    String currentText = textControllers[pageIndex][1].text;
-    if (number == '.' && currentText.contains('.')) return;
-    textControllers[pageIndex][1].text = currentText + number;
-    textControllers[pageIndex][1].selection = TextSelection.fromPosition(
-      TextPosition(offset: textControllers[pageIndex][1].text.length),
-    );
-  }
-
-  void clearActualField(int pageIndex) {
-    textControllers[pageIndex][1].clear();
+  void cleanupFocusNodes() {
+    for (var i = 0; i < focusNodes.length; i++) {
+      for (var j = 0; j < focusNodes[i].length; j++) {
+        if (focusNodes[i][j].hasFocus) {
+          focusNodes[i][j].unfocus();
+        }
+      }
+    }
   }
 }
