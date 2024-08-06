@@ -10,7 +10,7 @@ class SalesRoutes {
     ),
     GetPage(
       name: RoutesPaths.newSales,
-      page: () => const NewSalesScreen(),
+      page: () => NewSalesScreen(),
     ),
     GetPage(
       name: RoutesPaths.modifySales,

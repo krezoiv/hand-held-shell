@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:decimal/decimal.dart';
 import 'package:hand_held_shell/controllers/disepensers/modify.dispenser.controller.dart';
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
@@ -24,13 +25,22 @@ class DispenserController extends GetxController {
   final FocusNode focusNode = FocusNode();
   final RxBool isAnyButtonDisabled = false.obs;
   final RxList<RxBool> showCalculatorButtonsPerPage = <RxBool>[].obs;
+  final Rx<GeneralDispenserReader?> lastGeneralDispenserReader =
+      Rx<GeneralDispenserReader?>(null);
 
+  final RxBool isDataLoaded = false.obs;
+  final RxBool isSummaryCardEnabled = true.obs;
   final Rx<Map<String, dynamic>> dispenserReaderDetail =
       Rx<Map<String, dynamic>>({});
+
+  var totalSalesRegular = 0.0.obs;
+  var totalSalesSuper = 0.0.obs;
+  var totalSalesDiesel = 0.0.obs;
 
   @override
   void onInit() {
     super.onInit();
+
     ever(buttonsEnabled, _updateIsAnyButtonDisabled);
     loadState();
     showCalculatorButtonsPerPage.assignAll(
@@ -635,5 +645,25 @@ class DispenserController extends GetxController {
 
   void clearActualField(int pageIndex) {
     textControllers[pageIndex][1].clear();
+  }
+
+  Future<void> fetchLastGeneralDispenserReaderData() async {
+    try {
+      isLoading.value = true;
+      final response =
+          await DispenserReaderService.getLastGeneralDispenserReader();
+      if (response != null && response.ok) {
+        lastGeneralDispenserReader.value = response.generalDispenserReader;
+        isDataLoaded.value = true;
+        isSummaryCardEnabled.value = false; // Deshabilita el card de resumen
+      } else {
+        throw Exception('Failed to fetch last GeneralDispenserReader data');
+      }
+    } catch (e) {
+      Get.snackbar(
+          'Error', 'Failed to fetch last GeneralDispenserReader data: $e');
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class DispenserReaderService {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
+  static const String baseUrl = 'http://192.168.1.148:3000/api';
 
   static Future<List<dynamic>> fetchDispenserReaders(String token) async {
     try {
@@ -98,6 +98,35 @@ class DispenserReaderService {
             'Failed to get last GeneralDispenserReader - StatusCode: ${response.statusCode}, Body: ${response.body}');
       }
     } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<GeneralReaderDispenserDataResponse?>
+      getLastGeneralDispenserReader() async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) throw Exception('Token is null');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/generalDispenserReader/lastGeneralDispenserId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+      );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return generalReaderDispenserDataResponseFromJson(response.body);
+      } else {
+        throw Exception(
+            'Failed to get last GeneralDispenserReader - StatusCode: ${response.statusCode}, Body: ${response.body}');
+      }
+    } catch (e) {
+      print('Error fetching last GeneralDispenserReader: $e');
       return null;
     }
   }
