@@ -390,27 +390,72 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   }
 
   Widget buildSingleTextField(String label, RxString controller) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Obx(() {
+    return GestureDetector(
+      onDoubleTap: () {
+        showBottomSheetForTextField(label, controller);
+      },
+      child: AbsorbPointer(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Obx(() {
+            final textEditingController =
+                TextEditingController(text: controller.value);
+            textEditingController.selection = TextSelection.fromPosition(
+              TextPosition(offset: textEditingController.text.length),
+            );
+            return TextField(
+              decoration: InputDecoration(
+                labelText: label,
+                border: const OutlineInputBorder(),
+              ),
+              controller: textEditingController,
+              onChanged: (value) {
+                controller.value = value;
+                calculateTotalSales();
+                saveState(); // Guarda el estado cuando cambian los valores
+              },
+            );
+          }),
+        ),
+      ),
+    );
+  }
+
+  void showBottomSheetForTextField(String label, RxString controller) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
         final textEditingController =
             TextEditingController(text: controller.value);
-        textEditingController.selection = TextSelection.fromPosition(
-          TextPosition(offset: textEditingController.text.length),
-        );
-        return TextField(
-          decoration: InputDecoration(
-            labelText: label,
-            border: const OutlineInputBorder(),
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                decoration: InputDecoration(
+                  labelText: label,
+                  border: const OutlineInputBorder(),
+                ),
+                controller: textEditingController,
+                keyboardType: TextInputType.numberWithOptions(decimal: true),
+                onChanged: (value) {
+                  controller.value = value;
+                  calculateTotalSales();
+                  saveState(); // Guarda el estado cuando cambian los valores
+                },
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Cerrar'),
+              ),
+            ],
           ),
-          controller: textEditingController,
-          onChanged: (value) {
-            controller.value = value;
-            calculateTotalSales();
-            saveState(); // Guarda el estado cuando cambian los valores
-          },
         );
-      }),
+      },
     );
   }
 
