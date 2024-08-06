@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:hand_held_shell/shared/helpers/Thousands.formatter.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/models/models/fuel.station/fuel.model.dart';
 import 'package:hand_held_shell/models/models/fuel.station/status/status.model.dart';
@@ -8,7 +12,6 @@ import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.da
 import 'package:hand_held_shell/controllers/fuels/fuels.controller.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/sales/widgets/side.menu.sale.dart';
-import 'package:intl/intl.dart';
 
 class NewSalesScreen extends StatefulWidget {
   const NewSalesScreen({super.key});
@@ -110,7 +113,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                         child: buildCardPayments(),
                       ),
                     ),
-                    const SizedBox(height: 100), // Añadir más espacio al final
+                    const SizedBox(height: 100),
                   ],
                 ),
               ),
@@ -130,7 +133,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           await fuelController.fetchFuels();
           calculateTotalSales();
           updatePayments();
-          saveState(); // Guarda el estado después de cargar los datos
+          saveState();
         },
         child: Card(
           elevation: 12,
@@ -412,7 +415,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               onChanged: (value) {
                 controller.value = value;
                 calculateTotalSales();
-                saveState(); // Guarda el estado cuando cambian los valores
+                saveState();
               },
             );
           }),
@@ -425,78 +428,99 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
       builder: (BuildContext context) {
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (label == 'Gastos') ...[
-                  buildTextField('Número Correlativo', TextInputType.text),
-                  buildTextField('Fecha', TextInputType.datetime),
-                  buildTextField('Monto', TextInputType.number),
-                  buildTextField('Descripción', TextInputType.text),
-                ] else if (label == 'Vales') ...[
-                  buildTextField('Número de Vale', TextInputType.text),
-                  buildTextField('Descripción', TextInputType.text),
-                  buildTextField('Valor', TextInputType.number),
-                ] else if (label == 'Cupones') ...[
-                  buildTextField('Número de Cupón', TextInputType.text),
-                  buildTextField('Valor', TextInputType.number),
-                  buildTextField('Fecha', TextInputType.datetime),
-                ] else if (label == 'Vouchers') ...[
-                  buildDropdownField('POS', ['POS1', 'POS2']),
-                  buildTextField('Valor', TextInputType.number),
-                  buildTextField('Número de Autorización', TextInputType.text),
-                  buildTextField('Fecha', TextInputType.datetime),
-                ] else if (label == 'Depósitos') ...[
-                  buildDropdownField('Banco', ['Banco1', 'Banco2']),
-                  buildTextField('Número de Boleta', TextInputType.text),
-                  buildTextField('Valor', TextInputType.number),
-                  buildTextField('Fecha', TextInputType.datetime),
-                ] else if (label == 'Créditos') ...[
-                  buildDropdownField('Clientes', ['Cliente1', 'Cliente2']),
-                  buildTextField('Número de Comprobante', TextInputType.text),
-                  buildTextField('Valor', TextInputType.number),
-                  buildTextField('Fecha', TextInputType.datetime),
-                ] else if (label == 'Cheques') ...[
-                  buildDropdownField('Bancos', ['Banco1', 'Banco2']),
-                  buildTextField('Número de Cheque', TextInputType.text),
-                  buildTextField('Valor', TextInputType.number),
-                  buildDropdownField('Clientes', ['Cliente1', 'Cliente2']),
-                  buildTextField('Fecha', TextInputType.datetime),
-                ],
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Cancelar'),
-                    ),
-                    ElevatedButton(
-                      onPressed: () {
-                        controller.value = 'New Value'; // Update as needed
-                        calculateTotalSales();
-                        saveState();
-                        Navigator.pop(context);
-                      },
-                      child: const Text('Guardar'),
-                    ),
-                  ],
+        return WillPopScope(
+          onWillPop: () async => false,
+          child: KeyboardVisibilityBuilder(
+            builder: (context, isKeyboardVisible) {
+              return SingleChildScrollView(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom,
                 ),
-              ],
-            ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (label == 'Gastos') ...[
+                        buildTextField('Número Correlativo'),
+                        buildTextField('Fecha', TextInputType.datetime),
+                        buildNumberTextField('Monto'),
+                        buildTextField('Descripción'),
+                      ],
+                      if (label == 'Vales') ...[
+                        buildTextField('Número de Vale'),
+                        buildTextField('Descripción'),
+                        buildNumberTextField('Valor'),
+                      ],
+                      if (label == 'Cupones') ...[
+                        buildTextField('No. Cupon'),
+                        buildNumberTextField('Valor'),
+                        buildTextField('Fecha', TextInputType.datetime),
+                      ],
+                      if (label == 'Vouchers') ...[
+                        buildDropdownField('POS', ['POS1', 'POS2', 'POS3']),
+                        buildNumberTextField('Valor'),
+                        buildTextField('No. Autorización'),
+                        buildTextField('Fecha', TextInputType.datetime),
+                      ],
+                      if (label == 'Depósitos') ...[
+                        buildDropdownField(
+                            'Banco', ['Banco 1', 'Banco 2', 'Banco 3']),
+                        buildTextField('No. Boleta'),
+                        buildNumberTextField('Valor'),
+                        buildTextField('Fecha', TextInputType.datetime),
+                      ],
+                      if (label == 'Créditos') ...[
+                        buildDropdownField('Clientes',
+                            ['Cliente 1', 'Cliente 2', 'Cliente 3']),
+                        buildTextField('No. Comprobante'),
+                        buildNumberTextField('Valor'),
+                        buildTextField('Fecha', TextInputType.datetime),
+                      ],
+                      if (label == 'Cheques') ...[
+                        buildDropdownField(
+                            'Bancos', ['Banco 1', 'Banco 2', 'Banco 3']),
+                        buildTextField('No. Cheque'),
+                        buildNumberTextField('Valor'),
+                        buildDropdownField('Clientes',
+                            ['Cliente 1', 'Cliente 2', 'Cliente 3']),
+                        buildTextField('Fecha', TextInputType.datetime),
+                      ],
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Cancelar'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Guardar'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
           ),
         );
       },
     );
   }
 
-  Widget buildTextField(String label, TextInputType keyboardType) {
+  Widget buildTextField(String label,
+      [TextInputType inputType = TextInputType.text]) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
@@ -504,7 +528,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           labelText: label,
           border: const OutlineInputBorder(),
         ),
-        keyboardType: keyboardType,
+        keyboardType: inputType,
       ),
     );
   }
@@ -517,14 +541,14 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           labelText: label,
           border: const OutlineInputBorder(),
         ),
-        items: options.map((option) {
+        items: options.map((String option) {
           return DropdownMenuItem<String>(
             value: option,
             child: Text(option),
           );
         }).toList(),
-        onChanged: (value) {
-          // Do something with the value
+        onChanged: (String? value) {
+          // Manejar el cambio de valor si es necesario
         },
       ),
     );
@@ -614,5 +638,21 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     await prefs.remove('creditos');
     await prefs.remove('cheques');
     loadState(); // Vuelve a cargar el estado para asegurarse de que se restablezcan los valores
+  }
+
+  Widget buildNumberTextField(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          ThousandsFormatter(),
+        ],
+      ),
+    );
   }
 }
