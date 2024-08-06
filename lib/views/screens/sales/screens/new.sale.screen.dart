@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
-import 'package:hand_held_shell/controllers/fuels/fuels.controller.dart';
 import 'package:hand_held_shell/models/models/fuel.station/fuel.model.dart';
 import 'package:hand_held_shell/models/models/fuel.station/status/status.model.dart';
 import 'package:hand_held_shell/models/models/taxes/taxes.model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
+import 'package:hand_held_shell/controllers/fuels/fuels.controller.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/sales/widgets/side.menu.sale.dart';
 import 'package:intl/intl.dart';
 
-class NewSalesScreen extends StatelessWidget {
-  NewSalesScreen({super.key});
+class NewSalesScreen extends StatefulWidget {
+  const NewSalesScreen({super.key});
 
+  @override
+  _NewSalesScreenState createState() => _NewSalesScreenState();
+}
+
+class _NewSalesScreenState extends State<NewSalesScreen> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   final DispenserController dispenserController =
       Get.put(DispenserController());
@@ -36,6 +42,12 @@ class NewSalesScreen extends StatelessWidget {
       totalSalesRegular.value + totalSalesSuper.value + totalSalesDiesel.value;
 
   @override
+  void initState() {
+    super.initState();
+    loadState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
@@ -55,6 +67,12 @@ class NewSalesScreen extends StatelessWidget {
               ),
             );
           }),
+          IconButton(
+            icon: Icon(Icons.delete),
+            onPressed: () async {
+              await clearState();
+            },
+          ),
         ],
       ),
       drawer: SideMenuSale(scaffoldKey: scaffoldKey),
@@ -112,6 +130,7 @@ class NewSalesScreen extends StatelessWidget {
           await fuelController.fetchFuels();
           calculateTotalSales();
           updatePayments();
+          saveState(); // Guarda el estado después de cargar los datos
         },
         child: Card(
           elevation: 12,
@@ -148,31 +167,40 @@ class NewSalesScreen extends StatelessWidget {
                     }),
                   ),
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      const Text('Venta:',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Obx(() => Text(totalSales.toStringAsFixed(3))),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 45.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Venta:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Obx(() => Text(totalSales.toStringAsFixed(3))),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      const Text('Pagos:',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Obx(() => Text(totalPayments.toStringAsFixed(3))),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 45.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Pagos:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Obx(() => Text(totalPayments.toStringAsFixed(3))),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      const Text('Saldo:',
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Obx(() => Text(totalSaldo.toStringAsFixed(3))),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 45.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text('Saldo:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                        Obx(() => Text(totalSaldo.toStringAsFixed(3))),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -246,10 +274,12 @@ class NewSalesScreen extends StatelessWidget {
                               fontSize: 18, fontWeight: FontWeight.bold))),
                   const SizedBox(height: 16),
                   const Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text('Regular'),
+                      SizedBox(width: 16),
                       Text('Super'),
+                      SizedBox(width: 16),
                       Text('Diesel'),
                     ],
                   ),
@@ -261,10 +291,12 @@ class NewSalesScreen extends StatelessWidget {
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text('${regular.salePrice}'),
+                      SizedBox(width: 16),
                       Text('${superFuel.salePrice}'),
+                      SizedBox(width: 16),
                       Text('${diesel.salePrice}'),
                     ],
                   ),
@@ -276,7 +308,7 @@ class NewSalesScreen extends StatelessWidget {
                           TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Obx(() {
                         final reader = dispenserController
@@ -287,6 +319,7 @@ class NewSalesScreen extends StatelessWidget {
                         return Text(
                             '${reader.totalMechanicRegular.toStringAsFixed(3)}');
                       }),
+                      SizedBox(width: 16),
                       Obx(() {
                         final reader = dispenserController
                             .lastGeneralDispenserReader.value;
@@ -296,6 +329,7 @@ class NewSalesScreen extends StatelessWidget {
                         return Text(
                             '${reader.totalMechanicSuper.toStringAsFixed(3)}');
                       }),
+                      SizedBox(width: 16),
                       Obx(() {
                         final reader = dispenserController
                             .lastGeneralDispenserReader.value;
@@ -370,7 +404,11 @@ class NewSalesScreen extends StatelessWidget {
             border: const OutlineInputBorder(),
           ),
           controller: textEditingController,
-          onChanged: (value) => controller.value = value,
+          onChanged: (value) {
+            controller.value = value;
+            calculateTotalSales();
+            saveState(); // Guarda el estado cuando cambian los valores
+          },
         );
       }),
     );
@@ -409,5 +447,56 @@ class NewSalesScreen extends StatelessWidget {
     depositos.value = '0.000';
     creditos.value = '0.000';
     cheques.value = '0.000';
+  }
+
+  Future<void> saveState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('totalSalesRegular', totalSalesRegular.value);
+    await prefs.setDouble('totalSalesSuper', totalSalesSuper.value);
+    await prefs.setDouble('totalSalesDiesel', totalSalesDiesel.value);
+    await prefs.setDouble('totalPayments', totalPayments.value);
+    await prefs.setDouble('totalSaldo', totalSaldo.value);
+
+    await prefs.setString('gastos', gastos.value);
+    await prefs.setString('vales', vales.value);
+    await prefs.setString('cupones', cupones.value);
+    await prefs.setString('vouchers', vouchers.value);
+    await prefs.setString('depositos', depositos.value);
+    await prefs.setString('creditos', creditos.value);
+    await prefs.setString('cheques', cheques.value);
+  }
+
+  Future<void> loadState() async {
+    final prefs = await SharedPreferences.getInstance();
+    totalSalesRegular.value = prefs.getDouble('totalSalesRegular') ?? 0.0;
+    totalSalesSuper.value = prefs.getDouble('totalSalesSuper') ?? 0.0;
+    totalSalesDiesel.value = prefs.getDouble('totalSalesDiesel') ?? 0.0;
+    totalPayments.value = prefs.getDouble('totalPayments') ?? 0.0;
+    totalSaldo.value = prefs.getDouble('totalSaldo') ?? 0.0;
+
+    gastos.value = prefs.getString('gastos') ?? '0.000';
+    vales.value = prefs.getString('vales') ?? '0.000';
+    cupones.value = prefs.getString('cupones') ?? '0.000';
+    vouchers.value = prefs.getString('vouchers') ?? '0.000';
+    depositos.value = prefs.getString('depositos') ?? '0.000';
+    creditos.value = prefs.getString('creditos') ?? '0.000';
+    cheques.value = prefs.getString('cheques') ?? '0.000';
+  }
+
+  Future<void> clearState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('totalSalesRegular');
+    await prefs.remove('totalSalesSuper');
+    await prefs.remove('totalSalesDiesel');
+    await prefs.remove('totalPayments');
+    await prefs.remove('totalSaldo');
+    await prefs.remove('gastos');
+    await prefs.remove('vales');
+    await prefs.remove('cupones');
+    await prefs.remove('vouchers');
+    await prefs.remove('depositos');
+    await prefs.remove('creditos');
+    await prefs.remove('cheques');
+    loadState(); // Vuelve a cargar el estado para asegurarse de que se restablezcan los valores
   }
 }
