@@ -392,7 +392,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   Widget buildSingleTextField(String label, RxString controller) {
     return GestureDetector(
       onDoubleTap: () {
-        showBottomSheetForTextField(label, controller);
+        showBottomSheet(label, controller);
       },
       child: AbsorbPointer(
         child: Padding(
@@ -421,41 +421,112 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     );
   }
 
-  void showBottomSheetForTextField(String label, RxString controller) {
+  void showBottomSheet(String label, RxString controller) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (BuildContext context) {
-        final textEditingController =
-            TextEditingController(text: controller.value);
         return Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                decoration: InputDecoration(
-                  labelText: label,
-                  border: const OutlineInputBorder(),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (label == 'Gastos') ...[
+                  buildTextField('Número Correlativo', TextInputType.text),
+                  buildTextField('Fecha', TextInputType.datetime),
+                  buildTextField('Monto', TextInputType.number),
+                  buildTextField('Descripción', TextInputType.text),
+                ] else if (label == 'Vales') ...[
+                  buildTextField('Número de Vale', TextInputType.text),
+                  buildTextField('Descripción', TextInputType.text),
+                  buildTextField('Valor', TextInputType.number),
+                ] else if (label == 'Cupones') ...[
+                  buildTextField('Número de Cupón', TextInputType.text),
+                  buildTextField('Valor', TextInputType.number),
+                  buildTextField('Fecha', TextInputType.datetime),
+                ] else if (label == 'Vouchers') ...[
+                  buildDropdownField('POS', ['POS1', 'POS2']),
+                  buildTextField('Valor', TextInputType.number),
+                  buildTextField('Número de Autorización', TextInputType.text),
+                  buildTextField('Fecha', TextInputType.datetime),
+                ] else if (label == 'Depósitos') ...[
+                  buildDropdownField('Banco', ['Banco1', 'Banco2']),
+                  buildTextField('Número de Boleta', TextInputType.text),
+                  buildTextField('Valor', TextInputType.number),
+                  buildTextField('Fecha', TextInputType.datetime),
+                ] else if (label == 'Créditos') ...[
+                  buildDropdownField('Clientes', ['Cliente1', 'Cliente2']),
+                  buildTextField('Número de Comprobante', TextInputType.text),
+                  buildTextField('Valor', TextInputType.number),
+                  buildTextField('Fecha', TextInputType.datetime),
+                ] else if (label == 'Cheques') ...[
+                  buildDropdownField('Bancos', ['Banco1', 'Banco2']),
+                  buildTextField('Número de Cheque', TextInputType.text),
+                  buildTextField('Valor', TextInputType.number),
+                  buildDropdownField('Clientes', ['Cliente1', 'Cliente2']),
+                  buildTextField('Fecha', TextInputType.datetime),
+                ],
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Cancelar'),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        controller.value = 'New Value'; // Update as needed
+                        calculateTotalSales();
+                        saveState();
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Guardar'),
+                    ),
+                  ],
                 ),
-                controller: textEditingController,
-                keyboardType: TextInputType.numberWithOptions(decimal: true),
-                onChanged: (value) {
-                  controller.value = value;
-                  calculateTotalSales();
-                  saveState(); // Guarda el estado cuando cambian los valores
-                },
-              ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: const Text('Cerrar'),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },
+    );
+  }
+
+  Widget buildTextField(String label, TextInputType keyboardType) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        keyboardType: keyboardType,
+      ),
+    );
+  }
+
+  Widget buildDropdownField(String label, List<String> options) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: DropdownButtonFormField<String>(
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        items: options.map((option) {
+          return DropdownMenuItem<String>(
+            value: option,
+            child: Text(option),
+          );
+        }).toList(),
+        onChanged: (value) {
+          // Do something with the value
+        },
+      ),
     );
   }
 
