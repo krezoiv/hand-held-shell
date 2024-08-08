@@ -1,3 +1,5 @@
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
+
 class DispenserReader {
   num previousNoGallons;
   num actualNoGallons;
@@ -8,9 +10,9 @@ class DispenserReader {
   num previousNoMoney;
   num actualNoMoney;
   num totalNoMoney;
-  AssignmentHoseId assignmentHoseId;
-  String generalDispenserReaderId;
-  String dispenserReaderId;
+  AssignmentHose assignmentHoseId;
+  String generalDispenserReaderId; // Cambio a String
+  String dispenserReaderId; // Cambio a String
 
   DispenserReader({
     required this.previousNoGallons,
@@ -38,7 +40,8 @@ class DispenserReader {
         previousNoMoney: json["previousNoMoney"] ?? 0,
         actualNoMoney: json["actualNoMoney"] ?? 0,
         totalNoMoney: json["totalNoMoney"] ?? 0,
-        assignmentHoseId: json["assignmentHoseId"] ?? '',
+        assignmentHoseId:
+            AssignmentHose.fromJson(json["assignmentHoseId"] ?? {}),
         generalDispenserReaderId: json["generalDispenserReaderId"] ?? '',
         dispenserReaderId: json["dispenserReaderId"] ?? '',
       );
@@ -56,156 +59,6 @@ class DispenserReader {
         "assignmentHoseId": assignmentHoseId.toJson(),
         "generalDispenserReaderId": generalDispenserReaderId,
         "dispenserReaderId": dispenserReaderId,
-      };
-}
-
-class AssignmentHoseId {
-  String id;
-  int position;
-  HoseId hoseId;
-  SideId sideId;
-  AssignmentId assignmentId;
-  String statusId;
-
-  AssignmentHoseId({
-    required this.id,
-    required this.position,
-    required this.hoseId,
-    required this.sideId,
-    required this.assignmentId,
-    required this.statusId,
-  });
-
-  factory AssignmentHoseId.fromJson(Map<String, dynamic> json) =>
-      AssignmentHoseId(
-        id: json["_id"] ?? '',
-        position: json["position"] ?? 0,
-        hoseId: HoseId.fromJson(json["hoseId"] ?? {}),
-        sideId: SideId.fromJson(json["sideId"] ?? {}),
-        assignmentId: AssignmentId.fromJson(json["assignmentId"] ?? {}),
-        statusId: json["statusId"] ?? '',
-      );
-
-  Map<String, dynamic> toJson() => {
-        "_id": id,
-        "position": position,
-        "hoseId": hoseId.toJson(),
-        "sideId": sideId.toJson(),
-        "assignmentId": assignmentId.toJson(),
-        "statusId": statusId,
-      };
-}
-
-class AssignmentId {
-  String id;
-  DispenserId dispenserId;
-
-  AssignmentId({
-    required this.id,
-    required this.dispenserId,
-  });
-
-  factory AssignmentId.fromJson(Map<String, dynamic> json) => AssignmentId(
-        id: json["_id"] ?? '',
-        dispenserId: DispenserId.fromJson(json["dispenserId"] ?? {}),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "_id": id,
-        "dispenserId": dispenserId.toJson(),
-      };
-}
-
-class DispenserId {
-  String id;
-  String dispenserCode;
-
-  DispenserId({
-    required this.id,
-    required this.dispenserCode,
-  });
-
-  factory DispenserId.fromJson(Map<String, dynamic> json) => DispenserId(
-        id: json["_id"] ?? '',
-        dispenserCode: json["dispenserCode"] ?? '',
-      );
-
-  Map<String, dynamic> toJson() => {
-        "_id": id,
-        "dispenserCode": dispenserCode,
-      };
-}
-
-class HoseId {
-  String id;
-  String hoseColor;
-  FuelId fuelId;
-  String statusId;
-
-  int code;
-
-  HoseId({
-    required this.id,
-    required this.hoseColor,
-    required this.fuelId,
-    required this.statusId,
-    required this.code,
-  });
-
-  factory HoseId.fromJson(Map<String, dynamic> json) => HoseId(
-        id: json["_id"] ?? '',
-        hoseColor: json["hoseColor"] ?? '',
-        fuelId: FuelId.fromJson(json["fuelId"] ?? {}),
-        statusId: json["statusId"] ?? '',
-        code: json["code"] ?? 0,
-      );
-
-  Map<String, dynamic> toJson() => {
-        "_id": id,
-        "hoseColor": hoseColor,
-        "fuelId": fuelId.toJson(),
-        "statusId": statusId,
-        "code": code,
-      };
-}
-
-class FuelId {
-  String id;
-  String fuelName;
-
-  FuelId({
-    required this.id,
-    required this.fuelName,
-  });
-
-  factory FuelId.fromJson(Map<String, dynamic> json) => FuelId(
-        id: json["_id"] ?? '',
-        fuelName: json["fuelName"] ?? '',
-      );
-
-  Map<String, dynamic> toJson() => {
-        "_id": id,
-        "fuelName": fuelName,
-      };
-}
-
-class SideId {
-  String id;
-  String sideName;
-
-  SideId({
-    required this.id,
-    required this.sideName,
-  });
-
-  factory SideId.fromJson(Map<String, dynamic> json) => SideId(
-        id: json["_id"] ?? '',
-        sideName: json["sideName"] ?? '',
-      );
-
-  Map<String, dynamic> toJson() => {
-        "_id": id,
-        "sideName": sideName,
       };
 }
 

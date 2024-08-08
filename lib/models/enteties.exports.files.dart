@@ -1,3 +1,9 @@
+export 'package:hand_held_shell/models/models/fuel.station/assignment.hose.model.dart';
+export 'package:hand_held_shell/models/models/fuel.station/assignment.model.dart';
+export 'package:hand_held_shell/models/models/fuel.station/dispenser.model.dart';
+export 'package:hand_held_shell/models/models/fuel.station/hose.model.dart';
+export 'package:hand_held_shell/models/models/fuel.station/side.model.dart';
+
 export 'package:hand_held_shell/models/mappers/sales/sales.control.response.dart';
 export 'package:hand_held_shell/models/models/acocounting/bank.check.model.dart';
 export 'package:hand_held_shell/models/models/acocounting/bill.model.dart';

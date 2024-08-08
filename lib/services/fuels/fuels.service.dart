@@ -25,7 +25,6 @@ class FuelService {
             'Failed to get fuels - StatusCode: ${response.statusCode}, Body: ${response.body}');
       }
     } catch (e) {
-      print('Error fetching fuels: $e');
       return null;
     }
   }

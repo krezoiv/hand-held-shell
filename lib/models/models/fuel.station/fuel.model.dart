@@ -1,4 +1,4 @@
-import 'package:hand_held_shell/models/models/fuel.station/status/status.model.dart';
+import 'package:hand_held_shell/models/models/status/status.model.dart';
 import 'package:hand_held_shell/models/models/taxes/taxes.model.dart';
 
 class Fuel {

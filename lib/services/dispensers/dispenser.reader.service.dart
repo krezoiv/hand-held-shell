@@ -116,9 +116,6 @@ class DispenserReaderService {
         },
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
       if (response.statusCode == 200) {
         return generalReaderDispenserDataResponseFromJson(response.body);
       } else {
@@ -126,7 +123,6 @@ class DispenserReaderService {
             'Failed to get last GeneralDispenserReader - StatusCode: ${response.statusCode}, Body: ${response.body}');
       }
     } catch (e) {
-      print('Error fetching last GeneralDispenserReader: $e');
       return null;
     }
   }
