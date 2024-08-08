@@ -69,3 +69,10 @@ class LoginController extends GetxController {
     Get.offAllNamed(RoutesPaths.loginHome);
   }
 }
+
+
+/*  para obtener el userName y userId en cualquier lugar de tu aplicación, puedes hacerlo así:
+final userId = await AuthService.getUserId();
+final firstName = await AuthService.getFirstName();
+final lastName = await AuthService.getLastName();
+*/

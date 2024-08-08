@@ -4,10 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 import 'package:hand_held_shell/models/mappers/login.response.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:hand_held_shell/models/models/user.model.dart';
-// Asegúrate de importar la clase AuthApi
 
 class AuthService extends GetxController {
   final Rxn<UserModel> _usuario = Rxn<UserModel>();
@@ -21,15 +19,33 @@ class AuthService extends GetxController {
     _autenticando.value = valor;
   }
 
-  // Getters del token de forma estática
+  // Getters del token y userName, userId de forma estática
   static Future<String?> getToken() async {
     final storage = FlutterSecureStorage();
     return await storage.read(key: 'token');
   }
 
+  static Future<String?> getUserId() async {
+    final storage = FlutterSecureStorage();
+    return await storage.read(key: 'userId');
+  }
+
+  static Future<String?> getFirstName() async {
+    final storage = FlutterSecureStorage();
+    return await storage.read(key: 'firstName');
+  }
+
+  static Future<String?> getLastName() async {
+    final storage = FlutterSecureStorage();
+    return await storage.read(key: 'lastName');
+  }
+
   static Future<void> deleteToken() async {
     final storage = FlutterSecureStorage();
     await storage.delete(key: 'token');
+    await storage.delete(key: 'userId');
+    await storage.delete(key: 'firstName');
+    await storage.delete(key: 'lastName');
   }
 
   Future<bool> login(String email, String password) async {
@@ -49,6 +65,11 @@ class AuthService extends GetxController {
 
       if (loginResponse.token.isNotEmpty) {
         await _guardarToken(loginResponse.token);
+        await _guardarUserDetails(
+          loginResponse.user.userId!,
+          loginResponse.user.firstName,
+          loginResponse.user.lastName,
+        );
       }
 
       return true;
@@ -69,6 +90,11 @@ class AuthService extends GetxController {
       _usuario.value = loginResponse.user;
       if (loginResponse.token.isNotEmpty) {
         await _guardarToken(loginResponse.token);
+        await _guardarUserDetails(
+          loginResponse.user.userId!,
+          loginResponse.user.firstName,
+          loginResponse.user.lastName,
+        );
       }
       return true;
     } else {
@@ -81,8 +107,18 @@ class AuthService extends GetxController {
     return await _storage.write(key: 'token', value: token);
   }
 
+  Future _guardarUserDetails(
+      String userId, String firstName, String lastName) async {
+    await _storage.write(key: 'userId', value: userId);
+    await _storage.write(key: 'firstName', value: firstName);
+    await _storage.write(key: 'lastName', value: lastName);
+  }
+
   Future logout() async {
     await _storage.delete(key: 'token');
+    await _storage.delete(key: 'userId');
+    await _storage.delete(key: 'firstName');
+    await _storage.delete(key: 'lastName');
     _usuario.value = null;
   }
 }

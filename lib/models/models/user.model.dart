@@ -30,7 +30,7 @@ class UserModel {
         statusId: json["statusId"] ?? '',
         online: json["online"] ?? false,
         workShift: json["workShift"] as int?,
-        userId: json["userId"],
+        userId: json["userId"] ?? '', // Asegúrate de que no sea nulo
       );
 
   Map<String, dynamic> toJson() => {
