@@ -4,7 +4,7 @@ import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
 import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
-import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
+import 'package:hand_held_shell/services/fuel.statation/dispenser.reader.service.dart';
 import 'package:hand_held_shell/shared/helpers/show.error.dialog.dart';
 
 class ModifyDispenserController extends GetxController {

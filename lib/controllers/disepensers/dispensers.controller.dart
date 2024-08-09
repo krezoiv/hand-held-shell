@@ -5,7 +5,7 @@ import 'package:hand_held_shell/controllers/disepensers/modify.dispenser.control
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
+import 'package:hand_held_shell/services/fuel.statation/dispenser.reader.service.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 
 class DispenserController extends GetxController {

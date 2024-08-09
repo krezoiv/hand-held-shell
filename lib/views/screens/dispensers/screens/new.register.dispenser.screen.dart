@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:hand_held_shell/config/global/routes.path.dart';
 import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
-import 'package:hand_held_shell/services/dispensers/dispenser.reader.service.dart';
+import 'package:hand_held_shell/services/fuel.statation/dispenser.reader.service.dart';
 import 'package:hand_held_shell/shared/helpers/show.confirm.alert.dart';
 import 'package:hand_held_shell/views/screens/dispensers/screens/register.dispenser.page.screen.dart';
 import 'package:hand_held_shell/views/screens/dispensers/widgets/side.menu.dispenser.dart';

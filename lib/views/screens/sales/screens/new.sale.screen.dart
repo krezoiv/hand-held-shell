@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:hand_held_shell/controllers/accounting/banks/bank.controller.dart';
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
+
 import 'package:hand_held_shell/shared/helpers/Thousands.formatter.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
@@ -9,6 +12,7 @@ import 'package:hand_held_shell/models/models/taxes/taxes.model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
 import 'package:hand_held_shell/controllers/fuels/fuels.controller.dart';
+import 'package:hand_held_shell/controllers/pos/pos.controller.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/sales/widgets/side.menu.sale.dart';
 
@@ -21,9 +25,10 @@ class NewSalesScreen extends StatefulWidget {
 
 class _NewSalesScreenState extends State<NewSalesScreen> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  final DispenserController dispenserController =
-      Get.put(DispenserController());
-  final FuelController fuelController = Get.put(FuelController());
+  late DispenserController dispenserController;
+  late FuelController fuelController;
+  late PosController posController;
+  late BankController bankController;
 
   final totalSalesRegular = 0.0.obs;
   final totalSalesSuper = 0.0.obs;
@@ -46,6 +51,10 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   @override
   void initState() {
     super.initState();
+    dispenserController = Get.put(DispenserController());
+    fuelController = Get.put(FuelController());
+    posController = Get.put(PosController());
+    bankController = Get.put(BankController());
     loadState();
   }
 
@@ -444,49 +453,61 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (label == 'Gastos') ...[
-                        buildTextField('Número Correlativo'),
-                        buildTextField('Fecha', TextInputType.datetime),
-                        buildNumberTextField('Monto'),
-                        buildTextField('Descripción'),
-                      ],
-                      if (label == 'Vales') ...[
-                        buildTextField('Número de Vale'),
-                        buildTextField('Descripción'),
-                        buildNumberTextField('Valor'),
-                      ],
-                      if (label == 'Cupones') ...[
-                        buildTextField('No. Cupon'),
-                        buildNumberTextField('Valor'),
-                        buildTextField('Fecha', TextInputType.datetime),
-                      ],
                       if (label == 'Vouchers') ...[
-                        buildDropdownField('POS', ['POS1', 'POS2', 'POS3']),
+                        buildDropdownField(
+                          'POS',
+                          posController.posList
+                              .map((Pos pos) => pos.posName)
+                              .toList(),
+                        ),
                         buildNumberTextField('Valor'),
                         buildTextField('No. Autorización'),
                         buildTextField('Fecha', TextInputType.datetime),
                       ],
                       if (label == 'Depósitos') ...[
                         buildDropdownField(
-                            'Banco', ['Banco 1', 'Banco 2', 'Banco 3']),
+                          'Banco',
+                          bankController.bankList
+                              .map((Bank bank) => bank.bankName)
+                              .toList(),
+                          // Lista específica para Bancos
+                        ),
                         buildTextField('No. Boleta'),
                         buildNumberTextField('Valor'),
                         buildTextField('Fecha', TextInputType.datetime),
                       ],
                       if (label == 'Créditos') ...[
-                        buildDropdownField('Clientes',
-                            ['Cliente 1', 'Cliente 2', 'Cliente 3']),
+                        buildDropdownField(
+                          'Clientes',
+                          [
+                            'Cliente 1',
+                            'Cliente 2',
+                            'Cliente 3'
+                          ], // Lista específica para Clientes
+                        ),
                         buildTextField('No. Comprobante'),
                         buildNumberTextField('Valor'),
                         buildTextField('Fecha', TextInputType.datetime),
                       ],
                       if (label == 'Cheques') ...[
                         buildDropdownField(
-                            'Bancos', ['Banco 1', 'Banco 2', 'Banco 3']),
+                          'Bancos',
+                          [
+                            'Banco 1',
+                            'Banco 2',
+                            'Banco 3'
+                          ], // Lista específica para Bancos
+                        ),
                         buildTextField('No. Cheque'),
                         buildNumberTextField('Valor'),
-                        buildDropdownField('Clientes',
-                            ['Cliente 1', 'Cliente 2', 'Cliente 3']),
+                        buildDropdownField(
+                          'Clientes',
+                          [
+                            'Cliente 1',
+                            'Cliente 2',
+                            'Cliente 3'
+                          ], // Lista específica para Clientes
+                        ),
                         buildTextField('Fecha', TextInputType.datetime),
                       ],
                       const SizedBox(height: 16),
@@ -538,12 +559,30 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
           labelText: label,
-          border: const OutlineInputBorder(),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(
+                20.0), // Bordes redondos para el campo de texto
+          ),
+          filled: true,
+          fillColor: Colors.white, // Fondo gris para el TextField
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
         ),
+        style: const TextStyle(fontSize: 16, color: Colors.black),
+        isDense: false,
+        icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
+        iconSize: 24,
+        dropdownColor: Colors.white, // Fondo gris para la lista desplegable
         items: options.map((String option) {
           return DropdownMenuItem<String>(
             value: option,
-            child: Text(option),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Text(
+                option,
+                style: const TextStyle(fontSize: 16, color: Colors.black),
+              ),
+            ),
           );
         }).toList(),
         onChanged: (String? value) {
@@ -606,20 +645,24 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   }
 
   Future<void> loadState() async {
-    final prefs = await SharedPreferences.getInstance();
-    totalSalesRegular.value = prefs.getDouble('totalSalesRegular') ?? 0.0;
-    totalSalesSuper.value = prefs.getDouble('totalSalesSuper') ?? 0.0;
-    totalSalesDiesel.value = prefs.getDouble('totalSalesDiesel') ?? 0.0;
-    totalPayments.value = prefs.getDouble('totalPayments') ?? 0.0;
-    totalSaldo.value = prefs.getDouble('totalSaldo') ?? 0.0;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      totalSalesRegular.value = prefs.getDouble('totalSalesRegular') ?? 0.0;
+      totalSalesSuper.value = prefs.getDouble('totalSalesSuper') ?? 0.0;
+      totalSalesDiesel.value = prefs.getDouble('totalSalesDiesel') ?? 0.0;
+      totalPayments.value = prefs.getDouble('totalPayments') ?? 0.0;
+      totalSaldo.value = prefs.getDouble('totalSaldo') ?? 0.0;
 
-    gastos.value = prefs.getString('gastos') ?? '0.000';
-    vales.value = prefs.getString('vales') ?? '0.000';
-    cupones.value = prefs.getString('cupones') ?? '0.000';
-    vouchers.value = prefs.getString('vouchers') ?? '0.000';
-    depositos.value = prefs.getString('depositos') ?? '0.000';
-    creditos.value = prefs.getString('creditos') ?? '0.000';
-    cheques.value = prefs.getString('cheques') ?? '0.000';
+      gastos.value = prefs.getString('gastos') ?? '0.000';
+      vales.value = prefs.getString('vales') ?? '0.000';
+      cupones.value = prefs.getString('cupones') ?? '0.000';
+      vouchers.value = prefs.getString('vouchers') ?? '0.000';
+      depositos.value = prefs.getString('depositos') ?? '0.000';
+      creditos.value = prefs.getString('creditos') ?? '0.000';
+      cheques.value = prefs.getString('cheques') ?? '0.000';
+    } catch (e) {
+      print('Error loading state: $e');
+    }
   }
 
   Future<void> clearState() async {
@@ -653,5 +696,14 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    dispenserController.dispose();
+    fuelController.dispose();
+    posController.dispose();
+    bankController.dispose();
+    super.dispose();
   }
 }

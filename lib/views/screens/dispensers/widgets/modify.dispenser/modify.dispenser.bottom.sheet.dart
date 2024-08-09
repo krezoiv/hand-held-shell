@@ -61,13 +61,12 @@ class ModifyDispenserBottomSheet extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16),
                       child: Card(
-                        elevation: 12, // Incrementa la sombra
+                        elevation: 12,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
-                          side: BorderSide(
-                              color: Colors.black, width: 1), // Borde negro
+                          side: BorderSide(color: Colors.black, width: 1),
                         ),
-                        shadowColor: Colors.blue, // Sombra más oscura
+                        shadowColor: Colors.blue,
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Column(
@@ -80,19 +79,14 @@ class ModifyDispenserBottomSheet extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               TextField(
-                                controller: TextEditingController(
-                                  text: modifyController.formatNumberWithCommas(
-                                    modifyController
-                                        .previousControllers[cardIndex].text,
-                                  ),
-                                ),
+                                controller: modifyController
+                                    .previousControllers[cardIndex],
                                 decoration: InputDecoration(
                                   labelText: 'Lectura Anterior',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide(
-                                        color: Colors.black,
-                                        width: 2), // Borde negro
+                                        color: Colors.black, width: 2),
                                   ),
                                 ),
                                 readOnly: true,
@@ -100,24 +94,17 @@ class ModifyDispenserBottomSheet extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               TextField(
-                                controller: TextEditingController(
-                                  text: modifyController.formatNumberWithCommas(
-                                    modifyController
-                                        .actualControllers[cardIndex].text,
-                                  ),
-                                ),
+                                controller: modifyController
+                                    .actualControllers[cardIndex],
                                 decoration: InputDecoration(
                                   labelText: 'Lectura Actual',
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                     borderSide: BorderSide(
-                                        color: Colors.black,
-                                        width: 2), // Borde negro
+                                        color: Colors.black, width: 2),
                                   ),
                                 ),
-                                readOnly: true,
-                                showCursor: false,
-                                enableInteractiveSelection: false,
+                                readOnly: false, // Esto permitirá que se edite
                               ),
                               const SizedBox(height: 8),
                               Obx(() => Text(

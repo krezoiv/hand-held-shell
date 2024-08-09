@@ -1,8 +1,10 @@
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
+
 class BankCheck {
   String id;
   int checkNumber;
   DateTime checkDate;
-  String bankId;
+  Bank bankId;
   String clientId;
 
   BankCheck({
@@ -17,7 +19,8 @@ class BankCheck {
         id: json["_id"],
         checkNumber: json["checkNumber"],
         checkDate: DateTime.parse(json["checkDate"]),
-        bankId: json["bankId"],
+        bankId: Bank.fromJson(json["bankId"] ?? {}),
+        // bankId: json["bankId"],
         clientId: json["clientId"],
       );
 
@@ -25,7 +28,7 @@ class BankCheck {
         "_id": id,
         "checkNumber": checkNumber,
         "checkDate": checkDate.toIso8601String(),
-        "bankId": bankId,
+        "bankId": bankId.toJson(),
         "clientId": clientId,
       };
 }

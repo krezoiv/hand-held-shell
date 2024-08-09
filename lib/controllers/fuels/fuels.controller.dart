@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:hand_held_shell/models/models/fuel.station/fuel.model.dart';
 
-import 'package:hand_held_shell/services/fuels/fuels.service.dart';
+import 'package:hand_held_shell/services/accounting/fuels/fuels.service.dart';
 
 class FuelController extends GetxController {
   final RxList<Fuel> fuels = <Fuel>[].obs;
