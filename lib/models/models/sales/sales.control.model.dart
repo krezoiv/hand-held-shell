@@ -15,16 +15,16 @@ class SalesControl {
   num total;
   num balance;
   num totalAbonosBalance;
-  List<Bill> billIds;
-  List<Vale> valeIds;
-  List<Coupons> couponsIds;
-  List<Voucher> voucherIds;
-  List<Deposits> depositsIds;
-  List<Credit> creditIds;
-  List<BankCheck> bankCheckIds;
+  List<dynamic> billIds;
+  List<dynamic> valeIds;
+  List<dynamic> couponsIds;
+  List<dynamic> voucherIds;
+  List<dynamic> depositsIds;
+  List<dynamic> creditIds;
+  List<dynamic> bankCheckIds;
   num abonos;
   String userName;
-  dynamic generalDispenserReaderId;
+  GeneralDispenserReader generalDispenserReaderId;
   String salesControlId;
 
   SalesControl({
@@ -58,9 +58,9 @@ class SalesControl {
   factory SalesControl.fromJson(Map<String, dynamic> json) => SalesControl(
         salesDate: DateTime.parse(json["salesDate"]),
         noDocument: json["noDocument"],
-        regularPrice: json["regularPrice"].toDouble(),
-        superPrice: json["superPrice"].toDouble(),
-        dieselPrice: json["dieselPrice"].toDouble(),
+        regularPrice: json["regularPrice"],
+        superPrice: json["superPrice"],
+        dieselPrice: json["dieselPrice"],
         totalGallonRegular: json["totalGallonRegular"],
         totalGallonSuper: json["totalGallonSuper"],
         totalGallonDiesel: json["totalGallonDiesel"],
@@ -70,21 +70,17 @@ class SalesControl {
         total: json["total"],
         balance: json["balance"],
         totalAbonosBalance: json["totalAbonosBalance"],
-        billIds: List<Bill>.from(json["billIds"].map((x) => Bill.fromJson(x))),
-        valeIds: List<Vale>.from(json["valeIds"].map((x) => Vale.fromJson(x))),
-        couponsIds: List<Coupons>.from(
-            json["couponsIds"].map((x) => Coupons.fromJson(x))),
-        voucherIds: List<Voucher>.from(
-            json["voucherIds"].map((x) => Voucher.fromJson(x))),
-        depositsIds: List<Deposits>.from(
-            json["depositsIds"].map((x) => Deposits.fromJson(x))),
-        creditIds:
-            List<Credit>.from(json["creditIds"].map((x) => Credit.fromJson(x))),
-        bankCheckIds: List<BankCheck>.from(
-            json["bankCheckIds"].map((x) => BankCheck.fromJson(x))),
+        billIds: List<dynamic>.from(json["billIds"].map((x) => x)),
+        valeIds: List<dynamic>.from(json["valeIds"].map((x) => x)),
+        couponsIds: List<dynamic>.from(json["couponsIds"].map((x) => x)),
+        voucherIds: List<dynamic>.from(json["voucherIds"].map((x) => x)),
+        depositsIds: List<dynamic>.from(json["depositsIds"].map((x) => x)),
+        creditIds: List<dynamic>.from(json["creditIds"].map((x) => x)),
+        bankCheckIds: List<dynamic>.from(json["bankCheckIds"].map((x) => x)),
         abonos: json["abonos"],
         userName: json["userName"],
-        generalDispenserReaderId: json["generalDispenserReaderId"],
+        generalDispenserReaderId: GeneralDispenserReader.fromJson(
+            json["generalDispenserReaderId"] ?? {}),
         salesControlId: json["salesControlId"],
       );
 
@@ -103,16 +99,16 @@ class SalesControl {
         "total": total,
         "balance": balance,
         "totalAbonosBalance": totalAbonosBalance,
-        "billIds": List<dynamic>.from(billIds.map((x) => x.toJson())),
-        "valeIds": List<dynamic>.from(valeIds.map((x) => x.toJson())),
-        "couponsIds": List<dynamic>.from(couponsIds.map((x) => x.toJson())),
-        "voucherIds": List<dynamic>.from(voucherIds.map((x) => x.toJson())),
-        "depositsIds": List<dynamic>.from(depositsIds.map((x) => x.toJson())),
-        "creditIds": List<dynamic>.from(creditIds.map((x) => x.toJson())),
-        "bankCheckIds": List<dynamic>.from(bankCheckIds.map((x) => x.toJson())),
+        "billIds": List<dynamic>.from(billIds.map((x) => x)),
+        "valeIds": List<dynamic>.from(valeIds.map((x) => x)),
+        "couponsIds": List<dynamic>.from(couponsIds.map((x) => x)),
+        "voucherIds": List<dynamic>.from(voucherIds.map((x) => x)),
+        "depositsIds": List<dynamic>.from(depositsIds.map((x) => x)),
+        "creditIds": List<dynamic>.from(creditIds.map((x) => x)),
+        "bankCheckIds": List<dynamic>.from(bankCheckIds.map((x) => x)),
         "abonos": abonos,
         "userName": userName,
-        "generalDispenserReaderId": generalDispenserReaderId,
+        "generalDispenserReaderId": generalDispenserReaderId.toJson(),
         "salesControlId": salesControlId,
       };
 }

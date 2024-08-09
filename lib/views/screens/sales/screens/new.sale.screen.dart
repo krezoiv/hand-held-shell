@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hand_held_shell/controllers/accounting/banks/bank.controller.dart';
 import 'package:hand_held_shell/controllers/persons/clients/clients.controller.dart';
+import 'package:hand_held_shell/controllers/sales/new.sales.controller.dart';
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 
 import 'package:hand_held_shell/shared/helpers/Thousands.formatter.dart';
@@ -31,6 +32,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   late PosController posController;
   late BankController bankController;
   late ClientsController clientsController;
+  late SalesControlController salesControlController;
 
   final totalSalesRegular = 0.0.obs;
   final totalSalesSuper = 0.0.obs;
@@ -58,6 +60,8 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     posController = Get.put(PosController());
     bankController = Get.put(BankController());
     clientsController = Get.put(ClientsController());
+    salesControlController =
+        Get.put(SalesControlController()); // Aquí es donde corriges el error
     loadState();
   }
 
@@ -140,11 +144,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: GestureDetector(
         onDoubleTap: () async {
-          await dispenserController.fetchLastGeneralDispenserReaderData();
-          await fuelController.fetchFuels();
-          calculateTotalSales();
-          updatePayments();
-          saveState();
+          await Get.find<SalesControlController>().createNewSalesControl();
         },
         child: Card(
           elevation: 12,
@@ -705,6 +705,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     posController.dispose();
     bankController.dispose();
     clientsController.dispose();
+    salesControlController.dispose();
     super.dispose();
   }
 }
