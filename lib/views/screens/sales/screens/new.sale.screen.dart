@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hand_held_shell/controllers/accounting/banks/bank.controller.dart';
+import 'package:hand_held_shell/controllers/persons/clients/clients.controller.dart';
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 
 import 'package:hand_held_shell/shared/helpers/Thousands.formatter.dart';
@@ -29,6 +30,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   late FuelController fuelController;
   late PosController posController;
   late BankController bankController;
+  late ClientsController clientsController;
 
   final totalSalesRegular = 0.0.obs;
   final totalSalesSuper = 0.0.obs;
@@ -55,6 +57,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     fuelController = Get.put(FuelController());
     posController = Get.put(PosController());
     bankController = Get.put(BankController());
+    clientsController = Get.put(ClientsController());
     loadState();
   }
 
@@ -479,11 +482,10 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                       if (label == 'Créditos') ...[
                         buildDropdownField(
                           'Clientes',
-                          [
-                            'Cliente 1',
-                            'Cliente 2',
-                            'Cliente 3'
-                          ], // Lista específica para Clientes
+                          clientsController.clientsList
+                              .map((Client client) => client.clientName)
+                              .toList(),
+                          // Lista específica para Clientes
                         ),
                         buildTextField('No. Comprobante'),
                         buildNumberTextField('Valor'),
@@ -491,22 +493,20 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                       ],
                       if (label == 'Cheques') ...[
                         buildDropdownField(
-                          'Bancos',
-                          [
-                            'Banco 1',
-                            'Banco 2',
-                            'Banco 3'
-                          ], // Lista específica para Bancos
+                          'Banco',
+                          bankController.bankList
+                              .map((Bank bank) => bank.bankName)
+                              .toList(),
+                          // Lista específica para Bancos
                         ),
                         buildTextField('No. Cheque'),
                         buildNumberTextField('Valor'),
                         buildDropdownField(
                           'Clientes',
-                          [
-                            'Cliente 1',
-                            'Cliente 2',
-                            'Cliente 3'
-                          ], // Lista específica para Clientes
+                          clientsController.clientsList
+                              .map((Client client) => client.clientName)
+                              .toList(),
+                          // Lista específica para Clientes
                         ),
                         buildTextField('Fecha', TextInputType.datetime),
                       ],
@@ -704,6 +704,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     fuelController.dispose();
     posController.dispose();
     bankController.dispose();
+    clientsController.dispose();
     super.dispose();
   }
 }

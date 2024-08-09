@@ -1,3 +1,6 @@
+export 'package:hand_held_shell/models/mappers/client/client.list.response.dart';
+export 'package:hand_held_shell/models/models/persons/client.model.dart';
+
 export 'package:hand_held_shell/models/mappers/banks/bank.list.response.dart';
 export 'package:hand_held_shell/models/models/acocounting/bank.model.dart';
 
