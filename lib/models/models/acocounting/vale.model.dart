@@ -1,27 +1,33 @@
+import 'package:hand_held_shell/models/models/sales/sales.control.model.dart';
+
 class Vale {
-  String id;
   int valeNumber;
   DateTime valeDate;
   num valeAmount;
+  SalesControl salesControlId;
+  String valeId;
 
   Vale({
-    required this.id,
     required this.valeNumber,
     required this.valeDate,
     required this.valeAmount,
+    required this.salesControlId,
+    required this.valeId,
   });
 
   factory Vale.fromJson(Map<String, dynamic> json) => Vale(
-        id: json["_id"],
         valeNumber: json["valeNumber"],
         valeDate: DateTime.parse(json["valeDate"]),
         valeAmount: json["valeAmount"],
+        salesControlId: SalesControl.fromJson(json["salesControlId"] ?? {}),
+        valeId: json["valeId"],
       );
 
   Map<String, dynamic> toJson() => {
-        "_id": id,
         "valeNumber": valeNumber,
         "valeDate": valeDate.toIso8601String(),
         "valeAmount": valeAmount,
+        "salesControlId": salesControlId.toJson(),
+        "valeId": valeId,
       };
 }

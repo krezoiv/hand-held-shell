@@ -1,35 +1,42 @@
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
+import 'package:hand_held_shell/models/models/sales/sales.control.model.dart';
+
 class Credit {
-  String id;
   bool applied;
   int creditNumber;
   num creditAmount;
   DateTime creditDate;
-  String clientId;
+  Client clientId;
+  SalesControl salesControlId;
+  String creditId;
 
   Credit({
-    required this.id,
     required this.applied,
     required this.creditNumber,
     required this.creditAmount,
     required this.creditDate,
     required this.clientId,
+    required this.salesControlId,
+    required this.creditId,
   });
 
   factory Credit.fromJson(Map<String, dynamic> json) => Credit(
-        id: json["_id"],
         applied: json["applied"],
         creditNumber: json["creditNumber"],
         creditAmount: json["creditAmount"],
         creditDate: DateTime.parse(json["creditDate"]),
-        clientId: json["clientId"],
+        clientId: Client.fromJson(json["clientId"] ?? {}),
+        salesControlId: SalesControl.fromJson(json["salesControlId"] ?? {}),
+        creditId: json["creditId"],
       );
 
   Map<String, dynamic> toJson() => {
-        "_id": id,
         "applied": applied,
         "creditNumber": creditNumber,
         "creditAmount": creditAmount,
         "creditDate": creditDate.toIso8601String(),
-        "clientId": clientId,
+        "clientId": clientId.toJson(),
+        "salesControlId": salesControlId.toJson(),
+        "creditId": creditId,
       };
 }

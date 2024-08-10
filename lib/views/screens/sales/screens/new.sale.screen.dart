@@ -28,11 +28,11 @@ class NewSalesScreen extends StatefulWidget {
 class _NewSalesScreenState extends State<NewSalesScreen> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   late DispenserController dispenserController;
+  late SalesControlController salesControlController;
   late FuelController fuelController;
   late PosController posController;
   late BankController bankController;
   late ClientsController clientsController;
-  late SalesControlController salesControlController;
 
   final totalSalesRegular = 0.0.obs;
   final totalSalesSuper = 0.0.obs;
@@ -60,8 +60,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     posController = Get.put(PosController());
     bankController = Get.put(BankController());
     clientsController = Get.put(ClientsController());
-    salesControlController =
-        Get.put(SalesControlController()); // Aquí es donde corriges el error
+    salesControlController = Get.put(SalesControlController());
     loadState();
   }
 
@@ -144,7 +143,12 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: GestureDetector(
         onDoubleTap: () async {
-          await Get.find<SalesControlController>().createNewSalesControl();
+          await dispenserController.fetchLastGeneralDispenserReaderData();
+          await fuelController.fetchFuels();
+          await salesControlController.createNewSalesControl();
+          calculateTotalSales();
+          updatePayments();
+          saveState();
         },
         child: Card(
           elevation: 12,
@@ -705,7 +709,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     posController.dispose();
     bankController.dispose();
     clientsController.dispose();
-    salesControlController.dispose();
     super.dispose();
   }
 }

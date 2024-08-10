@@ -1,31 +1,38 @@
-class Deposits {
-  String id;
+import 'package:hand_held_shell/models/enteties.exports.files.dart';
+import 'package:hand_held_shell/models/models/sales/sales.control.model.dart';
+
+class Deposit {
   int depositNumber;
   num depositAmount;
   DateTime depositDate;
-  String bankId;
+  Bank bankId;
+  SalesControl salesControlId;
+  String depositId;
 
-  Deposits({
-    required this.id,
+  Deposit({
     required this.depositNumber,
     required this.depositAmount,
     required this.depositDate,
     required this.bankId,
+    required this.salesControlId,
+    required this.depositId,
   });
 
-  factory Deposits.fromJson(Map<String, dynamic> json) => Deposits(
-        id: json["_id"],
+  factory Deposit.fromJson(Map<String, dynamic> json) => Deposit(
         depositNumber: json["depositNumber"],
         depositAmount: json["depositAmount"],
         depositDate: DateTime.parse(json["depositDate"]),
-        bankId: json["bankId"],
+        bankId: Bank.fromJson(json["bankId"] ?? {}),
+        salesControlId: SalesControl.fromJson(json["salesControlId"] ?? {}),
+        depositId: json["depositId"],
       );
 
   Map<String, dynamic> toJson() => {
-        "_id": id,
         "depositNumber": depositNumber,
         "depositAmount": depositAmount,
         "depositDate": depositDate.toIso8601String(),
-        "bankId": bankId,
+        "bankId": bankId.toJson(),
+        "salesControlId": salesControlId.toJson(),
+        "depositId": depositId,
       };
 }

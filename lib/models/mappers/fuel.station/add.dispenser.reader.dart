@@ -25,7 +25,7 @@ class AddNewReaderResponse {
       AddNewReaderResponse(
         ok: json["ok"],
         newDispenserReader:
-            DispenserReader.fromJson(json["newDispenserReader"]),
+            DispenserReader.fromJson(json["newDispenserReader"] ?? {}),
       );
 
   Map<String, dynamic> toJson() => {
