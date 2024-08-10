@@ -25,7 +25,7 @@ class BankCheckService {
         url,
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
+          'x-token': token,
         },
         body: json.encode({
           'checkNumber': checkNumber,

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
+import 'package:hand_held_shell/controllers/accounting/bank.check/bank.check.controller.dart';
 import 'package:hand_held_shell/controllers/accounting/banks/bank.controller.dart';
 import 'package:hand_held_shell/controllers/persons/clients/clients.controller.dart';
 import 'package:hand_held_shell/controllers/sales/new.sales.controller.dart';
-import 'package:hand_held_shell/models/enteties.exports.files.dart';
-
+import 'package:hand_held_shell/models/models/acocounting/bank.model.dart';
+import 'package:hand_held_shell/models/models/acocounting/pos.model.dart';
+import 'package:hand_held_shell/models/models/persons/client.model.dart';
 import 'package:hand_held_shell/shared/helpers/Thousands.formatter.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
@@ -33,6 +35,12 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   late PosController posController;
   late BankController bankController;
   late ClientsController clientsController;
+  late BankCheckController bankCheckController;
+  String? selectedBank;
+  String? selectedClient;
+  TextEditingController checkNumberController = TextEditingController();
+  TextEditingController checkValueController = TextEditingController();
+  TextEditingController checkDateController = TextEditingController();
 
   final totalSalesRegular = 0.0.obs;
   final totalSalesSuper = 0.0.obs;
@@ -61,6 +69,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     bankController = Get.put(BankController());
     clientsController = Get.put(ClientsController());
     salesControlController = Get.put(SalesControlController());
+    bankCheckController = Get.put(BankCheckController());
     loadState();
   }
 
@@ -460,59 +469,36 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (label == 'Vouchers') ...[
-                        buildDropdownField(
-                          'POS',
-                          posController.posList
-                              .map((Pos pos) => pos.posName)
-                              .toList(),
-                        ),
-                        buildNumberTextField('Valor'),
-                        buildTextField('No. Autorización'),
-                        buildTextField('Fecha', TextInputType.datetime),
-                      ],
-                      if (label == 'Depósitos') ...[
-                        buildDropdownField(
-                          'Banco',
-                          bankController.bankList
-                              .map((Bank bank) => bank.bankName)
-                              .toList(),
-                          // Lista específica para Bancos
-                        ),
-                        buildTextField('No. Boleta'),
-                        buildNumberTextField('Valor'),
-                        buildTextField('Fecha', TextInputType.datetime),
-                      ],
-                      if (label == 'Créditos') ...[
-                        buildDropdownField(
-                          'Clientes',
-                          clientsController.clientsList
-                              .map((Client clients) => clients.clientName)
-                              .toList(),
-                          // Lista específica para Clientes
-                        ),
-                        buildTextField('No. Comprobante'),
-                        buildNumberTextField('Valor'),
-                        buildTextField('Fecha', TextInputType.datetime),
-                      ],
                       if (label == 'Cheques') ...[
                         buildDropdownField(
                           'Banco',
                           bankController.bankList
                               .map((Bank bank) => bank.bankName)
                               .toList(),
-                          // Lista específica para Bancos
+                          onChanged: (value) {
+                            setState(() {
+                              selectedBank = value;
+                            });
+                          },
                         ),
-                        buildTextField('No. Cheque'),
-                        buildNumberTextField('Valor'),
+                        buildTextField('No. Cheque',
+                            controller: checkNumberController),
+                        buildNumberTextField('Valor',
+                            controller: checkValueController),
                         buildDropdownField(
                           'Clientes',
                           clientsController.clientsList
                               .map((Client client) => client.clientName)
                               .toList(),
-                          // Lista específica para Clientes
+                          onChanged: (value) {
+                            setState(() {
+                              selectedClient = value;
+                            });
+                          },
                         ),
-                        buildTextField('Fecha', TextInputType.datetime),
+                        buildTextField('Fecha',
+                            inputType: TextInputType.datetime,
+                            controller: checkDateController),
                       ],
                       const SizedBox(height: 16),
                       Row(
@@ -525,7 +511,8 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                             child: const Text('Cancelar'),
                           ),
                           ElevatedButton(
-                            onPressed: () {
+                            onPressed: () async {
+                              await createBankCheck();
                               Navigator.pop(context);
                             },
                             child: const Text('Guardar'),
@@ -544,10 +531,12 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   }
 
   Widget buildTextField(String label,
-      [TextInputType inputType = TextInputType.text]) {
+      {TextInputType inputType = TextInputType.text,
+      TextEditingController? controller}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
+        controller: controller,
         decoration: InputDecoration(
           labelText: label,
           border: const OutlineInputBorder(),
@@ -557,18 +546,36 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     );
   }
 
-  Widget buildDropdownField(String label, List<String> options) {
+  Widget buildNumberTextField(String label,
+      {TextEditingController? controller}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          ThousandsFormatter(),
+        ],
+      ),
+    );
+  }
+
+  Widget buildDropdownField(String label, List<String> options,
+      {Function(String?)? onChanged}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: DropdownButtonFormField<String>(
         decoration: InputDecoration(
           labelText: label,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(
-                20.0), // Bordes redondos para el campo de texto
+            borderRadius: BorderRadius.circular(20.0),
           ),
           filled: true,
-          fillColor: Colors.white, // Fondo gris para el TextField
+          fillColor: Colors.white,
           contentPadding:
               const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
         ),
@@ -576,7 +583,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         isDense: false,
         icon: const Icon(Icons.arrow_drop_down, color: Colors.black),
         iconSize: 24,
-        dropdownColor: Colors.white, // Fondo gris para la lista desplegable
+        dropdownColor: Colors.white,
         items: options.map((String option) {
           return DropdownMenuItem<String>(
             value: option,
@@ -589,11 +596,47 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
             ),
           );
         }).toList(),
-        onChanged: (String? value) {
-          // Manejar el cambio de valor si es necesario
-        },
+        onChanged: onChanged,
       ),
     );
+  }
+
+  Future<void> createBankCheck() async {
+    if (selectedBank == null || selectedClient == null) {
+      Get.snackbar('Error', 'Por favor, seleccione un banco y un cliente');
+      return;
+    }
+
+    final checkNumber = int.tryParse(checkNumberController.text);
+    final checkValue =
+        num.tryParse(checkValueController.text.replaceAll(',', ''));
+    final checkDate = DateFormat('yyyy-MM-dd').parse(checkDateController.text);
+
+    if (checkNumber == null || checkValue == null) {
+      Get.snackbar('Error',
+          'Por favor, ingrese valores válidos para el número y valor del cheque');
+      return;
+    }
+
+    final bankId = bankController.bankList
+        .firstWhere((bank) => bank.bankName == selectedBank)
+        .bankId;
+    final clientId = clientsController.clientsList
+        .firstWhere((client) => client.clientName == selectedClient)
+        .clientId;
+
+    await bankCheckController.createBankCheck(
+      checkNumber: checkNumber,
+      checkValue: checkValue,
+      checkDate: checkDate,
+      bankId: bankId,
+      clientId: clientId,
+    );
+
+    // Update the cheques value
+    cheques.value = (num.parse(cheques.value) + checkValue).toStringAsFixed(3);
+    calculateTotalSales();
+    saveState();
   }
 
   void calculateTotalSales() {
@@ -684,22 +727,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     await prefs.remove('creditos');
     await prefs.remove('cheques');
     loadState(); // Vuelve a cargar el estado para asegurarse de que se restablezcan los valores
-  }
-
-  Widget buildNumberTextField(String label) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: TextField(
-        decoration: InputDecoration(
-          labelText: label,
-          border: const OutlineInputBorder(),
-        ),
-        keyboardType: TextInputType.numberWithOptions(decimal: true),
-        inputFormatters: [
-          ThousandsFormatter(),
-        ],
-      ),
-    );
   }
 
   @override
