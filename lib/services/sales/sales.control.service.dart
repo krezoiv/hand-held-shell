@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 
 class SalesControlService extends GetxService {
   static const String baseUrl =
-      'http://192.168.1.148:3000/api'; // Ajusta esta URL según tu configuración
+      'http://192.168.0.100:3000/api'; // Ajusta esta URL según tu configuración
 
   Future<NewSalesControlResponse> createSalesControl(
       Map<String, dynamic> requestBody, String token) async {
@@ -28,3 +28,4 @@ class SalesControlService extends GetxService {
     }
   }
 }
+//el tiempo llegara , ahorita no es el tiempo, mientras tanto estare enfocado crear los recursos

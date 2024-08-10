@@ -487,7 +487,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                         buildDropdownField(
                           'Clientes',
                           clientsController.clientsList
-                              .map((Client client) => client.clientName)
+                              .map((Client clients) => clients.clientName)
                               .toList(),
                           // Lista específica para Clientes
                         ),

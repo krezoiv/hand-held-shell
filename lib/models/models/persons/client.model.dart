@@ -1,12 +1,12 @@
 class Client {
-  String id;
+  String clientId;
   String clientName;
   String clientEmail;
   String clientPhone;
   String clientAddress;
 
   Client({
-    required this.id,
+    required this.clientId,
     required this.clientName,
     required this.clientEmail,
     required this.clientPhone,
@@ -14,7 +14,7 @@ class Client {
   });
 
   factory Client.fromJson(Map<String, dynamic> json) => Client(
-        id: json["_id"],
+        clientId: json["clientId"],
         clientName: json["clientName"],
         clientEmail: json["clientEmail"],
         clientPhone: json["clientPhone"],
@@ -22,7 +22,7 @@ class Client {
       );
 
   Map<String, dynamic> toJson() => {
-        "_id": id,
+        "clientId": clientId,
         "clientName": clientName,
         "clientEmail": clientEmail,
         "clientPhone": clientPhone,
