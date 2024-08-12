@@ -2,6 +2,7 @@ import 'package:hand_held_shell/controllers/accounting/coupons/coupons.controlle
 import 'package:hand_held_shell/controllers/accounting/credis/credits.crontroller.dart';
 import 'package:hand_held_shell/controllers/accounting/deposits/deposits.controller.dart';
 import 'package:hand_held_shell/controllers/accounting/voucher/voucher.controller.dart';
+import 'package:hand_held_shell/shared/helpers/show.confirm.dialog.dart';
 
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
@@ -50,30 +51,28 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   DepositsController? depositsController;
   CreditsController? creditsController;
 
-  String? selectedBank;
-  String? selectedClient;
+  String? selectedBankDeposit;
+  String? selectedBankCheck;
+  String? selectedClientChecks;
   String? selectedPOS;
-  String? selectedClientCredit;
+  String? selectedClientCredits;
 
-  TextEditingController checkNumberController = TextEditingController();
-  TextEditingController checkValueController = TextEditingController();
-  TextEditingController checkDateController = TextEditingController();
-  TextEditingController billDescriptionController = TextEditingController();
   TextEditingController billNumberController = TextEditingController();
-  TextEditingController billAmountController = TextEditingController();
   TextEditingController billDateController = TextEditingController();
+  TextEditingController billAmountController = TextEditingController();
+  TextEditingController billDescriptionController = TextEditingController();
 
   TextEditingController valeNumberController = TextEditingController();
+  TextEditingController valeDescriptionController = TextEditingController();
   TextEditingController valeAmountController = TextEditingController();
   TextEditingController valeDateController = TextEditingController();
-  TextEditingController valeDescriptionController = TextEditingController();
 
   TextEditingController couponsNumberController = TextEditingController();
   TextEditingController couponsAmountController = TextEditingController();
   TextEditingController couponsDateController = TextEditingController();
 
-  TextEditingController authorizationCodeController = TextEditingController();
   TextEditingController voucherAmountController = TextEditingController();
+  TextEditingController authorizationCodeController = TextEditingController();
   TextEditingController voucherDateController = TextEditingController();
 
   TextEditingController depositNumberController = TextEditingController();
@@ -84,20 +83,24 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   TextEditingController creditAmountController = TextEditingController();
   TextEditingController creditDateController = TextEditingController();
 
-  final totalSalesRegular = 0.0.obs;
-  final totalSalesSuper = 0.0.obs;
-  final totalSalesDiesel = 0.0.obs;
+  TextEditingController checkNumberController = TextEditingController();
+  TextEditingController checkValueController = TextEditingController();
+  TextEditingController checkDateController = TextEditingController();
 
-  final totalPayments = 0.0.obs;
-  final totalSaldo = 0.0.obs;
+  final totalSalesRegular = 0.00.obs;
+  final totalSalesSuper = 0.00.obs;
+  final totalSalesDiesel = 0.00.obs;
 
-  final gastos = '0.000'.obs;
-  final vales = '0.000'.obs;
-  final cupones = '0.000'.obs;
-  final vouchers = '0.000'.obs;
-  final depositos = '0.000'.obs;
-  final creditos = '0.000'.obs;
-  final cheques = '0.000'.obs;
+  final totalPayments = 0.00.obs;
+  final totalSaldo = 0.00.obs;
+
+  final gastos = '0.00'.obs;
+  final vales = '0.00'.obs;
+  final cupones = '0.00'.obs;
+  final vouchers = '0.00'.obs;
+  final depositos = '0.00'.obs;
+  final creditos = '0.00'.obs;
+  final cheques = '0.00'.obs;
 
   double get totalSales =>
       totalSalesRegular.value + totalSalesSuper.value + totalSalesDiesel.value;
@@ -134,8 +137,67 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: ElevatedButton(
                 onPressed: dispenserController.isDataLoaded.value
-                    ? () {
-                        // Acción al presionar el botón de guardar
+                    ? () async {
+                        showConfirmationDialog(
+                          title: 'Confirmación',
+                          message: '¿Deseas guardar los cambios?',
+                          confirmText: 'Sí',
+                          cancelText: 'No',
+                          onConfirm: () async {
+                            Get.back(); // Cierra el diálogo de confirmación
+
+                            // Muestra el spinner
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (BuildContext context) {
+                                return Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              },
+                            );
+
+                            try {
+                              // Llama al método _updateSalesControl
+                              await _updateSalesControl();
+
+                              // Cierra el spinner
+                              Navigator.pop(context);
+
+                              // Limpia todos los campos
+                              clearFields();
+
+                              // Limpia el estado almacenado y refresca la pantalla
+                              await clearState();
+
+                              // Reinicia el Summary Card
+                              dispenserController.isSummaryCardEnabled.value =
+                                  true;
+                              dispenserController
+                                  .lastGeneralDispenserReader.value = null;
+
+                              // Reinicia el estado de los controles y valores
+                              resetControllers();
+
+                              // Recargar la pantalla
+                              setState(() {});
+
+                              // Mostrar mensaje de éxito
+                              Get.snackbar('Éxito',
+                                  'Datos guardados y pantalla actualizada correctamente');
+                            } catch (e) {
+                              // Cierra el spinner en caso de error
+                              Navigator.pop(context);
+
+                              Get.snackbar('Error',
+                                  'Hubo un error al guardar los datos: $e');
+                            }
+                          },
+                          onCancel: () {
+                            // Cierra el diálogo de confirmación
+                            Get.back();
+                          },
+                        );
                       }
                     : null,
                 child: const Text('Guardar'),
@@ -201,12 +263,24 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: GestureDetector(
         onDoubleTap: () async {
-          await dispenserController.fetchLastGeneralDispenserReaderData();
-          await fuelController.fetchFuels();
-          await salesControlController.createNewSalesControl();
-          calculateTotalSales();
-          updatePayments();
-          saveState();
+          showConfirmationDialog(
+            title: 'Confirmación',
+            message: '¿Crear nuevo DLP?',
+            onConfirm: () async {
+              Get.back(); // Cierra el diálogo antes de ejecutar las acciones
+              await dispenserController.fetchLastGeneralDispenserReaderData();
+              await fuelController.fetchFuels();
+              await salesControlController.createNewSalesControl();
+              calculateTotalSales();
+              updatePayments();
+              saveState();
+            },
+            confirmText: 'Crear',
+            cancelText: 'Cancelar',
+            onCancel: () {
+              return;
+            },
+          );
         },
         child: Card(
           elevation: 12,
@@ -250,7 +324,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                       children: [
                         const Text('Venta:',
                             style: TextStyle(fontWeight: FontWeight.bold)),
-                        Obx(() => Text(totalSales.toStringAsFixed(3))),
+                        Obx(() => Text(totalSales.toStringAsFixed(2))),
                       ],
                     ),
                   ),
@@ -262,7 +336,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                       children: [
                         const Text('Pagos:',
                             style: TextStyle(fontWeight: FontWeight.bold)),
-                        Obx(() => Text(totalPayments.toStringAsFixed(3))),
+                        Obx(() => Text(totalPayments.toStringAsFixed(2))),
                       ],
                     ),
                   ),
@@ -274,7 +348,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                       children: [
                         const Text('Saldo:',
                             style: TextStyle(fontWeight: FontWeight.bold)),
-                        Obx(() => Text(totalSaldo.toStringAsFixed(3))),
+                        Obx(() => Text(totalSaldo.toStringAsFixed(2))),
                       ],
                     ),
                   ),
@@ -316,27 +390,27 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 (fuel) => fuel.fuelName == 'regular',
                 orElse: () => Fuel(
                     fuelName: 'regular',
-                    costPrice: 0.0,
-                    salePrice: 0.0,
+                    costPrice: 0.000,
+                    salePrice: 0.00,
                     statusId: Status(id: '', statusName: ''),
-                    taxesId: Taxes(id: '', idpName: '', idpAmount: 0.0),
+                    taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
                     fuelId: ''));
             final superFuel = fuels.firstWhere(
                 (fuel) => fuel.fuelName == 'super',
                 orElse: () => Fuel(
                     fuelName: 'super',
-                    costPrice: 0.0,
-                    salePrice: 0.0,
+                    costPrice: 0.00,
+                    salePrice: 0.00,
                     statusId: Status(id: '', statusName: ''),
-                    taxesId: Taxes(id: '', idpName: '', idpAmount: 0.0),
+                    taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
                     fuelId: ''));
             final diesel = fuels.firstWhere((fuel) => fuel.fuelName == 'diesel',
                 orElse: () => Fuel(
                     fuelName: 'diesel',
-                    costPrice: 0.0,
-                    salePrice: 0.0,
+                    costPrice: 0.00,
+                    salePrice: 0.00,
                     statusId: Status(id: '', statusName: ''),
-                    taxesId: Taxes(id: '', idpName: '', idpAmount: 0.0),
+                    taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
                     fuelId: ''));
 
             return Padding(
@@ -390,30 +464,30 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                         final reader = dispenserController
                             .lastGeneralDispenserReader.value;
                         if (reader == null) {
-                          return const Text('0.000');
+                          return const Text('0.00');
                         }
                         return Text(
-                            '${reader.totalMechanicRegular.toStringAsFixed(3)}');
+                            '${reader.totalMechanicRegular.toStringAsFixed(2)}');
                       }),
                       SizedBox(width: 16),
                       Obx(() {
                         final reader = dispenserController
                             .lastGeneralDispenserReader.value;
                         if (reader == null) {
-                          return const Text('0.000');
+                          return const Text('0.00');
                         }
                         return Text(
-                            '${reader.totalMechanicSuper.toStringAsFixed(3)}');
+                            '${reader.totalMechanicSuper.toStringAsFixed(2)}');
                       }),
                       SizedBox(width: 16),
                       Obx(() {
                         final reader = dispenserController
                             .lastGeneralDispenserReader.value;
                         if (reader == null) {
-                          return const Text('0.000');
+                          return const Text('0.00');
                         }
                         return Text(
-                            '${reader.totalMechanicDiesel.toStringAsFixed(3)}');
+                            '${reader.totalMechanicDiesel.toStringAsFixed(2)}');
                       }),
                     ],
                   ),
@@ -526,7 +600,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                               .toList(),
                           onChanged: (value) {
                             setState(() {
-                              selectedBank = value;
+                              selectedBankCheck = value;
                             });
                           },
                         ),
@@ -541,7 +615,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                               .toList(),
                           onChanged: (value) {
                             setState(() {
-                              selectedClient = value;
+                              selectedClientChecks = value;
                             });
                           },
                         ),
@@ -556,7 +630,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                               .toList(),
                           onChanged: (value) {
                             setState(() {
-                              selectedClientCredit = value;
+                              selectedClientCredits = value;
                             });
                           },
                         ),
@@ -622,7 +696,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                               .toList(),
                           onChanged: (value) {
                             setState(() {
-                              selectedBank = value;
+                              selectedBankDeposit = value;
                             });
                           },
                         ),
@@ -651,27 +725,69 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                           ),
                           ElevatedButton(
                             onPressed: () async {
-                              if (label == 'Cheques') {
-                                await createBankCheck();
-                              } else if (label == 'Gastos') {
-                                await createBill();
-                              } else if (label == "Vales") {
-                                await createVale();
-                              } else if (label == "Cupones") {
-                                await createCoupon();
-                              } else if (label == "Vouchers") {
-                                await createVoucher();
-                              } else if (label == "Depositos") {
-                                await createDeposits();
-                              } else if (label == 'Creditos') {
-                                await createCredit();
-                              } else {
-                                // Aquí puedes agregar lógica para otros tipos de pagos
-                                controller.value = checkValueController.text;
-                                calculateTotalSales();
-                                saveState();
-                              }
-                              Navigator.pop(context);
+                              showConfirmationDialog(
+                                title: 'Confirmación',
+                                message: '¿Guardar los cambios?',
+                                confirmText: 'Sí',
+                                cancelText: 'No',
+                                onConfirm: () async {
+                                  //Get.back(); // Cierra el diálogo de confirmación
+
+                                  // Muestra el spinner
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (BuildContext context) {
+                                      return Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    },
+                                  );
+
+                                  try {
+                                    if (label == 'Cheques') {
+                                      await createBankCheck();
+                                    } else if (label == 'Gastos') {
+                                      await createBill();
+                                    } else if (label == "Vales") {
+                                      await createVale();
+                                    } else if (label == "Cupones") {
+                                      await createCoupon();
+                                    } else if (label == "Vouchers") {
+                                      await createVoucher();
+                                    } else if (label == "Depositos") {
+                                      await createDeposits();
+                                    } else if (label == 'Creditos') {
+                                      await createCredit();
+                                    } else {
+                                      // Aquí puedes agregar lógica para otros tipos de pagos
+                                      controller.value =
+                                          checkValueController.text;
+                                      calculateTotalSales();
+                                      saveState();
+                                    }
+
+                                    // Cierra el spinner
+                                    Navigator.pop(context);
+
+                                    // Limpia los campos después de guardar
+                                    clearFields();
+
+                                    // Cierra el BottomSheet
+                                    Navigator.pop(context);
+                                  } catch (e) {
+                                    // En caso de error, cierra el spinner
+                                    Navigator.pop(context);
+
+                                    Get.snackbar('Error',
+                                        'Hubo un error al guardar: $e');
+                                  }
+                                },
+                                onCancel: () {
+                                  Navigator.pop(
+                                      context); // Cierra el diálogo de confirmación
+                                },
+                              );
                             },
                             child: const Text('Guardar'),
                           ),
@@ -760,7 +876,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   }
 
   Future<void> createBankCheck() async {
-    if (selectedBank == null || selectedClient == null) {
+    if (selectedBankCheck == null || selectedClientChecks == null) {
       Get.snackbar('Error', 'Por favor, seleccione un banco y un cliente');
       return;
     }
@@ -776,10 +892,10 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     }
 
     final bankId = bankController.bankList
-        .firstWhere((bank) => bank.bankName == selectedBank)
+        .firstWhere((bank) => bank.bankName == selectedBankCheck)
         .bankId;
     final clientId = clientsController.clientsList
-        .firstWhere((client) => client.clientName == selectedClient)
+        .firstWhere((client) => client.clientName == selectedClientChecks)
         .clientId;
 
     await bankCheckController.createBankCheck(
@@ -791,7 +907,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     );
 
     // Update the cheques value
-    cheques.value = (num.parse(cheques.value) + checkValue).toStringAsFixed(3);
+    cheques.value = (num.parse(cheques.value) + checkValue).toStringAsFixed(2);
     calculateTotalSales();
     saveState();
   }
@@ -821,7 +937,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         billAmount: billAmount,
         billDescription: billDescription);
 
-    gastos.value = (num.parse(gastos.value) + billAmount).toStringAsFixed(3);
+    gastos.value = (num.parse(gastos.value) + billAmount).toStringAsFixed(2);
     calculateTotalSales();
     saveState();
   }
@@ -848,7 +964,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         valeDate: valeDate,
         valeDescription: valeDescription);
 
-    vales.value = (num.parse(vales.value) + valeAmount).toStringAsFixed(3);
+    vales.value = (num.parse(vales.value) + valeAmount).toStringAsFixed(2);
     calculateTotalSales();
     saveState();
   }
@@ -875,7 +991,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
     if (success) {
       cupones.value =
-          (num.parse(cupones.value) + cuponesAmount).toStringAsFixed(3);
+          (num.parse(cupones.value) + cuponesAmount).toStringAsFixed(2);
       calculateTotalSales();
       saveState();
 
@@ -915,7 +1031,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
       if (success) {
         vouchers.value =
-            (num.parse(vouchers.value) + voucherAmount).toStringAsFixed(3);
+            (num.parse(vouchers.value) + voucherAmount).toStringAsFixed(2);
         calculateTotalSales();
         saveState();
 
@@ -929,7 +1045,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
   Future<void> createDeposits() async {
     try {
-      if (selectedBank == null) {
+      if (selectedBankDeposit == null) {
         Get.snackbar('Error', 'Por favor, seleccione un banco');
         return;
       }
@@ -946,7 +1062,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       }
 
       final bankId = bankController.bankList
-          .firstWhere((bank) => bank.bankName == selectedBank)
+          .firstWhere((bank) => bank.bankName == selectedBankDeposit)
           .bankId;
 
       final success = await depositsController!.createDeposits(
@@ -958,7 +1074,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
       if (success) {
         depositos.value =
-            (num.parse(depositos.value) + depositAmount).toStringAsFixed(3);
+            (num.parse(depositos.value) + depositAmount).toStringAsFixed(2);
         calculateTotalSales();
         saveState();
 
@@ -972,7 +1088,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
   Future<void> createCredit() async {
     try {
-      if (selectedClientCredit == null) {
+      if (selectedClientCredits == null) {
         Get.snackbar('Error', 'Por favor, seleccione un cliente');
         return;
       }
@@ -988,7 +1104,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       }
 
       final clientId = clientsController.clientsList
-          .firstWhere((client) => client.clientName == selectedClientCredit)
+          .firstWhere((client) => client.clientName == selectedClientCredits)
           .clientId;
 
       final success = await creditsController!.createCredit(
@@ -999,7 +1115,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       );
       if (success) {
         creditos.value =
-            (num.parse(creditos.value) + creditAmount).toStringAsFixed(3);
+            (num.parse(creditos.value) + creditAmount).toStringAsFixed(2);
         calculateTotalSales();
         saveState();
 
@@ -1031,18 +1147,106 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           double.parse(creditos.value) +
           double.parse(cheques.value);
 
-      totalSaldo.value = totalSales - totalPayments.value;
+      totalSaldo.value = totalPayments.value - totalSales;
     }
   }
 
+  Future<void> _updateSalesControl() async {
+    final reader = dispenserController.lastGeneralDispenserReader.value;
+    final fuels = fuelController.fuels;
+
+    if (reader != null && fuels.isNotEmpty) {
+      final regular = fuels.firstWhere((fuel) => fuel.fuelName == 'regular');
+      final superFuel = fuels.firstWhere((fuel) => fuel.fuelName == 'super');
+      final diesel = fuels.firstWhere((fuel) => fuel.fuelName == 'diesel');
+
+      final requestBody = {
+        'regularPrice': regular.salePrice,
+        'superPrice': superFuel.salePrice,
+        'dieselPrice': diesel.salePrice,
+        'totalGallonRegular': reader.totalMechanicRegular,
+        'totalGallonSuper': reader.totalMechanicSuper,
+        'totalGallonDiesel': reader.totalMechanicDiesel,
+        'total': totalSales,
+        'balance': totalSaldo.value,
+        'totalAbonosBalance': _calculateTotalPayments(),
+        'abonos': _calculateTotalPayments(),
+      };
+
+      await salesControlController.updateSalesControl(requestBody);
+    }
+  }
+
+  double _calculateTotalPayments() {
+    return double.parse(gastos.value) +
+        double.parse(vales.value) +
+        double.parse(cupones.value) +
+        double.parse(vouchers.value) +
+        double.parse(depositos.value) +
+        double.parse(creditos.value) +
+        double.parse(cheques.value);
+  }
+
   void updatePayments() {
-    gastos.value = '0.000';
-    vales.value = '0.000';
-    cupones.value = '0.000';
-    vouchers.value = '0.000';
-    depositos.value = '0.000';
-    creditos.value = '0.000';
-    cheques.value = '0.000';
+    gastos.value = '0.00';
+    vales.value = '0.00';
+    cupones.value = '0.00';
+    vouchers.value = '0.00';
+    depositos.value = '0.00';
+    creditos.value = '0.00';
+    cheques.value = '0.00';
+  }
+
+  void clearFields() {
+    billNumberController.clear();
+    billDateController.clear();
+    billAmountController.clear();
+    billDescriptionController.clear();
+
+    valeNumberController.clear();
+    valeDescriptionController.clear();
+    valeAmountController.clear();
+    valeDateController.clear();
+
+    couponsNumberController.clear();
+    couponsAmountController.clear();
+    couponsDateController.clear();
+
+    voucherAmountController.clear();
+    authorizationCodeController.clear();
+    voucherDateController.clear();
+
+    depositNumberController.clear();
+    depositAmountController.clear();
+    depositDateController.clear();
+
+    creditNumberController.clear();
+    creditAmountController.clear();
+    creditDateController.clear();
+
+    checkNumberController.clear();
+    checkValueController.clear();
+    checkDateController.clear();
+  }
+
+  void resetControllers() {
+    // Reinicia todos los valores observables en los controladores
+    totalSalesRegular.value = 0.00;
+    totalSalesSuper.value = 0.00;
+    totalSalesDiesel.value = 0.00;
+
+    totalPayments.value = 0.00;
+    totalSaldo.value = 0.00;
+
+    gastos.value = '0.00';
+    vales.value = '0.00';
+    cupones.value = '0.00';
+    vouchers.value = '0.00';
+    depositos.value = '0.00';
+    creditos.value = '0.00';
+    cheques.value = '0.00';
+
+    // Reinicia cualquier otra variable necesaria para volver al estado inicial
   }
 
   Future<void> saveState() async {
@@ -1071,13 +1275,13 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       totalPayments.value = prefs.getDouble('totalPayments') ?? 0.0;
       totalSaldo.value = prefs.getDouble('totalSaldo') ?? 0.0;
 
-      gastos.value = prefs.getString('gastos') ?? '0.000';
-      vales.value = prefs.getString('vales') ?? '0.000';
-      cupones.value = prefs.getString('cupones') ?? '0.000';
-      vouchers.value = prefs.getString('vouchers') ?? '0.000';
-      depositos.value = prefs.getString('depositos') ?? '0.000';
-      creditos.value = prefs.getString('creditos') ?? '0.000';
-      cheques.value = prefs.getString('cheques') ?? '0.000';
+      gastos.value = prefs.getString('gastos') ?? '0.00';
+      vales.value = prefs.getString('vales') ?? '0.00';
+      cupones.value = prefs.getString('cupones') ?? '0.00';
+      vouchers.value = prefs.getString('vouchers') ?? '0.00';
+      depositos.value = prefs.getString('depositos') ?? '0.00';
+      creditos.value = prefs.getString('creditos') ?? '0.00';
+      cheques.value = prefs.getString('cheques') ?? '0.00';
     } catch (e) {
       return;
     }

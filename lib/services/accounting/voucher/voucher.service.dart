@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class VoucherService {
-  static const String baseUrl = 'http://192.168.0.100:3000/api';
+  static const String baseUrl = 'http://192.168.1.148:3000/api';
   Future<NewVoucherResponse?> createVoucher({
     required String authorizationCode,
     required String posId,

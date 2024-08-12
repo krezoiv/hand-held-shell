@@ -5,7 +5,7 @@ import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 
 class CreditsService {
-  static const String baseUrl = 'http://192.168.0.100:3000/api';
+  static const String baseUrl = 'http://192.168.1.148:3000/api';
   Future<NewCreditResponse?> createCredit({
     required int creditNumber,
     required num creditAmount,

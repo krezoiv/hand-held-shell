@@ -45,4 +45,26 @@ class SalesControlController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<void> updateSalesControl(Map<String, dynamic> requestBody) async {
+    try {
+      isLoading.value = true;
+
+      final String? token = await AuthService.getToken();
+
+      if (token == null) {
+        throw Exception('Token is null');
+      }
+
+      final response =
+          await _salesControlService.updateLastSalesControl(requestBody, token);
+
+      salesControl.value = response.salesControl;
+      Get.snackbar('Success', response.message);
+    } catch (e) {
+      Get.snackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }
