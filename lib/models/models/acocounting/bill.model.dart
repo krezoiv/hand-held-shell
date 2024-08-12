@@ -3,7 +3,7 @@ import 'package:hand_held_shell/models/models/sales/sales.control.model.dart';
 class Bill {
   String billNumber;
   DateTime billDate;
-  int billAmount;
+  num billAmount;
   String billDescription;
   SalesControl salesControlId;
   String billId;

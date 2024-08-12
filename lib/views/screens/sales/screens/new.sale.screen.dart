@@ -1,24 +1,31 @@
+import 'package:hand_held_shell/controllers/accounting/coupons/coupons.controller.dart';
+import 'package:hand_held_shell/controllers/accounting/credis/credits.crontroller.dart';
+import 'package:hand_held_shell/controllers/accounting/deposits/deposits.controller.dart';
+import 'package:hand_held_shell/controllers/accounting/voucher/voucher.controller.dart';
+
+import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hand_held_shell/controllers/accounting/bank.check/bank.check.controller.dart';
 import 'package:hand_held_shell/controllers/accounting/banks/bank.controller.dart';
+import 'package:hand_held_shell/controllers/accounting/bills/bills.controller.dart';
+import 'package:hand_held_shell/controllers/accounting/vales/vales.controller.dart';
+import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
+import 'package:hand_held_shell/controllers/fuels/fuels.controller.dart';
 import 'package:hand_held_shell/controllers/persons/clients/clients.controller.dart';
+import 'package:hand_held_shell/controllers/pos/pos.controller.dart';
 import 'package:hand_held_shell/controllers/sales/new.sales.controller.dart';
 import 'package:hand_held_shell/models/models/acocounting/bank.model.dart';
 import 'package:hand_held_shell/models/models/acocounting/pos.model.dart';
-import 'package:hand_held_shell/models/models/persons/client.model.dart';
-import 'package:hand_held_shell/shared/helpers/Thousands.formatter.dart';
-import 'package:intl/intl.dart';
-import 'package:get/get.dart';
 import 'package:hand_held_shell/models/models/fuel.station/fuel.model.dart';
+import 'package:hand_held_shell/models/models/persons/client.model.dart';
 import 'package:hand_held_shell/models/models/status/status.model.dart';
 import 'package:hand_held_shell/models/models/taxes/taxes.model.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hand_held_shell/controllers/disepensers/dispensers.controller.dart';
-import 'package:hand_held_shell/controllers/fuels/fuels.controller.dart';
-import 'package:hand_held_shell/controllers/pos/pos.controller.dart';
+import 'package:hand_held_shell/shared/helpers/Thousands.formatter.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/sales/widgets/side.menu.sale.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class NewSalesScreen extends StatefulWidget {
   const NewSalesScreen({super.key});
@@ -36,11 +43,46 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   late BankController bankController;
   late ClientsController clientsController;
   late BankCheckController bankCheckController;
+  late BillsController billsController;
+  late ValesController valesController;
+  CouponsController? couponsController;
+  VoucherController? voucherController;
+  DepositsController? depositsController;
+  CreditsController? creditsController;
+
   String? selectedBank;
   String? selectedClient;
+  String? selectedPOS;
+  String? selectedClientCredit;
+
   TextEditingController checkNumberController = TextEditingController();
   TextEditingController checkValueController = TextEditingController();
   TextEditingController checkDateController = TextEditingController();
+  TextEditingController billDescriptionController = TextEditingController();
+  TextEditingController billNumberController = TextEditingController();
+  TextEditingController billAmountController = TextEditingController();
+  TextEditingController billDateController = TextEditingController();
+
+  TextEditingController valeNumberController = TextEditingController();
+  TextEditingController valeAmountController = TextEditingController();
+  TextEditingController valeDateController = TextEditingController();
+  TextEditingController valeDescriptionController = TextEditingController();
+
+  TextEditingController couponsNumberController = TextEditingController();
+  TextEditingController couponsAmountController = TextEditingController();
+  TextEditingController couponsDateController = TextEditingController();
+
+  TextEditingController authorizationCodeController = TextEditingController();
+  TextEditingController voucherAmountController = TextEditingController();
+  TextEditingController voucherDateController = TextEditingController();
+
+  TextEditingController depositNumberController = TextEditingController();
+  TextEditingController depositAmountController = TextEditingController();
+  TextEditingController depositDateController = TextEditingController();
+
+  TextEditingController creditNumberController = TextEditingController();
+  TextEditingController creditAmountController = TextEditingController();
+  TextEditingController creditDateController = TextEditingController();
 
   final totalSalesRegular = 0.0.obs;
   final totalSalesSuper = 0.0.obs;
@@ -70,6 +112,13 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     clientsController = Get.put(ClientsController());
     salesControlController = Get.put(SalesControlController());
     bankCheckController = Get.put(BankCheckController());
+    billsController = Get.put(BillsController());
+    valesController = Get.put(ValesController());
+    couponsController = Get.put(CouponsController());
+    voucherController = Get.put(VoucherController());
+    depositsController = Get.put(DepositsController());
+    creditsController = Get.put(CreditsController());
+
     loadState();
   }
 
@@ -405,8 +454,8 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 buildSingleTextField('Vales', vales),
                 buildSingleTextField('Cupones', cupones),
                 buildSingleTextField('Vouchers', vouchers),
-                buildSingleTextField('Depósitos', depositos),
-                buildSingleTextField('Créditos', creditos),
+                buildSingleTextField('Depositos', depositos),
+                buildSingleTextField('Creditos', creditos),
                 buildSingleTextField('Cheques', cheques),
               ],
             ),
@@ -499,6 +548,96 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                         buildTextField('Fecha',
                             inputType: TextInputType.datetime,
                             controller: checkDateController),
+                      ] else if (label == 'Creditos') ...[
+                        buildDropdownField(
+                          'Clientes',
+                          clientsController.clientsList
+                              .map((Client client) => client.clientName)
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedClientCredit = value;
+                            });
+                          },
+                        ),
+                        buildTextField('No. Comprobante',
+                            controller: creditNumberController),
+                        buildNumberTextField('Valor',
+                            controller: creditAmountController),
+                        buildTextField('Fecha',
+                            inputType: TextInputType.datetime,
+                            controller: creditDateController),
+                      ] else if (label == 'Gastos') ...[
+                        buildTextField('Número Correlativo',
+                            controller: billNumberController),
+                        buildTextField('Fecha',
+                            inputType: TextInputType.datetime,
+                            controller: billDateController),
+                        buildTextField('Monto',
+                            controller: billAmountController),
+                        buildTextField('Descripción',
+                            controller: billDescriptionController),
+                      ] else if (label == 'Vales') ...[
+                        buildTextField('Número de Vale',
+                            controller: valeNumberController),
+                        buildTextField('Descripción',
+                            controller: valeDescriptionController),
+                        buildNumberTextField('Valor',
+                            controller: valeAmountController),
+                        buildTextField('Fecha',
+                            inputType: TextInputType.datetime,
+                            controller: valeDateController),
+                      ] else if (label == 'Cupones') ...[
+                        buildTextField('No. Cupon',
+                            controller: couponsNumberController),
+                        buildNumberTextField('Valor',
+                            controller: couponsAmountController),
+                        buildTextField('Fecha',
+                            inputType: TextInputType.datetime,
+                            controller: couponsDateController),
+                      ] else if (label == 'Vouchers') ...[
+                        buildDropdownField(
+                          'POS',
+                          posController.posList
+                              .map((Pos pos) => pos.posName)
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedPOS = value;
+                            });
+                          },
+                        ),
+                        buildNumberTextField('Valor',
+                            controller: voucherAmountController),
+                        buildTextField('No. Autorización',
+                            controller: authorizationCodeController),
+                        buildTextField('Fecha',
+                            inputType: TextInputType.datetime,
+                            controller: voucherDateController),
+                      ] else if (label == 'Depositos') ...[
+                        buildDropdownField(
+                          'Banco',
+                          bankController.bankList
+                              .map((Bank bank) => bank.bankName)
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedBank = value;
+                            });
+                          },
+                        ),
+                        buildTextField('No. Boleta',
+                            controller: depositNumberController),
+                        buildNumberTextField('Valor',
+                            controller: depositAmountController),
+                        buildTextField('Fecha',
+                            inputType: TextInputType.datetime,
+                            controller: depositDateController),
+                      ] else ...[
+                        // Para otros tipos de pagos, mostramos un campo de valor genérico
+                        buildNumberTextField('Valor',
+                            controller:
+                                TextEditingController(text: controller.value)),
                       ],
                       const SizedBox(height: 16),
                       Row(
@@ -512,7 +651,26 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                           ),
                           ElevatedButton(
                             onPressed: () async {
-                              await createBankCheck();
+                              if (label == 'Cheques') {
+                                await createBankCheck();
+                              } else if (label == 'Gastos') {
+                                await createBill();
+                              } else if (label == "Vales") {
+                                await createVale();
+                              } else if (label == "Cupones") {
+                                await createCoupon();
+                              } else if (label == "Vouchers") {
+                                await createVoucher();
+                              } else if (label == "Depositos") {
+                                await createDeposits();
+                              } else if (label == 'Creditos') {
+                                await createCredit();
+                              } else {
+                                // Aquí puedes agregar lógica para otros tipos de pagos
+                                controller.value = checkValueController.text;
+                                calculateTotalSales();
+                                saveState();
+                              }
                               Navigator.pop(context);
                             },
                             child: const Text('Guardar'),
@@ -613,8 +771,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     final checkDate = DateFormat('yyyy-MM-dd').parse(checkDateController.text);
 
     if (checkNumber == null || checkValue == null) {
-      Get.snackbar('Error',
-          'Por favor, ingrese valores válidos para el número y valor del cheque');
+      Get.snackbar('Error', 'Por favor, ingrese valores válidos');
       return;
     }
 
@@ -637,6 +794,220 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     cheques.value = (num.parse(cheques.value) + checkValue).toStringAsFixed(3);
     calculateTotalSales();
     saveState();
+  }
+
+  Future<void> createBill() async {
+    final billDescription = billDescriptionController
+        .text; // Asumiendo que tienes un controlador para la descripción
+
+    final billNumber = billNumberController.text;
+    final billAmount =
+        num.tryParse(billAmountController.text.replaceAll(',', ''));
+    final billDate = DateFormat('yyyy-MM-dd').parse(billDateController.text);
+
+    if (billAmount == null) {
+      Get.snackbar('Error', 'Por favor, ingrese valores válidos');
+      return;
+    }
+    if (billDescription.isEmpty || billNumber.isEmpty) {
+      Get.snackbar(
+          'Error', 'Por favor, ingrese una descripción para el gastos');
+      return;
+    }
+
+    await billsController.createBill(
+        billNumber: billNumber,
+        billDate: billDate,
+        billAmount: billAmount,
+        billDescription: billDescription);
+
+    gastos.value = (num.parse(gastos.value) + billAmount).toStringAsFixed(3);
+    calculateTotalSales();
+    saveState();
+  }
+
+  Future<void> createVale() async {
+    final valeDescription = valeDescriptionController.text;
+    final valeNumber = valeNumberController.text;
+    final valeAmount =
+        num.tryParse(valeAmountController.text.replaceAll(',', ''));
+    final valeDate = DateFormat('yyyy-MM-dd').parse(valeDateController.text);
+
+    if (valeDescription.isEmpty) {
+      Get.snackbar('Error', 'Por favor, ingrese una descripción para el vale');
+      return;
+    }
+    if (valeAmount == null || valeNumber.isEmpty) {
+      Get.snackbar('Error', 'Por favor, ingrese valores válidos');
+      return;
+    }
+
+    await valesController.createVale(
+        valeNumber: valeNumber,
+        valeAmount: valeAmount,
+        valeDate: valeDate,
+        valeDescription: valeDescription);
+
+    vales.value = (num.parse(vales.value) + valeAmount).toStringAsFixed(3);
+    calculateTotalSales();
+    saveState();
+  }
+
+  Future<void> createCoupon() async {
+    //couponsController ??= Get.put(CouponsController());
+
+    final cuponesNumber = couponsNumberController.text;
+    final cuponesAmount =
+        num.tryParse(couponsAmountController.text.replaceAll(',', ''));
+    final cuponesDate =
+        DateFormat('yyyy-MM-dd').parse(couponsDateController.text);
+
+    if (cuponesAmount == null || cuponesNumber.isEmpty) {
+      // Get.snackbar('Error', 'Por favor, ingrese valores válidos');
+      return;
+    }
+
+    final success = await couponsController!.createCoupons(
+      cuponesNumber: cuponesNumber,
+      cuponesDate: cuponesDate,
+      cuponesAmount: cuponesAmount,
+    );
+
+    if (success) {
+      cupones.value =
+          (num.parse(cupones.value) + cuponesAmount).toStringAsFixed(3);
+      calculateTotalSales();
+      saveState();
+
+      Get.snackbar('Éxito', 'Cupón creado exitosamentasas');
+    }
+  }
+
+  Future<void> createVoucher() async {
+    try {
+      // voucherController ??= Get.put(VoucherController());
+      if (selectedPOS == null) {
+        Get.snackbar('Error', 'Por favor, seleccione un POS');
+        return;
+      }
+
+      final authorizationCode = authorizationCodeController.text;
+      final voucherAmount =
+          num.tryParse(voucherAmountController.text.replaceAll(',', ''));
+      final voucherDate =
+          DateFormat('yyyy-MM-dd').parse(voucherDateController.text);
+
+      if (voucherAmount == null) {
+        Get.snackbar('Error', 'Por favor, ingrese un monto válido');
+        return;
+      }
+
+      final posId = posController.posList
+          .firstWhere((pos) => pos.posName == selectedPOS)
+          .posId;
+
+      final success = await voucherController!.createVoucher(
+        authorizationCode: authorizationCode,
+        posId: posId,
+        voucherAmount: voucherAmount,
+        voucherDate: voucherDate,
+      );
+
+      if (success) {
+        vouchers.value =
+            (num.parse(vouchers.value) + voucherAmount).toStringAsFixed(3);
+        calculateTotalSales();
+        saveState();
+
+        Get.snackbar('Éxito', 'Voucher creado exitosamentasas');
+      }
+    } catch (e) {
+      Get.snackbar(
+          'Error', 'Hubo un error al crear el voucher: ${e.toString()}');
+    }
+  }
+
+  Future<void> createDeposits() async {
+    try {
+      if (selectedBank == null) {
+        Get.snackbar('Error', 'Por favor, seleccione un banco');
+        return;
+      }
+
+      final depositNumber = int.parse(depositNumberController.text);
+      final depositAmount =
+          num.tryParse(depositAmountController.text.replaceAll(',', ''));
+      final depositDate =
+          DateFormat('yyyy-MM-dd').parse(depositDateController.text);
+
+      if (depositAmount == null) {
+        Get.snackbar('Error', 'Por favor, ingrese un monto válido');
+        return;
+      }
+
+      final bankId = bankController.bankList
+          .firstWhere((bank) => bank.bankName == selectedBank)
+          .bankId;
+
+      final success = await depositsController!.createDeposits(
+        depositNumber: depositNumber,
+        depositAmount: depositAmount,
+        depositDate: depositDate,
+        bankId: bankId,
+      );
+
+      if (success) {
+        depositos.value =
+            (num.parse(depositos.value) + depositAmount).toStringAsFixed(3);
+        calculateTotalSales();
+        saveState();
+
+        Get.snackbar('Éxito', 'Voucher creado exitosamentasas');
+      }
+    } catch (e) {
+      Get.snackbar(
+          'Error', 'Hubo un error al crear el depósito: ${e.toString()}');
+    }
+  }
+
+  Future<void> createCredit() async {
+    try {
+      if (selectedClientCredit == null) {
+        Get.snackbar('Error', 'Por favor, seleccione un cliente');
+        return;
+      }
+
+      final creditNumber = int.parse(creditNumberController.text);
+      final creditAmount =
+          num.tryParse(creditAmountController.text.replaceAll(',', ''));
+      final creditDate =
+          DateFormat('yyyy-MM-dd').parse(creditDateController.text);
+      if (creditAmount == null) {
+        Get.snackbar('Error', 'Por favor, ingrese un monto válido');
+        return;
+      }
+
+      final clientId = clientsController.clientsList
+          .firstWhere((client) => client.clientName == selectedClientCredit)
+          .clientId;
+
+      final success = await creditsController!.createCredit(
+        creditNumber: creditNumber,
+        creditAmount: creditAmount,
+        creditDate: creditDate,
+        clientId: clientId,
+      );
+      if (success) {
+        creditos.value =
+            (num.parse(creditos.value) + creditAmount).toStringAsFixed(3);
+        calculateTotalSales();
+        saveState();
+
+        Get.snackbar('Éxito', 'Crédito creado exitosamentasas');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Hubo un error al crear crédito: ${e.toString()}');
+    }
   }
 
   void calculateTotalSales() {
@@ -708,7 +1079,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       creditos.value = prefs.getString('creditos') ?? '0.000';
       cheques.value = prefs.getString('cheques') ?? '0.000';
     } catch (e) {
-      print('Error loading state: $e');
+      return;
     }
   }
 
@@ -736,6 +1107,12 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     posController.dispose();
     bankController.dispose();
     clientsController.dispose();
+    billsController.dispose();
+    valesController.dispose();
+    couponsController?.dispose();
+    voucherController?.dispose();
+    depositsController?.dispose();
+    creditsController?.dispose();
     super.dispose();
   }
 }

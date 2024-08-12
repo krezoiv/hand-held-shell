@@ -29,11 +29,10 @@ class BankCheckController extends GetxController {
       if (response != null && response.ok) {
         newBankCheckResponse.value = response;
         Get.snackbar('Éxito', 'Cheque bancario creado exitosamente');
-      } else {
-        Get.snackbar('Error', 'No se pudo crear el cheque bancario');
       }
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      Get.snackbar('Error',
+          'Ocurrió un error al crear el cheque bancario: ${e.toString()}');
     } finally {
       isLoading.value = false;
     }

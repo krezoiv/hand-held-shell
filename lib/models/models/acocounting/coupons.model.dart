@@ -2,7 +2,7 @@ import 'package:hand_held_shell/models/models/sales/sales.control.model.dart';
 
 class Coupon {
   bool applied;
-  int cuponesNumber;
+  String cuponesNumber;
   DateTime cuponesDate;
   num cuponesAmount;
   SalesControl salesControlId;

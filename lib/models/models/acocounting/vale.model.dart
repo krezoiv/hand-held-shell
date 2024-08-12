@@ -1,9 +1,10 @@
 import 'package:hand_held_shell/models/models/sales/sales.control.model.dart';
 
 class Vale {
-  int valeNumber;
+  String valeNumber;
   DateTime valeDate;
   num valeAmount;
+  String valeDescription;
   SalesControl salesControlId;
   String valeId;
 
@@ -11,6 +12,7 @@ class Vale {
     required this.valeNumber,
     required this.valeDate,
     required this.valeAmount,
+    required this.valeDescription,
     required this.salesControlId,
     required this.valeId,
   });
@@ -19,6 +21,7 @@ class Vale {
         valeNumber: json["valeNumber"],
         valeDate: DateTime.parse(json["valeDate"]),
         valeAmount: json["valeAmount"],
+        valeDescription: json["valeDescription"],
         salesControlId: SalesControl.fromJson(json["salesControlId"] ?? {}),
         valeId: json["valeId"],
       );
@@ -27,6 +30,7 @@ class Vale {
         "valeNumber": valeNumber,
         "valeDate": valeDate.toIso8601String(),
         "valeAmount": valeAmount,
+        "valeDescription": valeDescription,
         "salesControlId": salesControlId.toJson(),
         "valeId": valeId,
       };

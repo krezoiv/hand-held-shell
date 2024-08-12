@@ -2,7 +2,7 @@ import 'package:hand_held_shell/models/enteties.exports.files.dart';
 
 class Voucher {
   bool applied;
-  int authorizationCode;
+  String authorizationCode;
   Pos posId;
   num voucherAmount;
   DateTime voucherDate;
