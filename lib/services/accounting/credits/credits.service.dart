@@ -10,6 +10,9 @@ class CreditsService {
     required int creditNumber,
     required num creditAmount,
     required DateTime creditDate,
+    required num regularAmount,
+    required num superAmount,
+    required num dieselAmount,
     required String clientId,
   }) async {
     try {
@@ -30,6 +33,9 @@ class CreditsService {
           'creditNumber': creditNumber,
           'creditDate': creditDate.toIso8601String(),
           'creditAmount': creditAmount,
+          'regularAmount': regularAmount,
+          'superAmount': superAmount,
+          'dieselAmount': dieselAmount,
           'clientId': clientId,
         }),
       );

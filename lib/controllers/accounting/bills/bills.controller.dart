@@ -1,11 +1,14 @@
 import 'package:get/get.dart';
 import 'package:hand_held_shell/models/mappers/accounting/Bills/new.bill.response.dart';
 import 'package:hand_held_shell/services/accounting/bills/bills.service.dart';
+import 'package:hand_held_shell/services/services.exports.files.dart';
 
 class BillsController extends GetxController {
   final BillsService _billsService = BillsService();
 
   final Rx<NewValesResponse?> newBillResponse = Rx<NewValesResponse?>(null);
+  final Rx<GetBillsListSaleControlResponse?> billsListResponse =
+      Rx<GetBillsListSaleControlResponse?>(null);
   final RxBool isLoading = false.obs;
 
   Future<void> createBill({
@@ -30,6 +33,25 @@ class BillsController extends GetxController {
     } catch (e) {
       Get.snackbar(
           'Error', 'Ocurrió un error al crear el gasto: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchBillsBySalesControl() async {
+    try {
+      isLoading.value = true;
+      final response = await _billsService.getBillsBySalesControl();
+
+      if (response != null && response.ok) {
+        billsListResponse.value = response;
+        Get.snackbar('Éxito', 'Facturas obtenidas exitosamente');
+      } else {
+        Get.snackbar(
+            'Error', 'No se pudieron obtener las facturas: ${response?.bills}');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Ocurrió un error al obtener las facturas: $e');
     } finally {
       isLoading.value = false;
     }

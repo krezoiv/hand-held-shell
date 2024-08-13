@@ -45,4 +45,33 @@ class BillsService {
       return null;
     }
   }
+
+  Future<GetBillsListSaleControlResponse?> getBillsBySalesControl() async {
+    try {
+      final String? token = await AuthService.getToken();
+
+      if (token == null) {
+        throw Exception('Token no disponible');
+      }
+
+      final url = Uri.parse('$baseUrl/bills/getBillsSalesControl');
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return getBillsListSaleControlResponseFromJson(response.body);
+      } else {
+        final errorResponse = json.decode(response.body);
+        throw Exception(errorResponse['message'] ?? 'Error desconocido');
+      }
+    } catch (e) {
+      print('Error al obtener facturas: $e');
+      return null;
+    }
+  }
 }

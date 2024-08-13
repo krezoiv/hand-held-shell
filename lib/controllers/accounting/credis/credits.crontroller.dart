@@ -13,6 +13,9 @@ class CreditsController extends GetxController {
     required int creditNumber,
     required num creditAmount,
     required DateTime creditDate,
+    required num regularAmount,
+    required num superAmount,
+    required num dieselAmount,
     required String clientId,
   }) async {
     try {
@@ -21,6 +24,9 @@ class CreditsController extends GetxController {
         creditNumber: creditNumber,
         creditAmount: creditAmount,
         creditDate: creditDate,
+        regularAmount: regularAmount,
+        superAmount: superAmount,
+        dieselAmount: dieselAmount,
         clientId: clientId,
       );
 

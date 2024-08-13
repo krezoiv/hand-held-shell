@@ -6,6 +6,9 @@ class Credit {
   int creditNumber;
   num creditAmount;
   DateTime creditDate;
+  num regularAmount;
+  num superAmount;
+  num dieselAmount;
   Client clientId;
   SalesControl salesControlId;
   String creditId;
@@ -15,6 +18,9 @@ class Credit {
     required this.creditNumber,
     required this.creditAmount,
     required this.creditDate,
+    required this.regularAmount,
+    required this.superAmount,
+    required this.dieselAmount,
     required this.clientId,
     required this.salesControlId,
     required this.creditId,
@@ -25,6 +31,9 @@ class Credit {
         creditNumber: json["creditNumber"],
         creditAmount: json["creditAmount"],
         creditDate: DateTime.parse(json["creditDate"]),
+        regularAmount: json["regularAmount"],
+        superAmount: json["superAmount"],
+        dieselAmount: json["dieselAmount"],
         clientId: Client.fromJson(json["clientId"] ?? {}),
         salesControlId: SalesControl.fromJson(json["salesControlId"] ?? {}),
         creditId: json["creditId"],
@@ -35,6 +44,9 @@ class Credit {
         "creditNumber": creditNumber,
         "creditAmount": creditAmount,
         "creditDate": creditDate.toIso8601String(),
+        "regularAmount": regularAmount,
+        "superAmount": superAmount,
+        "dieselAmount": dieselAmount,
         "clientId": clientId.toJson(),
         "salesControlId": salesControlId.toJson(),
         "creditId": creditId,

@@ -82,6 +82,9 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   TextEditingController creditNumberController = TextEditingController();
   TextEditingController creditAmountController = TextEditingController();
   TextEditingController creditDateController = TextEditingController();
+  TextEditingController regularAmountController = TextEditingController();
+  TextEditingController superAmountController = TextEditingController();
+  TextEditingController dieselAmountController = TextEditingController();
 
   TextEditingController checkNumberController = TextEditingController();
   TextEditingController checkValueController = TextEditingController();
@@ -151,7 +154,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                               context: context,
                               barrierDismissible: false,
                               builder: (BuildContext context) {
-                                return Center(
+                                return const Center(
                                   child: CircularProgressIndicator(),
                                 );
                               },
@@ -179,7 +182,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                               // Restablece la pantalla como un "hot restart"
                               resetScreenState();
 
-                              // Restablece las pantallas `NewRegisterDispenserScreen` y `RegisterDispenserPage`
+                              // Restablece las pantallas NewRegisterDispenserScreen y RegisterDispenserPage
                               final dispenserControllerReset =
                                   Get.find<DispenserController>();
                               await dispenserControllerReset
@@ -209,7 +212,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
             );
           }),
           IconButton(
-            icon: Icon(Icons.delete),
+            icon: const Icon(Icons.delete),
             onPressed: () async {
               await clearState();
             },
@@ -448,9 +451,9 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Text('${regular.salePrice}'),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Text('${superFuel.salePrice}'),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Text('${diesel.salePrice}'),
                     ],
                   ),
@@ -473,7 +476,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                         return Text(
                             '${reader.totalMechanicRegular.toStringAsFixed(3)}');
                       }),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Obx(() {
                         final reader = dispenserController
                             .lastGeneralDispenserReader.value;
@@ -483,7 +486,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                         return Text(
                             '${reader.totalMechanicSuper.toStringAsFixed(3)}');
                       }),
-                      SizedBox(width: 16),
+                      const SizedBox(width: 16),
                       Obx(() {
                         final reader = dispenserController
                             .lastGeneralDispenserReader.value;
@@ -584,224 +587,259 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       builder: (BuildContext context) {
         return WillPopScope(
           onWillPop: () async => false,
-          child: KeyboardVisibilityBuilder(
-            builder: (context, isKeyboardVisible) {
-              return SingleChildScrollView(
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.only(
-                  bottom: MediaQuery.of(context).viewInsets.bottom,
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (label == 'Cheques') ...[
-                        buildDropdownField(
-                          'Banco',
-                          bankController.bankList
-                              .map((Bank bank) => bank.bankName)
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedBankCheck = value;
-                            });
-                          },
-                        ),
-                        buildTextField('No. Cheque',
-                            controller: checkNumberController),
-                        buildNumberTextField('Valor',
-                            controller: checkValueController),
-                        buildDropdownField(
-                          'Clientes',
-                          clientsController.clientsList
-                              .map((Client client) => client.clientName)
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedClientChecks = value;
-                            });
-                          },
-                        ),
-                        buildTextField('Fecha',
-                            inputType: TextInputType.datetime,
-                            controller: checkDateController),
-                      ] else if (label == 'Creditos') ...[
-                        buildDropdownField(
-                          'Clientes',
-                          clientsController.clientsList
-                              .map((Client client) => client.clientName)
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedClientCredits = value;
-                            });
-                          },
-                        ),
-                        buildTextField('No. Comprobante',
-                            controller: creditNumberController),
-                        buildNumberTextField('Valor',
-                            controller: creditAmountController),
-                        buildTextField('Fecha',
-                            inputType: TextInputType.datetime,
-                            controller: creditDateController),
-                      ] else if (label == 'Gastos') ...[
-                        buildTextField('Número Correlativo',
-                            controller: billNumberController),
-                        buildTextField('Fecha',
-                            inputType: TextInputType.datetime,
-                            controller: billDateController),
-                        buildTextField('Monto',
-                            controller: billAmountController),
-                        buildTextField('Descripción',
-                            controller: billDescriptionController),
-                      ] else if (label == 'Vales') ...[
-                        buildTextField('Número de Vale',
-                            controller: valeNumberController),
-                        buildTextField('Descripción',
-                            controller: valeDescriptionController),
-                        buildNumberTextField('Valor',
-                            controller: valeAmountController),
-                        buildTextField('Fecha',
-                            inputType: TextInputType.datetime,
-                            controller: valeDateController),
-                      ] else if (label == 'Cupones') ...[
-                        buildTextField('No. Cupon',
-                            controller: couponsNumberController),
-                        buildNumberTextField('Valor',
-                            controller: couponsAmountController),
-                        buildTextField('Fecha',
-                            inputType: TextInputType.datetime,
-                            controller: couponsDateController),
-                      ] else if (label == 'Vouchers') ...[
-                        buildDropdownField(
-                          'POS',
-                          posController.posList
-                              .map((Pos pos) => pos.posName)
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedPOS = value;
-                            });
-                          },
-                        ),
-                        buildNumberTextField('Valor',
-                            controller: voucherAmountController),
-                        buildTextField('No. Autorización',
-                            controller: authorizationCodeController),
-                        buildTextField('Fecha',
-                            inputType: TextInputType.datetime,
-                            controller: voucherDateController),
-                      ] else if (label == 'Depositos') ...[
-                        buildDropdownField(
-                          'Banco',
-                          bankController.bankList
-                              .map((Bank bank) => bank.bankName)
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedBankDeposit = value;
-                            });
-                          },
-                        ),
-                        buildTextField('No. Boleta',
-                            controller: depositNumberController),
-                        buildNumberTextField('Valor',
-                            controller: depositAmountController),
-                        buildTextField('Fecha',
-                            inputType: TextInputType.datetime,
-                            controller: depositDateController),
-                      ] else ...[
-                        // Para otros tipos de pagos, mostramos un campo de valor genérico
-                        buildNumberTextField('Valor',
-                            controller:
-                                TextEditingController(text: controller.value)),
-                      ],
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: const Text('Cancelar'),
-                          ),
-                          ElevatedButton(
-                            onPressed: () async {
-                              showConfirmationDialog(
-                                title: 'Confirmación',
-                                message: '¿Guardar los cambios?',
-                                confirmText: 'Sí',
-                                cancelText: 'No',
-                                onConfirm: () async {
-                                  //Get.back(); // Cierra el diálogo de confirmación
-
-                                  // Muestra el spinner
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (BuildContext context) {
-                                      return Center(
-                                        child: CircularProgressIndicator(),
-                                      );
-                                    },
-                                  );
-
-                                  try {
-                                    if (label == 'Cheques') {
-                                      await createBankCheck();
-                                    } else if (label == 'Gastos') {
-                                      await createBill();
-                                    } else if (label == "Vales") {
-                                      await createVale();
-                                    } else if (label == "Cupones") {
-                                      await createCoupon();
-                                    } else if (label == "Vouchers") {
-                                      await createVoucher();
-                                    } else if (label == "Depositos") {
-                                      await createDeposits();
-                                    } else if (label == 'Creditos') {
-                                      await createCredit();
-                                    } else {
-                                      // Aquí puedes agregar lógica para otros tipos de pagos
-                                      controller.value =
-                                          checkValueController.text;
-                                      calculateTotalSales();
-                                      saveState();
-                                    }
-
-                                    // Cierra el spinner
-                                    Navigator.pop(context);
-
-                                    // Limpia los campos después de guardar
-                                    clearFields();
-
-                                    // Cierra el BottomSheet
-                                    Navigator.pop(context);
-                                  } catch (e) {
-                                    // En caso de error, cierra el spinner
-                                    Navigator.pop(context);
-
-                                    Get.snackbar('Error',
-                                        'Hubo un error al guardar: $e');
-                                  }
-                                },
-                                onCancel: () {
-                                  Navigator.pop(
-                                      context); // Cierra el diálogo de confirmación
-                                },
-                              );
-                            },
-                            child: const Text('Guardar'),
-                          ),
-                        ],
-                      ),
+          child: SizedBox(
+            height: MediaQuery.of(context).size.height * 0.95,
+            child: DefaultTabController(
+              length: 2,
+              child: Scaffold(
+                appBar: AppBar(
+                  automaticallyImplyLeading: false,
+                  backgroundColor: Colors.blueAccent,
+                  title: const TabBar(
+                    indicatorColor: Colors.white,
+                    tabs: [
+                      Tab(text: 'Datos'),
+                      Tab(text: 'Tablas'),
                     ],
                   ),
                 ),
-              );
-            },
+                body: TabBarView(
+                  children: [
+                    KeyboardVisibilityBuilder(
+                      builder: (context, isKeyboardVisible) {
+                        return SingleChildScrollView(
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: EdgeInsets.only(
+                            bottom: MediaQuery.of(context).viewInsets.bottom,
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (label == 'Cheques') ...[
+                                  buildDropdownField(
+                                    'Banco',
+                                    bankController.bankList
+                                        .map((Bank bank) => bank.bankName)
+                                        .toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedBankCheck = value;
+                                      });
+                                    },
+                                  ),
+                                  buildTextField('No. Cheque',
+                                      controller: checkNumberController),
+                                  buildNumberTextField('Valor',
+                                      controller: checkValueController),
+                                  buildDropdownField(
+                                    'Clientes',
+                                    clientsController.clientsList
+                                        .map((Client client) =>
+                                            client.clientName)
+                                        .toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedClientChecks = value;
+                                      });
+                                    },
+                                  ),
+                                  buildTextField('Fecha',
+                                      inputType: TextInputType.datetime,
+                                      controller: checkDateController),
+                                ] else if (label == 'Creditos') ...[
+                                  buildDropdownField(
+                                    'Clientes',
+                                    clientsController.clientsList
+                                        .map((Client client) =>
+                                            client.clientName)
+                                        .toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedClientCredits = value;
+                                      });
+                                    },
+                                  ),
+                                  buildTextField('Fecha',
+                                      inputType: TextInputType.datetime,
+                                      controller: creditDateController),
+                                  buildTextField('No. Comprobante',
+                                      controller: creditNumberController),
+                                  buildTextField('Galones Super',
+                                      controller: superAmountController),
+                                  buildTextField('Galones Regular',
+                                      controller: regularAmountController),
+                                  buildTextField('Galones Diesel',
+                                      controller: dieselAmountController),
+                                  buildNumberTextField('Valor',
+                                      controller: creditAmountController),
+                                ] else if (label == 'Gastos') ...[
+                                  buildTextField('Número Correlativo',
+                                      controller: billNumberController),
+                                  buildTextField('Fecha',
+                                      inputType: TextInputType.datetime,
+                                      controller: billDateController),
+                                  buildTextField('Monto',
+                                      controller: billAmountController),
+                                  buildTextField('Descripción',
+                                      controller: billDescriptionController),
+                                ] else if (label == 'Vales') ...[
+                                  buildTextField('Número de Vale',
+                                      controller: valeNumberController),
+                                  buildTextField('Descripción',
+                                      controller: valeDescriptionController),
+                                  buildNumberTextField('Valor',
+                                      controller: valeAmountController),
+                                  buildTextField('Fecha',
+                                      inputType: TextInputType.datetime,
+                                      controller: valeDateController),
+                                ] else if (label == 'Cupones') ...[
+                                  buildTextField('No. Cupon',
+                                      controller: couponsNumberController),
+                                  buildNumberTextField('Valor',
+                                      controller: couponsAmountController),
+                                  buildTextField('Fecha',
+                                      inputType: TextInputType.datetime,
+                                      controller: couponsDateController),
+                                ] else if (label == 'Vouchers') ...[
+                                  buildDropdownField(
+                                    'POS',
+                                    posController.posList
+                                        .map((Pos pos) => pos.posName)
+                                        .toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedPOS = value;
+                                      });
+                                    },
+                                  ),
+                                  buildNumberTextField('Valor',
+                                      controller: voucherAmountController),
+                                  buildTextField('No. Autorización',
+                                      controller: authorizationCodeController),
+                                  buildTextField('Fecha',
+                                      inputType: TextInputType.datetime,
+                                      controller: voucherDateController),
+                                ] else if (label == 'Depositos') ...[
+                                  buildDropdownField(
+                                    'Banco',
+                                    bankController.bankList
+                                        .map((Bank bank) => bank.bankName)
+                                        .toList(),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        selectedBankDeposit = value;
+                                      });
+                                    },
+                                  ),
+                                  buildTextField('No. Boleta',
+                                      controller: depositNumberController),
+                                  buildNumberTextField('Valor',
+                                      controller: depositAmountController),
+                                  buildTextField('Fecha',
+                                      inputType: TextInputType.datetime,
+                                      controller: depositDateController),
+                                ] else ...[
+                                  // Para otros tipos de pagos, mostramos un campo de valor genérico
+                                  buildNumberTextField('Valor',
+                                      controller: TextEditingController(
+                                          text: controller.value)),
+                                ],
+                                const SizedBox(height: 16),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        showConfirmationDialog(
+                                          title: 'Confirmación',
+                                          message: '¿Guardar los cambios?',
+                                          confirmText: 'Sí',
+                                          cancelText: 'No',
+                                          onConfirm: () async {
+                                            showDialog(
+                                              context: context,
+                                              barrierDismissible: false,
+                                              builder: (BuildContext context) {
+                                                return const Center(
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                );
+                                              },
+                                            );
+
+                                            try {
+                                              if (label == 'Cheques') {
+                                                await createBankCheck();
+                                              } else if (label == 'Gastos') {
+                                                await createBill();
+                                              } else if (label == "Vales") {
+                                                await createVale();
+                                              } else if (label == "Cupones") {
+                                                await createCoupon();
+                                              } else if (label == "Vouchers") {
+                                                await createVoucher();
+                                              } else if (label == "Depositos") {
+                                                await createDeposits();
+                                              } else if (label == 'Creditos') {
+                                                await createCredit();
+                                              } else {
+                                                controller.value =
+                                                    checkValueController.text;
+                                                calculateTotalSales();
+                                                saveState();
+                                              }
+
+                                              // Cierra el spinner
+                                              Navigator.pop(context);
+
+                                              // Limpia los campos después de guardar
+                                              clearFields();
+
+                                              // Cierra el BottomSheet
+                                              Navigator.pop(context);
+                                            } catch (e) {
+                                              Navigator.pop(context);
+                                              Get.snackbar('Error',
+                                                  'Hubo un error al guardar: $e');
+                                            }
+                                          },
+                                          onCancel: () {
+                                            Navigator.pop(context);
+                                          },
+                                        );
+                                      },
+                                      child: const Text('Guardar'),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    Container(
+                      color: Colors.white,
+                      child: const Center(
+                        child: Text(
+                          'Contenido de la tabla (pendiente)',
+                          style: TextStyle(fontSize: 18, color: Colors.black),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         );
       },
@@ -834,7 +872,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           labelText: label,
           border: const OutlineInputBorder(),
         ),
-        keyboardType: TextInputType.numberWithOptions(decimal: true),
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
         inputFormatters: [
           ThousandsFormatter(),
         ],
@@ -910,15 +948,13 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       clientId: clientId,
     );
 
-    // Update the cheques value
     cheques.value = (num.parse(cheques.value) + checkValue).toStringAsFixed(2);
     calculateTotalSales();
     saveState();
   }
 
   Future<void> createBill() async {
-    final billDescription = billDescriptionController
-        .text; // Asumiendo que tienes un controlador para la descripción
+    final billDescription = billDescriptionController.text;
 
     final billNumber = billNumberController.text;
     final billAmount =
@@ -930,8 +966,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       return;
     }
     if (billDescription.isEmpty || billNumber.isEmpty) {
-      Get.snackbar(
-          'Error', 'Por favor, ingrese una descripción para el gastos');
+      Get.snackbar('Error', 'Por favor, ingrese una descripción para el gasto');
       return;
     }
 
@@ -974,8 +1009,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   }
 
   Future<void> createCoupon() async {
-    //couponsController ??= Get.put(CouponsController());
-
     final cuponesNumber = couponsNumberController.text;
     final cuponesAmount =
         num.tryParse(couponsAmountController.text.replaceAll(',', ''));
@@ -983,7 +1016,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         DateFormat('yyyy-MM-dd').parse(couponsDateController.text);
 
     if (cuponesAmount == null || cuponesNumber.isEmpty) {
-      // Get.snackbar('Error', 'Por favor, ingrese valores válidos');
       return;
     }
 
@@ -999,13 +1031,12 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       calculateTotalSales();
       saveState();
 
-      Get.snackbar('Éxito', 'Cupón creado exitosamentasas');
+      Get.snackbar('Éxito', 'Cupón creado exitosamente');
     }
   }
 
   Future<void> createVoucher() async {
     try {
-      // voucherController ??= Get.put(VoucherController());
       if (selectedPOS == null) {
         Get.snackbar('Error', 'Por favor, seleccione un POS');
         return;
@@ -1039,7 +1070,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         calculateTotalSales();
         saveState();
 
-        Get.snackbar('Éxito', 'Voucher creado exitosamentasas');
+        Get.snackbar('Éxito', 'Voucher creado exitosamente');
       }
     } catch (e) {
       Get.snackbar(
@@ -1082,7 +1113,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         calculateTotalSales();
         saveState();
 
-        Get.snackbar('Éxito', 'Voucher creado exitosamentasas');
+        Get.snackbar('Éxito', 'Depósito creado exitosamente');
       }
     } catch (e) {
       Get.snackbar(
@@ -1102,7 +1133,16 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           num.tryParse(creditAmountController.text.replaceAll(',', ''));
       final creditDate =
           DateFormat('yyyy-MM-dd').parse(creditDateController.text);
-      if (creditAmount == null) {
+      final regularAmount =
+          num.tryParse(regularAmountController.text.replaceAll(',', ''));
+      final superAmount =
+          num.tryParse(superAmountController.text.replaceAll(',', ''));
+      final dieselAmount =
+          num.tryParse(dieselAmountController.text.replaceAll(',', ''));
+      if (creditAmount == null ||
+          regularAmount == null ||
+          superAmount == null ||
+          dieselAmount == null) {
         Get.snackbar('Error', 'Por favor, ingrese un monto válido');
         return;
       }
@@ -1115,6 +1155,9 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         creditNumber: creditNumber,
         creditAmount: creditAmount,
         creditDate: creditDate,
+        regularAmount: regularAmount,
+        superAmount: superAmount,
+        dieselAmount: dieselAmount,
         clientId: clientId,
       );
       if (success) {
@@ -1123,7 +1166,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         calculateTotalSales();
         saveState();
 
-        Get.snackbar('Éxito', 'Crédito creado exitosamentasas');
+        Get.snackbar('Éxito', 'Crédito creado exitosamente');
       }
     } catch (e) {
       Get.snackbar('Error', 'Hubo un error al crear crédito: ${e.toString()}');
@@ -1139,9 +1182,9 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       final superFuel = fuels.firstWhere((fuel) => fuel.fuelName == 'super');
       final diesel = fuels.firstWhere((fuel) => fuel.fuelName == 'diesel');
 
-      totalSalesRegular.value = regular.salePrice * reader.totalMechanicRegular;
-      totalSalesSuper.value = superFuel.salePrice * reader.totalMechanicSuper;
-      totalSalesDiesel.value = diesel.salePrice * reader.totalMechanicDiesel;
+      totalSalesRegular.value = reader.totalMoneyRegular.toDouble();
+      totalSalesSuper.value = reader.totalMoneySuper.toDouble();
+      totalSalesDiesel.value = reader.totalMoneyDiesel.toDouble();
 
       totalPayments.value = double.parse(gastos.value) +
           double.parse(vales.value) +
@@ -1227,6 +1270,9 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     creditNumberController.clear();
     creditAmountController.clear();
     creditDateController.clear();
+    regularAmountController.clear();
+    superAmountController.clear();
+    dieselAmountController.clear();
 
     checkNumberController.clear();
     checkValueController.clear();
@@ -1234,7 +1280,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   }
 
   void resetControllers() {
-    // Reinicia todos los valores observables en los controladores
     totalSalesRegular.value = 0.00;
     totalSalesSuper.value = 0.00;
     totalSalesDiesel.value = 0.00;
@@ -1263,12 +1308,9 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     voucherController = Get.put(VoucherController());
     depositsController = Get.put(DepositsController());
     creditsController = Get.put(CreditsController());
-
-    // Reinicia cualquier otra variable necesaria para volver al estado inicial
   }
 
   void resetScreenState() {
-    // Desasigna los controladores para reiniciarlos
     Get.delete<DispenserController>();
     Get.delete<SalesControlController>();
     Get.delete<FuelController>();
@@ -1283,7 +1325,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     Get.delete<DepositsController>();
     Get.delete<CreditsController>();
 
-    // Reasigna los controladores
     dispenserController = Get.put(DispenserController());
     fuelController = Get.put(FuelController());
     posController = Get.put(PosController());
@@ -1298,7 +1339,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     depositsController = Get.put(DepositsController());
     creditsController = Get.put(CreditsController());
 
-    // Restablece la UI
     setState(() {});
   }
 
@@ -1354,7 +1394,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     await prefs.remove('depositos');
     await prefs.remove('creditos');
     await prefs.remove('cheques');
-    loadState(); // Vuelve a cargar el estado para asegurarse de que se restablezcan los valores
+    loadState();
   }
 
   @override
