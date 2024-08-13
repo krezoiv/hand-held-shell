@@ -179,9 +179,16 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                               // Restablece la pantalla como un "hot restart"
                               resetScreenState();
 
+                              // Restablece las pantallas `NewRegisterDispenserScreen` y `RegisterDispenserPage`
+                              final dispenserControllerReset =
+                                  Get.find<DispenserController>();
+                              await dispenserControllerReset
+                                  .clearSharedPreferences();
+                              dispenserController.resetState();
+
                               // Mostrar mensaje de éxito
                               Get.snackbar('Éxito',
-                                  'Datos guardados y pantalla actualizada correctamente');
+                                  'Datos guardados y pantallas actualizadas correctamente');
                             } catch (e) {
                               // Cierra el spinner en caso de error
                               Navigator.pop(context);
@@ -464,7 +471,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                           return const Text('0.00');
                         }
                         return Text(
-                            '${reader.totalMechanicRegular.toStringAsFixed(2)}');
+                            '${reader.totalMechanicRegular.toStringAsFixed(3)}');
                       }),
                       SizedBox(width: 16),
                       Obx(() {
@@ -474,7 +481,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                           return const Text('0.00');
                         }
                         return Text(
-                            '${reader.totalMechanicSuper.toStringAsFixed(2)}');
+                            '${reader.totalMechanicSuper.toStringAsFixed(3)}');
                       }),
                       SizedBox(width: 16),
                       Obx(() {
@@ -484,7 +491,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                           return const Text('0.00');
                         }
                         return Text(
-                            '${reader.totalMechanicDiesel.toStringAsFixed(2)}');
+                            '${reader.totalMechanicDiesel.toStringAsFixed(3)}');
                       }),
                     ],
                   ),

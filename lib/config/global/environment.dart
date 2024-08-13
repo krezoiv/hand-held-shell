@@ -18,7 +18,7 @@ class Environment {
 
   static String get socketUrl {
     if (Platform.isAndroid) {
-      return 'http://192.168.1.148.100:3000'; // Para emulador de Android
+      return 'http://192.168.1.148:3000'; // Para emulador de Android
     } else if (Platform.isIOS) {
       return 'http://localhost:3000';
     }

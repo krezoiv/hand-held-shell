@@ -1,4 +1,3 @@
-import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:hand_held_shell/models/mappers/accounting/vouchers/new.voucher.response.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
