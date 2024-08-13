@@ -5,7 +5,7 @@ class Bill {
   DateTime billDate;
   num billAmount;
   String billDescription;
-  SalesControl salesControlId;
+  String salesControlId; // Cambiado de SalesControl a String
   String billId;
 
   Bill({
@@ -13,7 +13,7 @@ class Bill {
     required this.billDate,
     required this.billAmount,
     required this.billDescription,
-    required this.salesControlId,
+    required this.salesControlId, // Cambiado de SalesControl a String
     required this.billId,
   });
 
@@ -22,7 +22,7 @@ class Bill {
         billDate: DateTime.parse(json["billDate"]),
         billAmount: json["billAmount"],
         billDescription: json["billDescription"],
-        salesControlId: SalesControl.fromJson(json["salesControlId"] ?? {}),
+        salesControlId: json["salesControlId"], // Aquí se asigna directamente
         billId: json["billId"],
       );
 
@@ -31,7 +31,7 @@ class Bill {
         "billDate": billDate.toIso8601String(),
         "billAmount": billAmount,
         "billDescription": billDescription,
-        "salesControlId": salesControlId.toJson(),
+        "salesControlId": salesControlId, // Aquí se convierte directamente
         "billId": billId,
       };
 }

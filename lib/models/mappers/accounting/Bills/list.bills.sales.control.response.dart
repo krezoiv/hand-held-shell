@@ -23,11 +23,13 @@ class GetBillsListSaleControlResponse {
     required this.bills,
   });
 
-  factory GetBillsListSaleControlResponse.fromJson(Map<String, dynamic> json) =>
-      GetBillsListSaleControlResponse(
-        ok: json["ok"],
-        bills: List<Bill>.from(json["bills"].map((x) => Bill.fromJson(x))),
-      );
+  factory GetBillsListSaleControlResponse.fromJson(Map<String, dynamic> json) {
+    print('Datos JSON recibidos: $json');
+    return GetBillsListSaleControlResponse(
+      ok: json["ok"],
+      bills: List<Bill>.from(json["bills"].map((x) => Bill.fromJson(x))),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         "ok": ok,

@@ -43,12 +43,13 @@ class BillsController extends GetxController {
       isLoading.value = true;
       final response = await _billsService.getBillsBySalesControl();
 
-      if (response != null && response.ok) {
+      if (response != null && response.ok && response.bills.isNotEmpty) {
         billsListResponse.value = response;
         Get.snackbar('Éxito', 'Facturas obtenidas exitosamente');
+      } else if (response != null && !response.ok) {
+        Get.snackbar('Error', 'Error en la respuesta: ${response.bills}');
       } else {
-        Get.snackbar(
-            'Error', 'No se pudieron obtener las facturas: ${response?.bills}');
+        Get.snackbar('Error', 'No se encontraron facturas');
       }
     } catch (e) {
       Get.snackbar('Error', 'Ocurrió un error al obtener las facturas: $e');
