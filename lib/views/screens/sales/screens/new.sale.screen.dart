@@ -167,20 +167,17 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                               // Limpia todos los campos
                               clearFields();
 
-                              // Limpia el estado almacenado y refresca la pantalla
+                              // Limpia el estado almacenado
                               await clearState();
 
-                              // Reinicia el Summary Card
+                              // Reinicia el Summary Card para mostrar el mensaje de no hay información
                               dispenserController.isSummaryCardEnabled.value =
                                   true;
                               dispenserController
                                   .lastGeneralDispenserReader.value = null;
 
-                              // Reinicia el estado de los controles y valores
-                              resetControllers();
-
-                              // Recargar la pantalla
-                              setState(() {});
+                              // Restablece la pantalla como un "hot restart"
+                              resetScreenState();
 
                               // Mostrar mensaje de éxito
                               Get.snackbar('Éxito',
@@ -1246,7 +1243,56 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     creditos.value = '0.00';
     cheques.value = '0.00';
 
+    dispenserController = Get.put(DispenserController());
+    fuelController = Get.put(FuelController());
+    posController = Get.put(PosController());
+    bankController = Get.put(BankController());
+    clientsController = Get.put(ClientsController());
+    salesControlController = Get.put(SalesControlController());
+    bankCheckController = Get.put(BankCheckController());
+    billsController = Get.put(BillsController());
+    valesController = Get.put(ValesController());
+    couponsController = Get.put(CouponsController());
+    voucherController = Get.put(VoucherController());
+    depositsController = Get.put(DepositsController());
+    creditsController = Get.put(CreditsController());
+
     // Reinicia cualquier otra variable necesaria para volver al estado inicial
+  }
+
+  void resetScreenState() {
+    // Desasigna los controladores para reiniciarlos
+    Get.delete<DispenserController>();
+    Get.delete<SalesControlController>();
+    Get.delete<FuelController>();
+    Get.delete<PosController>();
+    Get.delete<BankController>();
+    Get.delete<ClientsController>();
+    Get.delete<BankCheckController>();
+    Get.delete<BillsController>();
+    Get.delete<ValesController>();
+    Get.delete<CouponsController>();
+    Get.delete<VoucherController>();
+    Get.delete<DepositsController>();
+    Get.delete<CreditsController>();
+
+    // Reasigna los controladores
+    dispenserController = Get.put(DispenserController());
+    fuelController = Get.put(FuelController());
+    posController = Get.put(PosController());
+    bankController = Get.put(BankController());
+    clientsController = Get.put(ClientsController());
+    salesControlController = Get.put(SalesControlController());
+    bankCheckController = Get.put(BankCheckController());
+    billsController = Get.put(BillsController());
+    valesController = Get.put(ValesController());
+    couponsController = Get.put(CouponsController());
+    voucherController = Get.put(VoucherController());
+    depositsController = Get.put(DepositsController());
+    creditsController = Get.put(CreditsController());
+
+    // Restablece la UI
+    setState(() {});
   }
 
   Future<void> saveState() async {
