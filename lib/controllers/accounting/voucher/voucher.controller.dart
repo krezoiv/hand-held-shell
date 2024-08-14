@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:hand_held_shell/models/mappers/accounting/vouchers/list.voucher.sales.control.response.dart';
 
 import 'package:hand_held_shell/models/mappers/accounting/vouchers/new.voucher.response.dart';
 import 'package:hand_held_shell/services/accounting/voucher/voucher.service.dart';
