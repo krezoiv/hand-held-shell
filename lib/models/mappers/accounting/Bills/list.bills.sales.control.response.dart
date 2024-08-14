@@ -24,7 +24,6 @@ class GetBillsListSaleControlResponse {
   });
 
   factory GetBillsListSaleControlResponse.fromJson(Map<String, dynamic> json) {
-    print('Datos JSON recibidos: $json');
     return GetBillsListSaleControlResponse(
       ok: json["ok"],
       bills: List<Bill>.from(json["bills"].map((x) => Bill.fromJson(x))),

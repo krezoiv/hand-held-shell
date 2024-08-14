@@ -1,3 +1,5 @@
+export 'package:hand_held_shell/models/mappers/accounting/vouchers/list.voucher.sales.control.response.dart';
+
 export 'package:hand_held_shell/models/mappers/accounting/Bills/list.bills.sales.control.response.dart';
 
 export 'package:hand_held_shell/services/accounting/banks/banks.service.dart';

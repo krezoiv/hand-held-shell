@@ -6,7 +6,7 @@ class Voucher {
   Pos posId;
   num voucherAmount;
   DateTime voucherDate;
-  SalesControl salesControlId;
+  String salesControlId;
   String voucherId;
 
   Voucher({
@@ -25,7 +25,7 @@ class Voucher {
         posId: Pos.fromJson(json["posId"] ?? {}),
         voucherAmount: json["voucherAmount"],
         voucherDate: DateTime.parse(json["voucherDate"]),
-        salesControlId: SalesControl.fromJson(json["salesControlId"] ?? {}),
+        salesControlId: json["salesControlId"],
         voucherId: json["voucherId"],
       );
 
@@ -35,7 +35,7 @@ class Voucher {
         "posId": posId.toJson(),
         "voucherAmount": voucherAmount,
         "voucherDate": voucherDate.toIso8601String(),
-        "salesControlId": salesControlId.toJson(),
+        "salesControlId": salesControlId,
         "voucherId": voucherId,
       };
 }

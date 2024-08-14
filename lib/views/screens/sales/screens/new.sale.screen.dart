@@ -1,13 +1,10 @@
+import 'package:get/get.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hand_held_shell/controllers/accounting/coupons/coupons.controller.dart';
 import 'package:hand_held_shell/controllers/accounting/credis/credits.crontroller.dart';
 import 'package:hand_held_shell/controllers/accounting/deposits/deposits.controller.dart';
 import 'package:hand_held_shell/controllers/accounting/voucher/voucher.controller.dart';
-import 'package:hand_held_shell/shared/helpers/show.confirm.dialog.dart';
-
-import 'package:intl/intl.dart';
-import 'package:get/get.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hand_held_shell/controllers/accounting/bank.check/bank.check.controller.dart';
 import 'package:hand_held_shell/controllers/accounting/banks/bank.controller.dart';
 import 'package:hand_held_shell/controllers/accounting/bills/bills.controller.dart';
@@ -19,14 +16,19 @@ import 'package:hand_held_shell/controllers/pos/pos.controller.dart';
 import 'package:hand_held_shell/controllers/sales/new.sales.controller.dart';
 import 'package:hand_held_shell/models/models/acocounting/bank.model.dart';
 import 'package:hand_held_shell/models/models/acocounting/pos.model.dart';
+
 import 'package:hand_held_shell/models/models/fuel.station/fuel.model.dart';
 import 'package:hand_held_shell/models/models/persons/client.model.dart';
 import 'package:hand_held_shell/models/models/status/status.model.dart';
 import 'package:hand_held_shell/models/models/taxes/taxes.model.dart';
 import 'package:hand_held_shell/shared/helpers/Thousands.formatter.dart';
+import 'package:hand_held_shell/shared/helpers/show.confirm.dialog.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/sales/widgets/side.menu.sale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
+
+enum TabType { Gastos, Vales, Cheques, Cupones, Vouchers, Depositos, Creditos }
 
 class NewSalesScreen extends StatefulWidget {
   const NewSalesScreen({super.key});
@@ -531,13 +533,13 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold))),
                 const SizedBox(height: 16),
-                buildSingleTextField('Gastos', gastos),
-                buildSingleTextField('Vales', vales),
-                buildSingleTextField('Cupones', cupones),
-                buildSingleTextField('Vouchers', vouchers),
-                buildSingleTextField('Depositos', depositos),
-                buildSingleTextField('Creditos', creditos),
-                buildSingleTextField('Cheques', cheques),
+                buildSingleTextField('Gastos', gastos, TabType.Gastos),
+                buildSingleTextField('Vales', vales, TabType.Vales),
+                buildSingleTextField('Cupones', cupones, TabType.Cupones),
+                buildSingleTextField('Vouchers', vouchers, TabType.Vouchers),
+                buildSingleTextField('Depositos', depositos, TabType.Depositos),
+                buildSingleTextField('Creditos', creditos, TabType.Creditos),
+                buildSingleTextField('Cheques', cheques, TabType.Cheques),
               ],
             ),
           ),
@@ -546,10 +548,10 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     );
   }
 
-  Widget buildSingleTextField(String label, RxString controller) {
+  Widget buildSingleTextField(String label, RxString controller, TabType type) {
     return GestureDetector(
       onDoubleTap: () {
-        showBottomSheet(label, controller);
+        showBottomSheet(label, controller, type);
       },
       child: AbsorbPointer(
         child: Padding(
@@ -578,7 +580,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     );
   }
 
-  void showBottomSheet(String label, RxString controller) {
+  void showBottomSheet(String label, RxString controller, TabType type) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -605,10 +607,8 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 ),
                 body: TabBarView(
                   children: [
-                    // Pestaña Datos
                     _buildDataTab(label, controller),
-                    // Pestaña Tablas
-                    _buildBillsTableTab(),
+                    _buildBillsTableTab(type),
                   ],
                 ),
               ),
@@ -632,8 +632,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Aquí van los diferentes campos según el tipo de label
-                // Como el código que ya tienes para "Cheques", "Gastos", etc.
                 _buildSpecificFields(label, controller),
                 const SizedBox(height: 16),
                 Row(
@@ -664,22 +662,15 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                             );
 
                             try {
-                              // Lógica para guardar el bill
                               if (label == 'Gastos') {
                                 await createBill();
                               }
-                              // Otros tipos como "Vales", "Cheques", etc.
-
-                              // Cierra el spinner
                               Navigator.pop(context);
 
-                              // Limpia los campos después de guardar
                               clearFields();
 
-                              // Ejecuta el método para obtener las facturas actualizadas
                               await billsController.fetchBillsBySalesControl();
 
-                              // Cierra el BottomSheet
                               Navigator.pop(context);
                             } catch (e) {
                               Navigator.pop(context);
@@ -704,7 +695,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     );
   }
 
-  Widget _buildBillsTableTab() {
+  Widget _buildBillsTableTab(TabType type) {
     return Obx(() {
       if (billsController.isLoading.value) {
         return const Center(
@@ -712,14 +703,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         );
       }
 
-      if (billsController.billsListResponse.value == null ||
-          billsController.billsListResponse.value!.bills.isEmpty) {
-        return const Center(
-          child: Text('No hay facturas disponibles.'),
-        );
-      }
-
-      final bills = billsController.billsListResponse.value!.bills;
+      final bills = billsController.billsListResponse.value?.bills ?? [];
 
       return ListView.builder(
         itemCount: bills.length,
@@ -736,8 +720,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   }
 
   Widget _buildSpecificFields(String label, RxString controller) {
-    // Aquí puedes construir los campos específicos para cada tipo de label
-    // como lo que ya tienes para "Cheques", "Gastos", etc.
     if (label == 'Cheques') {
       return Column(
         children: [
@@ -768,6 +750,91 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               controller: checkDateController),
         ],
       );
+    } else if (label == 'Vales') {
+      return Column(
+        children: [
+          buildTextField('Número de Vale', controller: valeNumberController),
+          buildTextField('Descripción', controller: valeDescriptionController),
+          buildNumberTextField('Valor', controller: valeAmountController),
+          buildTextField('Fecha',
+              inputType: TextInputType.datetime,
+              controller: valeDateController),
+        ],
+      );
+    } else if (label == 'Cupones') {
+      return Column(
+        children: [
+          buildTextField('No. Cupon', controller: couponsNumberController),
+          buildNumberTextField('Valor', controller: couponsAmountController),
+          buildTextField('Fecha',
+              inputType: TextInputType.datetime,
+              controller: couponsDateController),
+        ],
+      );
+    } else if (label == 'Vouchers') {
+      return Column(
+        children: [
+          buildDropdownField(
+            'POS',
+            posController.posList.map((Pos pos) => pos.posName).toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedPOS = value;
+              });
+            },
+          ),
+          buildNumberTextField('Valor', controller: voucherAmountController),
+          buildTextField('No. Autorización',
+              controller: authorizationCodeController),
+          buildTextField('Fecha',
+              inputType: TextInputType.datetime,
+              controller: voucherDateController),
+        ],
+      );
+    } else if (label == 'Depositos') {
+      return Column(
+        children: [
+          buildDropdownField(
+            'Banco',
+            bankController.bankList.map((Bank bank) => bank.bankName).toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedBankDeposit = value;
+              });
+            },
+          ),
+          buildTextField('No. Boleta', controller: depositNumberController),
+          buildNumberTextField('Valor', controller: depositAmountController),
+          buildTextField('Fecha',
+              inputType: TextInputType.datetime,
+              controller: depositDateController),
+        ],
+      );
+    } else if (label == 'Creditos') {
+      return Column(
+        children: [
+          buildDropdownField(
+            'Clientes',
+            clientsController.clientsList
+                .map((Client client) => client.clientName)
+                .toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedClientCredits = value;
+              });
+            },
+          ),
+          buildTextField('Fecha',
+              inputType: TextInputType.datetime,
+              controller: creditDateController),
+          buildTextField('No. Comprobante', controller: creditNumberController),
+          buildTextField('Galones Super', controller: superAmountController),
+          buildTextField('Galones Regular',
+              controller: regularAmountController),
+          buildTextField('Galones Diesel', controller: dieselAmountController),
+          buildNumberTextField('Valor', controller: creditAmountController),
+        ],
+      );
     } else if (label == 'Gastos') {
       return Column(
         children: [
@@ -781,7 +848,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         ],
       );
     }
-    // Continúa con el resto de tipos (Vales, Cupones, etc.)
+    // Otros campos específicos según el tipo de label.
     return Container(); // Fallback si no hay un tipo específico
   }
 
