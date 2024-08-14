@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class VoucherService {
-  static const String baseUrl = 'http://192.168.0.100:3000/api';
+  static const String baseUrl = 'http://192.168.1.148:3000/api';
   Future<NewVoucherResponse?> createVoucher({
     required String authorizationCode,
     required String posId,
@@ -49,33 +49,6 @@ class VoucherService {
       }
     } catch (e) {
       print('Error in createVoucher: $e'); // Imprime el error si ocurre
-      return null;
-    }
-  }
-
-  Future<GetVoucherListSaleControlResponse?> getVoucherSalesControl() async {
-    try {
-      final String? token = await AuthService.getToken();
-      if (token == null) {
-        throw Exception('Token no disponible');
-      }
-
-      final url = Uri.parse('$baseUrl/vouchers/getVouchersSaleControl');
-      final response = await http.get(
-        url,
-        headers: {
-          'Content-Type': 'application/json',
-          'x-token': token,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        return getVoucherListSaleControlResponseFromJson(response.body);
-      } else {
-        final errorResponse = json.decode(response.body);
-        throw Exception(errorResponse['message'] ?? 'Error desconocido');
-      }
-    } catch (e) {
       return null;
     }
   }
