@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Environment {
+  static String nameEnva = '.env';
   static String nameEnv = '.env';
   static initEnvironment() async {
     await dotenv.load(fileName: nameEnv);
@@ -26,7 +27,7 @@ class Environment {
   }
 }
 
-// hoy
+
 
 
 //192.168.1.148 ofic
