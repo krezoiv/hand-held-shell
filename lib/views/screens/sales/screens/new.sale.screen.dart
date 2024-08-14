@@ -651,6 +651,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                           confirmText: 'Sí',
                           cancelText: 'No',
                           onConfirm: () async {
+                            // Mostrar un spinner mientras se guarda
                             showDialog(
                               context: context,
                               barrierDismissible: false,
@@ -662,29 +663,37 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                             );
 
                             try {
+                              // Verificar el label y ejecutar la acción correspondiente
                               if (label == 'Gastos') {
                                 await createBill();
+                                await billsController
+                                    .fetchBillsBySalesControl();
+                              } else if (label == 'Vouchers') {
+                                await createVoucher();
+                                await voucherController
+                                    ?.fetchVoucherBySalesControl();
                               }
-                              Navigator.pop(context);
+
+                              Navigator.pop(context); // Cierra el spinner
 
                               clearFields();
 
-                              await billsController.fetchBillsBySalesControl();
-
-                              Navigator.pop(context);
+                              Navigator.pop(context); // Cierra el BottomSheet
                             } catch (e) {
-                              Navigator.pop(context);
+                              Navigator.pop(
+                                  context); // Cierra el spinner en caso de error
                               Get.snackbar(
                                   'Error', 'Hubo un error al guardar: $e');
                             }
                           },
                           onCancel: () {
-                            Navigator.pop(context);
+                            Navigator.pop(
+                                context); // Cierra el diálogo de confirmación
                           },
                         );
                       },
                       child: const Text('Guardar'),
-                    ),
+                    )
                   ],
                 ),
               ],
@@ -697,22 +706,64 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
   Widget _buildBillsTableTab(TabType type) {
     return Obx(() {
-      if (billsController.isLoading.value) {
+      // Definir las listas y controladores según el tipo de TabType
+      bool isLoading = true;
+      List items = [];
+
+      switch (type) {
+        case TabType.Gastos:
+          isLoading = billsController.isLoading.value;
+          items = billsController.billsListResponse.value?.bills ?? [];
+          break;
+        case TabType.Vouchers:
+          isLoading = voucherController?.isLoading.value ?? true;
+          items = voucherController?.voucherListResponse.value?.vouchers ?? [];
+          break;
+        // Puedes agregar otros casos aquí si tienes más tipos.
+        default:
+          return const Center(child: Text('Tipo no soportado'));
+      }
+
+      if (isLoading) {
         return const Center(
           child: CircularProgressIndicator(),
         );
       }
 
-      final bills = billsController.billsListResponse.value?.bills ?? [];
-
       return ListView.builder(
-        itemCount: bills.length,
+        itemCount: items.length,
         itemBuilder: (context, index) {
-          final bill = bills[index];
+          final item = items[index];
+
+          // Inicializa las variables title y subtitle
+          String title = '';
+          String subtitle = '';
+
+          if (type == TabType.Gastos) {
+            title = 'Factura: ${item.billNumber}';
+            subtitle =
+                'Monto: ${item.billAmount.toStringAsFixed(2)}\nFecha: ${DateFormat('dd-MM-yyyy').format(item.billDate)}\nDescripción: ${item.billDescription}';
+          } else if (type == TabType.Vouchers) {
+            if (item.authorizationCode == null ||
+                item.voucherAmount == null ||
+                item.voucherDate == null ||
+                item.posId == null ||
+                item.posId.posName == null) {
+              return ListTile(
+                title: Text('Datos incompletos'),
+                subtitle: Text('No se puede mostrar este voucher'),
+              );
+            }
+            title = 'Voucher: ${item.authorizationCode ?? 'Sin código'}';
+            subtitle =
+                'Monto: ${item.voucherAmount?.toStringAsFixed(2) ?? '0.00'}\n'
+                'Fecha: ${item.voucherDate != null ? DateFormat('dd-MM-yyyy').format(item.voucherDate) : 'Sin fecha'}\n'
+                'POS: ${item.posId.posName}'; // Aquí se muestra el posName
+          }
+
           return ListTile(
-            title: Text('Factura: ${bill.billNumber}'),
-            subtitle: Text(
-                'Monto: ${bill.billAmount.toStringAsFixed(2)}\nFecha: ${DateFormat('dd-MM-yyyy').format(bill.billDate)}\nDescripción: ${bill.billDescription}'),
+            title: Text(title),
+            subtitle: Text(subtitle),
           );
         },
       );
@@ -1043,7 +1094,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
   Future<void> createVoucher() async {
     try {
-      if (selectedPOS == null) {
+      if (selectedPOS == null || selectedPOS!.isEmpty) {
         Get.snackbar('Error', 'Por favor, seleccione un POS');
         return;
       }
@@ -1059,9 +1110,25 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         return;
       }
 
-      final posId = posController.posList
-          .firstWhere((pos) => pos.posName == selectedPOS)
-          .posId;
+      // Depura los valores de los posNames disponibles
+      print("POS disponibles:");
+      posController.posList.forEach((pos) {
+        print(" - ${pos.posName}");
+      });
+
+      // Busca el posId correspondiente al selectedPOS
+      final pos = posController.posList.firstWhere(
+        (pos) => pos.posName == selectedPOS,
+        orElse: () => Pos(posName: '', posId: ''),
+      );
+
+      final posId = pos.posId.isNotEmpty
+          ? pos.posId
+          : throw Exception('ID de POS no válida');
+
+      // Depura el valor de posId
+      print("selectedPOS: $selectedPOS");
+      print("posId: $posId");
 
       final success = await voucherController!.createVoucher(
         authorizationCode: authorizationCode,

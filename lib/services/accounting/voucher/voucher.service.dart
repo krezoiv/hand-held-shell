@@ -5,7 +5,6 @@ import 'dart:convert';
 
 class VoucherService {
   static const String baseUrl = 'http://192.168.0.100:3000/api';
-
   Future<NewVoucherResponse?> createVoucher({
     required String authorizationCode,
     required String posId,
@@ -20,19 +19,26 @@ class VoucherService {
       }
 
       final url = Uri.parse('$baseUrl/vouchers/createVouchers');
+      final body = json.encode({
+        'authorizationCode': authorizationCode,
+        'voucherDate': voucherDate.toIso8601String(),
+        'posId': posId,
+        'voucherAmount': voucherAmount,
+      });
+
+      print('Request body: $body'); // Imprime el cuerpo de la solicitud
+
       final response = await http.post(
         url,
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
         },
-        body: json.encode({
-          'authorizationCode': authorizationCode,
-          'voucherDate': voucherDate.toIso8601String(),
-          'posId': posId,
-          'voucherAmount': voucherAmount,
-        }),
+        body: body,
       );
+
+      print('Response status: ${response.statusCode}');
+      print('Response body: ${response.body}');
 
       if (response.statusCode == 201) {
         return newVoucherResponseFromJson(response.body);
@@ -41,6 +47,7 @@ class VoucherService {
         throw Exception(errorResponse['message'] ?? 'Error desconocido');
       }
     } catch (e) {
+      print('Error in createVoucher: $e'); // Imprime el error si ocurre
       return null;
     }
   }
