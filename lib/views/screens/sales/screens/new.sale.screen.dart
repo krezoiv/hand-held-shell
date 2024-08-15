@@ -476,7 +476,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                           return const Text('0.00');
                         }
                         return Text(
-                            '${reader.totalMechanicRegular.toStringAsFixed(3)}');
+                            reader.totalMechanicRegular.toStringAsFixed(3));
                       }),
                       const SizedBox(width: 16),
                       Obx(() {
@@ -486,7 +486,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                           return const Text('0.00');
                         }
                         return Text(
-                            '${reader.totalMechanicSuper.toStringAsFixed(3)}');
+                            reader.totalMechanicSuper.toStringAsFixed(3));
                       }),
                       const SizedBox(width: 16),
                       Obx(() {
@@ -496,7 +496,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                           return const Text('0.00');
                         }
                         return Text(
-                            '${reader.totalMechanicDiesel.toStringAsFixed(3)}');
+                            reader.totalMechanicDiesel.toStringAsFixed(3));
                       }),
                     ],
                   ),
@@ -942,6 +942,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           ),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
+              isDateField: true,
               controller: checkDateController),
         ],
       );
@@ -953,6 +954,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           buildNumberTextField('Valor', controller: valeAmountController),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
+              isDateField: true,
               controller: valeDateController),
         ],
       );
@@ -963,6 +965,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           buildNumberTextField('Valor', controller: couponsAmountController),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
+              isDateField: true,
               controller: couponsDateController),
         ],
       );
@@ -983,6 +986,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               controller: authorizationCodeController),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
+              isDateField: true,
               controller: voucherDateController),
         ],
       );
@@ -1002,6 +1006,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           buildNumberTextField('Valor', controller: depositAmountController),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
+              isDateField: true,
               controller: depositDateController),
         ],
       );
@@ -1021,6 +1026,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           ),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
+              isDateField: true,
               controller: creditDateController),
           buildTextField('No. Comprobante', controller: creditNumberController),
           buildTextField('Galones Super', controller: superAmountController),
@@ -1037,6 +1043,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               controller: billNumberController),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
+              isDateField: true,
               controller: billDateController),
           buildTextField('Monto', controller: billAmountController),
           buildTextField('Descripción', controller: billDescriptionController),
@@ -1049,7 +1056,8 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
   Widget buildTextField(String label,
       {TextInputType inputType = TextInputType.text,
-      TextEditingController? controller}) {
+      TextEditingController? controller,
+      bool isDateField = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: TextField(
@@ -1059,6 +1067,25 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           border: const OutlineInputBorder(),
         ),
         keyboardType: inputType,
+        readOnly: isDateField,
+        onTap: isDateField
+            ? () async {
+                FocusScope.of(context).requestFocus(FocusNode());
+                DateTime? pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2101),
+                );
+
+                if (pickedDate != null) {
+                  // Formatea la fecha seleccionada como dd-MM-yyyy
+                  String formattedDate =
+                      DateFormat('dd-MM-yyyy').format(pickedDate);
+                  controller?.text = formattedDate;
+                }
+              }
+            : null,
       ),
     );
   }
@@ -1127,7 +1154,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     final checkNumber = int.tryParse(checkNumberController.text);
     final checkValue =
         num.tryParse(checkValueController.text.replaceAll(',', ''));
-    final checkDate = DateFormat('yyyy-MM-dd').parse(checkDateController.text);
+    final checkDate = DateFormat('dd-MM-yyyy').parse(checkDateController.text);
 
     if (checkNumber == null || checkValue == null) {
       Get.snackbar('Error', 'Por favor, ingrese valores válidos');
@@ -1160,7 +1187,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     final billNumber = billNumberController.text;
     final billAmount =
         num.tryParse(billAmountController.text.replaceAll(',', ''));
-    final billDate = DateFormat('yyyy-MM-dd').parse(billDateController.text);
+    final billDate = DateFormat('dd-MM-yyyy').parse(billDateController.text);
 
     if (billAmount == null) {
       Get.snackbar('Error', 'Por favor, ingrese valores válidos');
@@ -1187,7 +1214,8 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     final valeNumber = valeNumberController.text;
     final valeAmount =
         num.tryParse(valeAmountController.text.replaceAll(',', ''));
-    final valeDate = DateFormat('yyyy-MM-dd').parse(valeDateController.text);
+    final valeDate = DateFormat('dd-MM-yyyy').parse(valeDateController
+        .text); // Cambia el formato al que esperas en el TextField
 
     if (valeDescription.isEmpty) {
       Get.snackbar('Error', 'Por favor, ingrese una descripción para el vale');
@@ -1198,6 +1226,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       return;
     }
 
+    // Aquí, estamos enviando `valeDate` como un objeto `DateTime`, que es lo correcto si la base de datos espera un DateTime.
     await valesController.createVale(
         valeNumber: valeNumber,
         valeAmount: valeAmount,
@@ -1214,7 +1243,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     final cuponesAmount =
         num.tryParse(couponsAmountController.text.replaceAll(',', ''));
     final cuponesDate =
-        DateFormat('yyyy-MM-dd').parse(couponsDateController.text);
+        DateFormat('dd-MM-yyyy').parse(couponsDateController.text);
 
     if (cuponesAmount == null || cuponesNumber.isEmpty) {
       return;
@@ -1247,7 +1276,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       final voucherAmount =
           num.tryParse(voucherAmountController.text.replaceAll(',', ''));
       final voucherDate =
-          DateFormat('yyyy-MM-dd').parse(voucherDateController.text);
+          DateFormat('dd-MM-yyyy').parse(voucherDateController.text);
 
       if (voucherAmount == null) {
         Get.snackbar('Error', 'Por favor, ingrese un monto válido');
@@ -1255,10 +1284,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       }
 
       // Depura los valores de los posNames disponibles
-      print("POS disponibles:");
-      posController.posList.forEach((pos) {
-        print(" - ${pos.posName}");
-      });
+      for (var pos in posController.posList) {}
 
       // Busca el posId correspondiente al selectedPOS
       final pos = posController.posList.firstWhere(
@@ -1271,8 +1297,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           : throw Exception('ID de POS no válida');
 
       // Depura el valor de posId
-      print("selectedPOS: $selectedPOS");
-      print("posId: $posId");
 
       final success = await voucherController!.createVoucher(
         authorizationCode: authorizationCode,
@@ -1306,7 +1330,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       final depositAmount =
           num.tryParse(depositAmountController.text.replaceAll(',', ''));
       final depositDate =
-          DateFormat('yyyy-MM-dd').parse(depositDateController.text);
+          DateFormat('dd-MM-yyyy').parse(depositDateController.text);
 
       if (depositAmount == null) {
         Get.snackbar('Error', 'Por favor, ingrese un monto válido');
@@ -1349,7 +1373,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       final creditAmount =
           num.tryParse(creditAmountController.text.replaceAll(',', ''));
       final creditDate =
-          DateFormat('yyyy-MM-dd').parse(creditDateController.text);
+          DateFormat('dd-MM-yyyy').parse(creditDateController.text);
       final regularAmount =
           num.tryParse(regularAmountController.text.replaceAll(',', ''));
       final superAmount =

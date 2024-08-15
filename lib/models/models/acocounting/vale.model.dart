@@ -1,3 +1,4 @@
+// ignore: unused_import
 import 'package:hand_held_shell/models/models/sales/sales.control.model.dart';
 
 class Vale {

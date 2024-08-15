@@ -1,4 +1,3 @@
-import 'package:hand_held_shell/models/mappers/accounting/vouchers/list.voucher.sales.control.response.dart';
 import 'package:hand_held_shell/models/mappers/accounting/vouchers/new.voucher.response.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
@@ -27,7 +26,7 @@ class VoucherService {
         'voucherAmount': voucherAmount,
       });
 
-      print('Request body: $body'); // Imprime el cuerpo de la solicitud
+      // Imprime el cuerpo de la solicitud
 
       final response = await http.post(
         url,
@@ -38,9 +37,6 @@ class VoucherService {
         body: body,
       );
 
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
-
       if (response.statusCode == 201) {
         return newVoucherResponseFromJson(response.body);
       } else {
@@ -48,7 +44,7 @@ class VoucherService {
         throw Exception(errorResponse['message'] ?? 'Error desconocido');
       }
     } catch (e) {
-      print('Error in createVoucher: $e'); // Imprime el error si ocurre
+      // Imprime el error si ocurre
       return null;
     }
   }

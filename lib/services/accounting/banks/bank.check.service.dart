@@ -44,7 +44,6 @@ class BankCheckService {
         throw Exception(errorResponse['message'] ?? 'Error desconocido');
       }
     } catch (e) {
-      print('Error creando cheque bancario: $e');
       return null;
     }
   }

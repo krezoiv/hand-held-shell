@@ -41,7 +41,6 @@ class BillsService {
         throw Exception(errorResponse['message'] ?? 'Error desconocido');
       }
     } catch (e) {
-      print('Error al crear gasto: $e');
       return null;
     }
   }

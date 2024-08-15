@@ -1,5 +1,3 @@
-import 'package:hand_held_shell/models/models/sales/sales.control.model.dart';
-
 class Coupon {
   bool applied;
   String cuponesNumber;
