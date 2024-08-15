@@ -1,19 +1,19 @@
 class Pos {
-  String posId;
   String posName;
+  String posId;
 
   Pos({
-    required this.posId,
     required this.posName,
+    required this.posId,
   });
 
   factory Pos.fromJson(Map<String, dynamic> json) => Pos(
-        posId: json["_id"] ?? '', // Asegúrate de manejar los valores null
-        posName: json["posName"] ?? '',
+        posName: json["posName"],
+        posId: json["posId"],
       );
 
   Map<String, dynamic> toJson() => {
-        "_id": posId,
         "posName": posName,
+        "posId": posId,
       };
 }

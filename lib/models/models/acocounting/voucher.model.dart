@@ -1,9 +1,7 @@
-import 'package:hand_held_shell/models/models/acocounting/pos.model.dart';
-
 class Voucher {
   bool applied;
   String authorizationCode;
-  Pos posId; // Mantén esto como Pos
+  Pos posId;
   num voucherAmount;
   DateTime voucherDate;
   String salesControlId;
@@ -20,16 +18,13 @@ class Voucher {
   });
 
   factory Voucher.fromJson(Map<String, dynamic> json) => Voucher(
-        applied: json["applied"] ?? false,
-        authorizationCode: json["authorizationCode"] ?? '',
-        posId: Pos.fromJson(
-            json["posId"] ?? {}), // Asegúrate de que el mapeo esté correcto
-        voucherAmount: json["voucherAmount"] ?? 0.0,
-        voucherDate: json["voucherDate"] != null
-            ? DateTime.parse(json["voucherDate"])
-            : DateTime.now(),
-        salesControlId: json["salesControlId"] ?? '',
-        voucherId: json["voucherId"] ?? '',
+        applied: json["applied"],
+        authorizationCode: json["authorizationCode"],
+        posId: Pos.fromJson(json["posId"] ?? {}),
+        voucherAmount: json["voucherAmount"],
+        voucherDate: DateTime.parse(json["voucherDate"]),
+        salesControlId: json["salesControlId"],
+        voucherId: json["voucherId"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -40,5 +35,25 @@ class Voucher {
         "voucherDate": voucherDate.toIso8601String(),
         "salesControlId": salesControlId,
         "voucherId": voucherId,
+      };
+}
+
+class Pos {
+  String posId;
+  String posName;
+
+  Pos({
+    required this.posId,
+    required this.posName,
+  });
+
+  factory Pos.fromJson(Map<String, dynamic> json) => Pos(
+        posId: json["posId"] ?? '', // Asegúrate de manejar los valores null
+        posName: json["posName"] ?? '',
+      );
+
+  Map<String, dynamic> toJson() => {
+        "posId": posId,
+        "posName": posName,
       };
 }

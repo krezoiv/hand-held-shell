@@ -1,4 +1,3 @@
-import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:hand_held_shell/models/models/sales/sales.control.model.dart';
 
 class Credit {
@@ -10,7 +9,7 @@ class Credit {
   num superAmount;
   num dieselAmount;
   Client clientId;
-  SalesControl salesControlId;
+  String salesControlId;
   String creditId;
 
   Credit({
@@ -35,7 +34,7 @@ class Credit {
         superAmount: json["superAmount"],
         dieselAmount: json["dieselAmount"],
         clientId: Client.fromJson(json["clientId"] ?? {}),
-        salesControlId: SalesControl.fromJson(json["salesControlId"] ?? {}),
+        salesControlId: json["salesControlId"],
         creditId: json["creditId"],
       );
 
@@ -48,7 +47,39 @@ class Credit {
         "superAmount": superAmount,
         "dieselAmount": dieselAmount,
         "clientId": clientId.toJson(),
-        "salesControlId": salesControlId.toJson(),
+        "salesControlId": salesControlId,
         "creditId": creditId,
+      };
+}
+
+class Client {
+  String clientId;
+  String clientName;
+  String clientEmail;
+  String clientPhone;
+  String clientAddress;
+
+  Client({
+    required this.clientId,
+    required this.clientName,
+    required this.clientEmail,
+    required this.clientPhone,
+    required this.clientAddress,
+  });
+
+  factory Client.fromJson(Map<String, dynamic> json) => Client(
+        clientId: json["clientId"] ?? "",
+        clientName: json["clientName"] ?? "",
+        clientEmail: json["clientEmail"] ?? "",
+        clientPhone: json["clientPhone"] ?? "",
+        clientAddress: json["clientAddress"] ?? "",
+      );
+
+  Map<String, dynamic> toJson() => {
+        "clientId": clientId,
+        "clientName": clientName,
+        "clientEmail": clientEmail,
+        "clientPhone": clientPhone,
+        "clientAddress": clientAddress,
       };
 }

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:hand_held_shell/models/mappers/credits/list.credits.sales.control.response.dart';
 import 'package:hand_held_shell/models/mappers/credits/new.credit.response.dart';
 import 'package:hand_held_shell/services/accounting/credits/credits.service.dart';
 
@@ -7,6 +8,9 @@ class CreditsController extends GetxController {
 
   final Rx<NewCreditResponse?> newCreditsResponse =
       Rx<NewCreditResponse?>(null);
+
+  final Rx<GetCreditsListSaleControlResponse?> creditsListResponse =
+      Rx<GetCreditsListSaleControlResponse?>(null);
   final RxBool isLoading = false.obs;
 
   Future<bool> createCredit({
@@ -40,6 +44,26 @@ class CreditsController extends GetxController {
       Get.snackbar(
           'Error', 'Ocurrió un error al crear el crédito: ${e.toString()}');
       return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> fetchCreditsBySalesControl() async {
+    try {
+      isLoading.value = true;
+      final response = await _creditService.getCreditsSalesControl();
+
+      if (response != null && response.ok && response.credits.isNotEmpty) {
+        creditsListResponse.value = response;
+        Get.snackbar('Éxito', 'Créditos obtenidos exitosamente');
+      } else if (response != null && !response.ok) {
+        Get.snackbar('Error', 'Error en la respuesta: ${response.credits}');
+      } else {
+        Get.snackbar('Error', 'No se encontraron los créditos');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Ocurrió un error al obtener los créditos: $e');
     } finally {
       isLoading.value = false;
     }

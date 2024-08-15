@@ -1,4 +1,8 @@
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
+import 'package:hand_held_shell/models/models/acocounting/bank.check.model.dart';
+import 'package:hand_held_shell/models/models/acocounting/credit.model.dart';
+import 'package:hand_held_shell/models/models/acocounting/deposits.model.dart';
+import 'package:hand_held_shell/models/models/acocounting/voucher.model.dart';
 
 class SalesControl {
   DateTime salesDate;

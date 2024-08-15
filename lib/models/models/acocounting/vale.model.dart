@@ -5,7 +5,7 @@ class Vale {
   DateTime valeDate;
   num valeAmount;
   String valeDescription;
-  SalesControl salesControlId;
+  String salesControlId;
   String valeId;
 
   Vale({
@@ -22,7 +22,7 @@ class Vale {
         valeDate: DateTime.parse(json["valeDate"]),
         valeAmount: json["valeAmount"],
         valeDescription: json["valeDescription"],
-        salesControlId: SalesControl.fromJson(json["salesControlId"] ?? {}),
+        salesControlId: json["salesControlId"],
         valeId: json["valeId"],
       );
 
@@ -31,7 +31,7 @@ class Vale {
         "valeDate": valeDate.toIso8601String(),
         "valeAmount": valeAmount,
         "valeDescription": valeDescription,
-        "salesControlId": salesControlId.toJson(),
+        "salesControlId": salesControlId,
         "valeId": valeId,
       };
 }

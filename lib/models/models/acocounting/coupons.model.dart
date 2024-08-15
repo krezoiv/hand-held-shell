@@ -5,7 +5,7 @@ class Coupon {
   String cuponesNumber;
   DateTime cuponesDate;
   num cuponesAmount;
-  SalesControl salesControlId;
+  String salesControlId;
   String couponId;
 
   Coupon({
@@ -22,7 +22,7 @@ class Coupon {
         cuponesNumber: json["cuponesNumber"],
         cuponesDate: DateTime.parse(json["cuponesDate"]),
         cuponesAmount: json["cuponesAmount"],
-        salesControlId: SalesControl.fromJson(json["salesControlId"] ?? {}),
+        salesControlId: json["salesControlId"],
         couponId: json["couponId"],
       );
 
@@ -31,7 +31,7 @@ class Coupon {
         "cuponesNumber": cuponesNumber,
         "cuponesDate": cuponesDate.toIso8601String(),
         "cuponesAmount": cuponesAmount,
-        "salesControlId": salesControlId.toJson(),
+        "salesControlId": salesControlId,
         "couponId": couponId,
       };
 }

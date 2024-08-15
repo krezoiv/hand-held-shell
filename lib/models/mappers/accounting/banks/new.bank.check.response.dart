@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-import 'package:hand_held_shell/models/enteties.exports.files.dart';
+import 'package:hand_held_shell/models/models/acocounting/bank.check.model.dart';
 
 NewBankCheckResponse newBankCheckResponseFromJson(String str) =>
     NewBankCheckResponse.fromJson(json.decode(str));

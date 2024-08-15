@@ -672,6 +672,26 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                                 await createVoucher();
                                 await voucherController
                                     ?.fetchVoucherBySalesControl();
+                              } else if (label == 'Vales') {
+                                await createVale();
+                                await valesController
+                                    .fetchValesBySalesControl();
+                              } else if (label == "Cupones") {
+                                await createCoupon();
+                                await couponsController
+                                    ?.fetchCouponsBySalesControl();
+                              } else if (label == "Depositos") {
+                                await createDeposits();
+                                await depositsController
+                                    ?.fetchDepositsBySalesControl();
+                              } else if (label == "Creditos") {
+                                await createCredit();
+                                await creditsController
+                                    ?.fetchCreditsBySalesControl();
+                              } else if (label == "Cheques") {
+                                await createBankCheck();
+                                await bankCheckController
+                                    .fetchBankCheckBySalesControl();
                               }
 
                               Navigator.pop(context); // Cierra el spinner
@@ -719,7 +739,31 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           isLoading = voucherController?.isLoading.value ?? true;
           items = voucherController?.voucherListResponse.value?.vouchers ?? [];
           break;
-        // Puedes agregar otros casos aquí si tienes más tipos.
+        case TabType.Vales:
+          isLoading = valesController.isLoading.value;
+          items = valesController.valesListResponse.value?.vales ?? [];
+          break;
+        case TabType.Cupones:
+          isLoading = couponsController?.isLoading.value ?? true;
+          items = couponsController?.couponsListResponse.value?.coupons ?? [];
+          break;
+        case TabType.Depositos:
+          isLoading = depositsController?.isLoading.value ?? true;
+          items =
+              depositsController?.depositsitsListResponse.value?.deposits ?? [];
+          break;
+
+        case TabType.Creditos:
+          isLoading = creditsController?.isLoading.value ?? true;
+          items = creditsController?.creditsListResponse.value?.credits ?? [];
+          break;
+
+        case TabType.Cheques:
+          isLoading = bankCheckController.isLoading.value;
+          items =
+              bankCheckController.bankCheckListResponse.value?.bankCheck ?? [];
+          break;
+
         default:
           return const Center(child: Text('Tipo no soportado'));
       }
@@ -738,12 +782,15 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           // Inicializa las variables title y subtitle
           String title = '';
           String subtitle = '';
-
+          //!gastos
           if (type == TabType.Gastos) {
-            title = 'Factura: ${item.billNumber}';
+            title = 'Gasto No. : ${item.billNumber}';
             subtitle =
                 'Monto: ${item.billAmount.toStringAsFixed(2)}\nFecha: ${DateFormat('dd-MM-yyyy').format(item.billDate)}\nDescripción: ${item.billDescription}';
-          } else if (type == TabType.Vouchers) {
+          }
+
+          //!voucher
+          else if (type == TabType.Vouchers) {
             if (item.authorizationCode == null ||
                 item.voucherAmount == null ||
                 item.voucherDate == null ||
@@ -754,11 +801,108 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 subtitle: Text('No se puede mostrar este voucher'),
               );
             }
-            title = 'Voucher: ${item.authorizationCode ?? 'Sin código'}';
+            title = 'Voucher No. : ${item.authorizationCode ?? 'Sin código'}';
             subtitle =
                 'Monto: ${item.voucherAmount?.toStringAsFixed(2) ?? '0.00'}\n'
                 'Fecha: ${item.voucherDate != null ? DateFormat('dd-MM-yyyy').format(item.voucherDate) : 'Sin fecha'}\n'
-                'POS: ${item.posId.posName}'; // Aquí se muestra el posName
+                'POS: ${item.posId.posName}';
+          }
+          //!vales
+          else if (type == TabType.Vales) {
+            if (item.valeNumber == null ||
+                item.valeAmount == null ||
+                item.valeDescription == null ||
+                item.valeDate == null) {
+              return ListTile(
+                title: Text('Datos incompletos'),
+                subtitle: Text('No se puede mostrar este vale'),
+              );
+            }
+            title = 'Vale No. : ${item.valeNumber ?? 'Sin número'}';
+            subtitle = 'Descripcion: ${item.valeDescription}\n'
+                'Fecha: ${item.valeDate != null ? DateFormat('dd-MM-yyyy').format(item.valeDate) : 'Sin fecha'}\n'
+                'Monto: ${item.valeAmount.toStringAsFixed(2)}';
+          }
+
+          //!cupones
+          else if (type == TabType.Cupones) {
+            if (item.cuponesNumber == null ||
+                item.cuponesAmount == null ||
+                item.cuponesDate == null) {
+              return ListTile(
+                title: Text('Datos incompletos'),
+                subtitle: Text('No se puede mostrar este cupón'),
+              );
+            }
+            title = 'Cupón No. : ${item.cuponesNumber ?? 'Sin número'}';
+            subtitle = 'Monto: ${item.cuponesAmount.toStringAsFixed(2)}\n'
+                'Fecha: ${item.cuponesDate != null ? DateFormat('dd-MM-yyyy').format(item.cuponesDate) : 'Sin fecha'}';
+          }
+          //!Depositos
+          else if (type == TabType.Depositos) {
+            if (item.depositNumber == null ||
+                item.depositAmount == null ||
+                item.depositDate == null ||
+                item.bankId == null ||
+                item.bankId.bankName == null) {
+              return ListTile(
+                title: Text('Datos incompletos'),
+                subtitle: Text('No se puede mostrar este depósito'),
+              );
+            }
+            title = 'Depósito No. : ${item.depositNumber ?? 'Sin Nnúmero'}';
+            subtitle =
+                'Monto: ${item.depositAmount?.toStringAsFixed(2) ?? '0.00'}\n'
+                'Fecha: ${item.depositDate != null ? DateFormat('dd-MM-yyyy').format(item.depositDate) : 'Sin fecha'}\n'
+                'Banco: ${item.bankId.bankName}';
+          }
+
+          //!Creditos
+          else if (type == TabType.Creditos) {
+            if (item.creditNumber == null ||
+                item.creditAmount == null ||
+                item.creditDate == null ||
+                item.regularAmount == null ||
+                item.superAmount == null ||
+                item.dieselAmount == null ||
+                item.clientId == null ||
+                item.clientId.clientName == null) {
+              return ListTile(
+                title: Text('Datos incompletos'),
+                subtitle: Text('No se puede mostrar este crédito'),
+              );
+            }
+            title = 'Crédito No. : ${item.creditNumber ?? 'Sin Nnúmero'}';
+            subtitle =
+                'Fecha: ${item.creditDate != null ? DateFormat('dd-MM-yyyy').format(item.creditDate) : 'Sin fecha'}\n'
+                'Cliente: ${item.clientId.clientName}\n'
+                'Cantidad Super: ${item.superAmount?.toStringAsFixed(2) ?? '0.00'}\n'
+                'Cantidad Regular: ${item.regularAmount?.toStringAsFixed(2) ?? '0.00'}\n'
+                'Cantidad Diésel: ${item.dieselAmount?.toStringAsFixed(2) ?? '0.00'}\n'
+                'Monto: ${item.creditAmount?.toStringAsFixed(2) ?? '0.00'}';
+          }
+
+          //! Cheques
+          else if (type == TabType.Cheques) {
+            if (item.checkNumber == null ||
+                item.checkValue == null ||
+                item.checkDate == null ||
+                item.bankId == null ||
+                item.bankId.bankName == null ||
+                item.clientId == null ||
+                item.clientId.clientName == null) {
+              return ListTile(
+                title: Text('Datos incompletos'),
+                subtitle: Text('No se puede mostrar este cheque'),
+              );
+            }
+
+            title = 'Cheque No. : ${item.checkNumber ?? 'Sin Nnúmero'}';
+            subtitle =
+                'Fecha: ${item.checkDate != null ? DateFormat('dd-MM-yyyy').format(item.checkDate) : 'Sin fecha'}\n'
+                'Cliente: ${item.clientId.clientName}\n'
+                'Banco: ${item.bankId.bankName}\n'
+                'Monto: ${item.checkValue?.toStringAsFixed(2) ?? '0.00'}';
           }
 
           return ListTile(
@@ -815,7 +959,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     } else if (label == 'Cupones') {
       return Column(
         children: [
-          buildTextField('No. Cupon', controller: couponsNumberController),
+          buildTextField('No. Cupón', controller: couponsNumberController),
           buildNumberTextField('Valor', controller: couponsAmountController),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,

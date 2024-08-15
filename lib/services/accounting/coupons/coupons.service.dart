@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:hand_held_shell/models/mappers/accounting/coupons/list.coupons.sales.control.response.dart';
 import 'package:hand_held_shell/models/mappers/accounting/coupons/new.coupons.response.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
@@ -33,6 +34,33 @@ class CouponsService {
 
       if (response.statusCode == 201) {
         return newCouponsResponseFromJson(response.body);
+      } else {
+        final errorResponse = json.decode(response.body);
+        throw Exception(errorResponse['message'] ?? 'Error desconocido');
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<GetCouponsListSaleControlResponse?> getCouponsSalesControl() async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) {
+        throw Exception('Token no disponible');
+      }
+
+      final url = Uri.parse('$baseUrl/coupons/getCouponsSalesControl');
+      final response = await http.get(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return getCouponsListSaleControlResponseFromJson(response.body);
       } else {
         final errorResponse = json.decode(response.body);
         throw Exception(errorResponse['message'] ?? 'Error desconocido');
