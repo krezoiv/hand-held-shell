@@ -752,18 +752,15 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           items =
               depositsController?.depositsitsListResponse.value?.deposits ?? [];
           break;
-
         case TabType.Creditos:
           isLoading = creditsController?.isLoading.value ?? true;
           items = creditsController?.creditsListResponse.value?.credits ?? [];
           break;
-
         case TabType.Cheques:
           isLoading = bankCheckController.isLoading.value;
           items =
               bankCheckController.bankCheckListResponse.value?.bankCheck ?? [];
           break;
-
         default:
           return const Center(child: Text('Tipo no soportado'));
       }
@@ -782,6 +779,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           // Inicializa las variables title y subtitle
           String title = '';
           String subtitle = '';
+
           //!gastos
           if (type == TabType.Gastos) {
             title = 'Gasto No. : ${item.billNumber}';
@@ -796,9 +794,20 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 item.voucherDate == null ||
                 item.posId == null ||
                 item.posId.posName == null) {
-              return ListTile(
-                title: Text('Datos incompletos'),
-                subtitle: Text('No se puede mostrar este voucher'),
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('Datos incompletos'),
+                      SizedBox(height: 8.0),
+                      Text('No se puede mostrar este voucher'),
+                    ],
+                  ),
+                ),
               );
             }
             title = 'Voucher No. : ${item.authorizationCode ?? 'Sin código'}';
@@ -813,9 +822,20 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 item.valeAmount == null ||
                 item.valeDescription == null ||
                 item.valeDate == null) {
-              return ListTile(
-                title: Text('Datos incompletos'),
-                subtitle: Text('No se puede mostrar este vale'),
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('Datos incompletos'),
+                      SizedBox(height: 8.0),
+                      Text('No se puede mostrar este vale'),
+                    ],
+                  ),
+                ),
               );
             }
             title = 'Vale No. : ${item.valeNumber ?? 'Sin número'}';
@@ -829,9 +849,20 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
             if (item.cuponesNumber == null ||
                 item.cuponesAmount == null ||
                 item.cuponesDate == null) {
-              return ListTile(
-                title: Text('Datos incompletos'),
-                subtitle: Text('No se puede mostrar este cupón'),
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('Datos incompletos'),
+                      SizedBox(height: 8.0),
+                      Text('No se puede mostrar este cupón'),
+                    ],
+                  ),
+                ),
               );
             }
             title = 'Cupón No. : ${item.cuponesNumber ?? 'Sin número'}';
@@ -845,9 +876,20 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 item.depositDate == null ||
                 item.bankId == null ||
                 item.bankId.bankName == null) {
-              return ListTile(
-                title: Text('Datos incompletos'),
-                subtitle: Text('No se puede mostrar este depósito'),
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('Datos incompletos'),
+                      SizedBox(height: 8.0),
+                      Text('No se puede mostrar este depósito'),
+                    ],
+                  ),
+                ),
               );
             }
             title = 'Depósito No. : ${item.depositNumber ?? 'Sin Nnúmero'}';
@@ -867,9 +909,20 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 item.dieselAmount == null ||
                 item.clientId == null ||
                 item.clientId.clientName == null) {
-              return ListTile(
-                title: Text('Datos incompletos'),
-                subtitle: Text('No se puede mostrar este crédito'),
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('Datos incompletos'),
+                      SizedBox(height: 8.0),
+                      Text('No se puede mostrar este crédito'),
+                    ],
+                  ),
+                ),
               );
             }
             title = 'Crédito No. : ${item.creditNumber ?? 'Sin Nnúmero'}';
@@ -891,9 +944,20 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 item.bankId.bankName == null ||
                 item.clientId == null ||
                 item.clientId.clientName == null) {
-              return ListTile(
-                title: Text('Datos incompletos'),
-                subtitle: Text('No se puede mostrar este cheque'),
+              return Card(
+                elevation: 4,
+                margin: const EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: const [
+                      Text('Datos incompletos'),
+                      SizedBox(height: 8.0),
+                      Text('No se puede mostrar este cheque'),
+                    ],
+                  ),
+                ),
               );
             }
 
@@ -905,9 +969,21 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 'Monto: ${item.checkValue?.toStringAsFixed(2) ?? '0.00'}';
           }
 
-          return ListTile(
-            title: Text(title),
-            subtitle: Text(subtitle),
+          return Card(
+            elevation: 4,
+            margin: const EdgeInsets.all(8.0),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title,
+                      style: const TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8.0),
+                  Text(subtitle),
+                ],
+              ),
+            ),
           );
         },
       );
