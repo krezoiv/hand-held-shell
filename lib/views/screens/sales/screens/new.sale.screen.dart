@@ -780,151 +780,33 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           String title = '';
           String subtitle = '';
 
-          //!gastos
+          // Configuración del título y subtítulo para cada tipo de TabType
           if (type == TabType.Gastos) {
             title = 'Gasto No. : ${item.billNumber}';
             subtitle =
                 'Monto: ${item.billAmount.toStringAsFixed(2)}\nFecha: ${DateFormat('dd-MM-yyyy').format(item.billDate)}\nDescripción: ${item.billDescription}';
-          }
-
-          //!voucher
-          else if (type == TabType.Vouchers) {
-            if (item.authorizationCode == null ||
-                item.voucherAmount == null ||
-                item.voucherDate == null ||
-                item.posId == null ||
-                item.posId.posName == null) {
-              return Card(
-                elevation: 4,
-                margin: const EdgeInsets.all(8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('Datos incompletos'),
-                      SizedBox(height: 8.0),
-                      Text('No se puede mostrar este voucher'),
-                    ],
-                  ),
-                ),
-              );
-            }
+          } else if (type == TabType.Vouchers) {
             title = 'Voucher No. : ${item.authorizationCode ?? 'Sin código'}';
             subtitle =
                 'Monto: ${item.voucherAmount?.toStringAsFixed(2) ?? '0.00'}\n'
                 'Fecha: ${item.voucherDate != null ? DateFormat('dd-MM-yyyy').format(item.voucherDate) : 'Sin fecha'}\n'
                 'POS: ${item.posId.posName}';
-          }
-          //!vales
-          else if (type == TabType.Vales) {
-            if (item.valeNumber == null ||
-                item.valeAmount == null ||
-                item.valeDescription == null ||
-                item.valeDate == null) {
-              return Card(
-                elevation: 4,
-                margin: const EdgeInsets.all(8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('Datos incompletos'),
-                      SizedBox(height: 8.0),
-                      Text('No se puede mostrar este vale'),
-                    ],
-                  ),
-                ),
-              );
-            }
+          } else if (type == TabType.Vales) {
             title = 'Vale No. : ${item.valeNumber ?? 'Sin número'}';
             subtitle = 'Descripcion: ${item.valeDescription}\n'
                 'Fecha: ${item.valeDate != null ? DateFormat('dd-MM-yyyy').format(item.valeDate) : 'Sin fecha'}\n'
                 'Monto: ${item.valeAmount.toStringAsFixed(2)}';
-          }
-
-          //!cupones
-          else if (type == TabType.Cupones) {
-            if (item.cuponesNumber == null ||
-                item.cuponesAmount == null ||
-                item.cuponesDate == null) {
-              return Card(
-                elevation: 4,
-                margin: const EdgeInsets.all(8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('Datos incompletos'),
-                      SizedBox(height: 8.0),
-                      Text('No se puede mostrar este cupón'),
-                    ],
-                  ),
-                ),
-              );
-            }
+          } else if (type == TabType.Cupones) {
             title = 'Cupón No. : ${item.cuponesNumber ?? 'Sin número'}';
             subtitle = 'Monto: ${item.cuponesAmount.toStringAsFixed(2)}\n'
                 'Fecha: ${item.cuponesDate != null ? DateFormat('dd-MM-yyyy').format(item.cuponesDate) : 'Sin fecha'}';
-          }
-          //!Depositos
-          else if (type == TabType.Depositos) {
-            if (item.depositNumber == null ||
-                item.depositAmount == null ||
-                item.depositDate == null ||
-                item.bankId == null ||
-                item.bankId.bankName == null) {
-              return Card(
-                elevation: 4,
-                margin: const EdgeInsets.all(8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('Datos incompletos'),
-                      SizedBox(height: 8.0),
-                      Text('No se puede mostrar este depósito'),
-                    ],
-                  ),
-                ),
-              );
-            }
+          } else if (type == TabType.Depositos) {
             title = 'Depósito No. : ${item.depositNumber ?? 'Sin Nnúmero'}';
             subtitle =
                 'Monto: ${item.depositAmount?.toStringAsFixed(2) ?? '0.00'}\n'
                 'Fecha: ${item.depositDate != null ? DateFormat('dd-MM-yyyy').format(item.depositDate) : 'Sin fecha'}\n'
                 'Banco: ${item.bankId.bankName}';
-          }
-
-          //!Creditos
-          else if (type == TabType.Creditos) {
-            if (item.creditNumber == null ||
-                item.creditAmount == null ||
-                item.creditDate == null ||
-                item.regularAmount == null ||
-                item.superAmount == null ||
-                item.dieselAmount == null ||
-                item.clientId == null ||
-                item.clientId.clientName == null) {
-              return Card(
-                elevation: 4,
-                margin: const EdgeInsets.all(8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('Datos incompletos'),
-                      SizedBox(height: 8.0),
-                      Text('No se puede mostrar este crédito'),
-                    ],
-                  ),
-                ),
-              );
-            }
+          } else if (type == TabType.Creditos) {
             title = 'Crédito No. : ${item.creditNumber ?? 'Sin Nnúmero'}';
             subtitle =
                 'Fecha: ${item.creditDate != null ? DateFormat('dd-MM-yyyy').format(item.creditDate) : 'Sin fecha'}\n'
@@ -933,34 +815,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 'Cantidad Regular: ${item.regularAmount?.toStringAsFixed(2) ?? '0.00'}\n'
                 'Cantidad Diésel: ${item.dieselAmount?.toStringAsFixed(2) ?? '0.00'}\n'
                 'Monto: ${item.creditAmount?.toStringAsFixed(2) ?? '0.00'}';
-          }
-
-          //! Cheques
-          else if (type == TabType.Cheques) {
-            if (item.checkNumber == null ||
-                item.checkValue == null ||
-                item.checkDate == null ||
-                item.bankId == null ||
-                item.bankId.bankName == null ||
-                item.clientId == null ||
-                item.clientId.clientName == null) {
-              return Card(
-                elevation: 4,
-                margin: const EdgeInsets.all(8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('Datos incompletos'),
-                      SizedBox(height: 8.0),
-                      Text('No se puede mostrar este cheque'),
-                    ],
-                  ),
-                ),
-              );
-            }
-
+          } else if (type == TabType.Cheques) {
             title = 'Cheque No. : ${item.checkNumber ?? 'Sin Nnúmero'}';
             subtitle =
                 'Fecha: ${item.checkDate != null ? DateFormat('dd-MM-yyyy').format(item.checkDate) : 'Sin fecha'}\n'
@@ -969,19 +824,43 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 'Monto: ${item.checkValue?.toStringAsFixed(2) ?? '0.00'}';
           }
 
-          return Card(
-            elevation: 4,
-            margin: const EdgeInsets.all(8.0),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title,
-                      style: const TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8.0),
-                  Text(subtitle),
-                ],
+          return Dismissible(
+            key: Key(item.toString()), // Usar un ID único de cada item
+            direction: DismissDirection
+                .endToStart, // Solo permitir deslizar hacia la izquierda
+            background: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              color: Colors.red,
+              alignment: Alignment.centerRight,
+              child: const Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
+            ),
+            confirmDismiss: (direction) async {
+              // Aquí se puede implementar la lógica para eliminar el item
+              // Por ahora, no hará nada cuando se deslice hacia la izquierda
+              return false;
+            },
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width *
+                  0.99, // El 95% del ancho de la pantalla
+              child: Card(
+                elevation: 4,
+                margin: const EdgeInsets.symmetric(
+                    vertical: 8.0), // Solo margen vertical
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title,
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      const SizedBox(height: 8.0),
+                      Text(subtitle),
+                    ],
+                  ),
+                ),
               ),
             ),
           );
