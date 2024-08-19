@@ -1,6 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hand_held_shell/controllers/accounting/coupons/coupons.controller.dart';
 import 'package:hand_held_shell/controllers/accounting/credis/credits.crontroller.dart';
@@ -25,7 +26,6 @@ import 'package:hand_held_shell/shared/helpers/show.confirm.dialog.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/sales/widgets/side.menu.sale.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
 
 enum TabType { Gastos, Vales, Cheques, Cupones, Vouchers, Depositos, Creditos }
 
@@ -57,6 +57,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   String? selectedClientChecks;
   String? selectedPOS;
   String? selectedClientCredits;
+  bool _isMounted = false;
 
   TextEditingController billNumberController = TextEditingController();
   TextEditingController billDateController = TextEditingController();
@@ -112,6 +113,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   @override
   void initState() {
     super.initState();
+    _isMounted = true;
 
     dispenserController = Get.put(DispenserController());
     fuelController = Get.put(FuelController());
@@ -916,13 +918,13 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
             subtitle = 'Monto: ${item.cuponesAmount.toStringAsFixed(2)}\n'
                 'Fecha: ${item.cuponesDate != null ? DateFormat('dd-MM-yyyy').format(item.cuponesDate) : 'Sin fecha'}';
           } else if (type == TabType.Depositos) {
-            title = 'Depósito No. : ${item.depositNumber ?? 'Sin Nnúmero'}';
+            title = 'Depósito No. : ${item.depositNumber ?? 'Sin número'}';
             subtitle =
                 'Monto: ${item.depositAmount?.toStringAsFixed(2) ?? '0.00'}\n'
                 'Fecha: ${item.depositDate != null ? DateFormat('dd-MM-yyyy').format(item.depositDate) : 'Sin fecha'}\n'
                 'Banco: ${item.bankId.bankName}';
           } else if (type == TabType.Creditos) {
-            title = 'Crédito No. : ${item.creditNumber ?? 'Sin Nnúmero'}';
+            title = 'Crédito No. : ${item.creditNumber ?? 'Sin número'}';
             subtitle =
                 'Fecha: ${item.creditDate != null ? DateFormat('dd-MM-yyyy').format(item.creditDate) : 'Sin fecha'}\n'
                 'Cliente: ${item.clientId.clientName}\n'
@@ -931,7 +933,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 'Cantidad Diésel: ${item.dieselAmount?.toStringAsFixed(2) ?? '0.00'}\n'
                 'Monto: ${item.creditAmount?.toStringAsFixed(2) ?? '0.00'}';
           } else if (type == TabType.Cheques) {
-            title = 'Cheque No. : ${item.checkNumber ?? 'Sin Nnúmero'}';
+            title = 'Cheque No. : ${item.checkNumber ?? 'Sin número'}';
             subtitle =
                 'Fecha: ${item.checkDate != null ? DateFormat('dd-MM-yyyy').format(item.checkDate) : 'Sin fecha'}\n'
                 'Cliente: ${item.clientId.clientName}\n'
@@ -953,8 +955,60 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               ),
             ),
             confirmDismiss: (direction) async {
+              final bool confirmDelete = await Get.dialog<bool>(
+                    AlertDialog(
+                      title: const Text('Confirmación'),
+                      content: const Text(
+                          '¿Estás seguro de que deseas eliminar este voucher?'),
+                      actions: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            Get.back(result: false);
+                          },
+                          child: const Text('Cancelar'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Get.back(result: true);
+                          },
+                          child: const Text('Eliminar'),
+                        ),
+                      ],
+                    ),
+                  ) ??
+                  false;
+
+              if (confirmDelete) {
+                try {
+                  if (type == TabType.Vouchers && voucherController != null) {
+                    final success =
+                        await voucherController!.deleteVoucher(item.voucherId);
+
+                    if (success) {
+                      // Resta el valor del voucher eliminado del campo correspondiente
+                      vouchers.value =
+                          (double.parse(vouchers.value) - item.voucherAmount!)
+                              .toStringAsFixed(2);
+
+                      // Elimina el item de la lista y refresca
+                      items.removeAt(index);
+                      voucherController?.voucherListResponse.refresh();
+
+                      Get.snackbar('Éxito', 'Voucher eliminado correctamente');
+                      return true;
+                    } else {
+                      Get.snackbar('Error', 'No se pudo eliminar el voucher.');
+                      return false;
+                    }
+                  }
+                } catch (e) {
+                  Get.snackbar('Error', 'Hubo un error al eliminar: $e');
+                  return false;
+                }
+              }
               return false;
             },
+
             child: SizedBox(
               width: MediaQuery.of(context).size.width *
                   0.99, // El 99% del ancho de la pantalla

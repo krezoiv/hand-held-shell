@@ -76,4 +76,34 @@ class VoucherService {
       return null;
     }
   }
+
+  Future<bool> deleteVoucher(String voucherId) async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) {
+        throw Exception('Token no disponible');
+      }
+
+      final url = Uri.parse('$baseUrl/vouchers/deleteVoucher/$voucherId');
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Verificar si la eliminación fue exitosa
+        final responseBody = json.decode(response.body);
+        return responseBody['ok'] == true;
+      } else {
+        final errorResponse = json.decode(response.body);
+        throw Exception(errorResponse['message'] ?? 'Error desconocido');
+      }
+    } catch (e) {
+      // Manejar errores y devolver false en caso de error
+      return false;
+    }
+  }
 }

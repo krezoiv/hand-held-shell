@@ -63,4 +63,24 @@ class VoucherController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<bool> deleteVoucher(String voucherId) async {
+    try {
+      isLoading.value = true;
+      final success = await _voucherService.deleteVoucher(voucherId);
+
+      if (success) {
+        Get.snackbar('Éxito', 'Voucher eliminado exitosamente');
+        return true;
+      } else {
+        Get.snackbar('Error', 'No se pudo eliminar el voucher');
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Ocurrió un error al eliminar el voucher: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }
