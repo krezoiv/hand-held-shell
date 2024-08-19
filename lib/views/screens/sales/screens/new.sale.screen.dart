@@ -145,6 +145,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 child: ElevatedButton(
                   onPressed: controller.isDataLoaded.value
                       ? () async {
+                          // Muestra el spinner antes de comenzar la operación
+                          showDialog(
+                            context: context,
+                            barrierDismissible:
+                                false, // Evita que se cierre al hacer clic fuera del diálogo
+                            builder: (BuildContext context) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                          );
+
                           showConfirmationDialog(
                             title: 'Confirmación',
                             message: '¿Deseas guardar los cambios?',
@@ -153,34 +165,42 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                             onConfirm: () async {
                               Get.back(); // Cierra el diálogo de confirmación
 
-                              // Llama al método _updateSalesControl
-                              await _updateSalesControl();
+                              try {
+                                // Llama al método _updateSalesControl
+                                await _updateSalesControl();
 
-                              // Limpia todos los campos
-                              clearFields();
+                                // Limpia todos los campos
+                                clearFields();
 
-                              // Limpia el estado almacenado
-                              await clearState();
+                                // Limpia el estado almacenado
+                                await clearState();
 
-                              // Reinicia el Summary Card para mostrar el mensaje de no hay información
-                              controller.isSummaryCardEnabled.value = true;
-                              controller.lastGeneralDispenserReader.value =
-                                  null;
+                                // Reinicia el Summary Card para mostrar el mensaje de no hay información
+                                controller.isSummaryCardEnabled.value = true;
+                                controller.lastGeneralDispenserReader.value =
+                                    null;
 
-                              // Restablece la pantalla como un "hot restart"
-                              resetScreenState();
+                                // Restablece la pantalla como un "hot restart"
+                                resetScreenState();
 
-                              // Restablece las pantallas NewRegisterDispenserScreen y RegisterDispenserPage
-                              await controller.clearSharedPreferences();
-                              controller.resetState();
+                                // Restablece las pantallas NewRegisterDispenserScreen y RegisterDispenserPage
+                                await controller.clearSharedPreferences();
+                                controller.resetState();
 
-                              // Mostrar mensaje de éxito
-                              Get.snackbar('Éxito',
-                                  'Datos guardados y pantallas actualizadas correctamente');
+                                // Mostrar mensaje de éxito
+                                Get.snackbar('Éxito',
+                                    'Datos guardados y pantallas actualizadas correctamente');
+                              } catch (e) {
+                                Get.snackbar('Error', 'Ocurrió un error: $e');
+                              } finally {
+                                // Cierra el spinner después de que se complete la operación
+                                Navigator.of(context).pop();
+                              }
                             },
                             onCancel: () {
-                              // Cierra el diálogo de confirmación
+                              // Cierra el diálogo de confirmación y el spinner si se cancela
                               Get.back();
+                              Navigator.of(context).pop();
                             },
                           );
                         }
