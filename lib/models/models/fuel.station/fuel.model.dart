@@ -3,8 +3,8 @@ import 'package:hand_held_shell/models/models/taxes/taxes.model.dart';
 
 class Fuel {
   String fuelName;
-  double costPrice;
-  double salePrice;
+  num costPrice;
+  num salePrice;
   Status statusId;
   Taxes taxesId;
   String fuelId;

@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
@@ -273,19 +274,32 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       child: GestureDetector(
         onDoubleTap: () async {
           showConfirmationDialog(
-            title: 'Confirmación',
+            title: 'Nuevo DLP',
             message: '¿Crear nuevo DLP?',
+            confirmText: 'crear',
+            cancelText: 'cancelar',
             onConfirm: () async {
-              Get.back(); // Cierra el diálogo antes de ejecutar las acciones
-              await dispenserController.fetchLastGeneralDispenserReaderData();
-              await fuelController.fetchFuels();
-              await salesControlController.createNewSalesControl();
-              calculateTotalSales();
-              updatePayments();
-              saveState();
+              try {
+                Get.back();
+
+                // Llamada a createNewSalesControl y verificación de éxito
+                bool isSalesControlCreated =
+                    await salesControlController.createNewSalesControl();
+
+                // Solo continuar si la creación de SalesControl fue exitosa
+                if (isSalesControlCreated) {
+                  await dispenserController
+                      .fetchLastGeneralDispenserReaderData();
+                  await fuelController.fetchFuels();
+                  calculateTotalSales();
+                  updatePayments();
+                  saveState();
+                }
+              } catch (e) {
+                // Manejo de cualquier excepción no prevista
+                Get.snackbar('Error', e.toString());
+              }
             },
-            confirmText: 'Crear',
-            cancelText: 'Cancelar',
             onCancel: () {
               return;
             },
@@ -373,138 +387,249 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   Widget buildCardInformation() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Card(
-        elevation: 12,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: const BorderSide(color: Colors.black, width: 1),
-        ),
-        shadowColor: Colors.blue,
-        child: InkWell(
-          onTap: () {
-            // Acción al presionar el Card Information
-          },
-          child: Obx(() {
-            final fuels = fuelController.fuels;
-            if (fuels.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Center(
-                  child: Text('No hay información de combustibles disponible'),
+      child: GestureDetector(
+        onDoubleTap: () async {
+          final fuels = fuelController.fuels;
+
+          // Obtén los combustibles desde el controlador
+          final regular = fuels.firstWhere((fuel) => fuel.fuelName == 'regular',
+              orElse: () => Fuel(
+                  fuelName: 'regular',
+                  costPrice: 0.000,
+                  salePrice: 0.00,
+                  statusId: Status(id: '', statusName: ''),
+                  taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
+                  fuelId: ''));
+          final superFuel = fuels.firstWhere((fuel) => fuel.fuelName == 'super',
+              orElse: () => Fuel(
+                  fuelName: 'super',
+                  costPrice: 0.00,
+                  salePrice: 0.00,
+                  statusId: Status(id: '', statusName: ''),
+                  taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
+                  fuelId: ''));
+          final diesel = fuels.firstWhere((fuel) => fuel.fuelName == 'diesel',
+              orElse: () => Fuel(
+                  fuelName: 'diesel',
+                  costPrice: 0.00,
+                  salePrice: 0.00,
+                  statusId: Status(id: '', statusName: ''),
+                  taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
+                  fuelId: ''));
+
+          // Controladores para los TextFields en el diálogo
+          TextEditingController regularController =
+              TextEditingController(text: regular.salePrice.toStringAsFixed(2));
+          TextEditingController superController = TextEditingController(
+              text: superFuel.salePrice.toStringAsFixed(2));
+          TextEditingController dieselController =
+              TextEditingController(text: diesel.salePrice.toStringAsFixed(2));
+
+          // Mostrar el diálogo con los TextFields
+          showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: const Text('Información de Precios'),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    buildPriceTextField('Precio Regular', regularController),
+                    buildPriceTextField('Precio Super', superController),
+                    buildPriceTextField('Precio Diesel', dieselController),
+                  ],
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Cerrar'),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      // Obtiene el FuelController
+                      final fuelController = Get.find<FuelController>();
+
+                      // Actualiza los valores en el controlador
+                      setState(() {
+                        regular.salePrice =
+                            double.parse(regularController.text);
+                        superFuel.salePrice =
+                            double.parse(superController.text);
+                        diesel.salePrice = double.parse(dieselController.text);
+                      });
+
+                      // Llama al método updateFuelPrices para actualizar los precios en el backend
+                      await fuelController.updateFuelPrices(
+                        regularPrice: regular.salePrice,
+                        superPrice: superFuel.salePrice,
+                        dieselPrice: diesel.salePrice,
+                      );
+
+                      // Cierra el diálogo después de actualizar los precios
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Agregar'),
+                  )
+                ],
+              );
+            },
+          );
+        },
+        child: Card(
+          elevation: 12,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: Colors.black, width: 1),
+          ),
+          shadowColor: Colors.blue,
+          child: InkWell(
+            onTap: () {
+              // Acción al presionar el Card Information
+            },
+            child: Obx(() {
+              final fuels = fuelController.fuels;
+              if (fuels.isEmpty) {
+                return const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Center(
+                    child:
+                        Text('No hay información de combustibles disponible'),
+                  ),
+                );
+              }
+
+              final regular = fuels.firstWhere(
+                  (fuel) => fuel.fuelName == 'regular',
+                  orElse: () => Fuel(
+                      fuelName: 'regular',
+                      costPrice: 0.000,
+                      salePrice: 0.00,
+                      statusId: Status(id: '', statusName: ''),
+                      taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
+                      fuelId: ''));
+              final superFuel = fuels.firstWhere(
+                  (fuel) => fuel.fuelName == 'super',
+                  orElse: () => Fuel(
+                      fuelName: 'super',
+                      costPrice: 0.00,
+                      salePrice: 0.00,
+                      statusId: Status(id: '', statusName: ''),
+                      taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
+                      fuelId: ''));
+              final diesel = fuels.firstWhere(
+                  (fuel) => fuel.fuelName == 'diesel',
+                  orElse: () => Fuel(
+                      fuelName: 'diesel',
+                      costPrice: 0.00,
+                      salePrice: 0.00,
+                      statusId: Status(id: '', statusName: ''),
+                      taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
+                      fuelId: ''));
+
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Center(
+                        child: Text('Información',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold))),
+                    const SizedBox(height: 16),
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text('Regular'),
+                        SizedBox(width: 16),
+                        Text('Super'),
+                        SizedBox(width: 16),
+                        Text('Diesel'),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    const Text('Precios',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Text('${regular.salePrice}'),
+                        const SizedBox(width: 16),
+                        Text('${superFuel.salePrice}'),
+                        const SizedBox(width: 16),
+                        Text('${diesel.salePrice}'),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    const Text('Ventas',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Obx(() {
+                          final reader = dispenserController
+                              .lastGeneralDispenserReader.value;
+                          if (reader == null) {
+                            return const Text('0.00');
+                          }
+                          return Text(
+                              reader.totalMechanicRegular.toStringAsFixed(3));
+                        }),
+                        const SizedBox(width: 16),
+                        Obx(() {
+                          final reader = dispenserController
+                              .lastGeneralDispenserReader.value;
+                          if (reader == null) {
+                            return const Text('0.00');
+                          }
+                          return Text(
+                              reader.totalMechanicSuper.toStringAsFixed(3));
+                        }),
+                        const SizedBox(width: 16),
+                        Obx(() {
+                          final reader = dispenserController
+                              .lastGeneralDispenserReader.value;
+                          if (reader == null) {
+                            return const Text('0.00');
+                          }
+                          return Text(
+                              reader.totalMechanicDiesel.toStringAsFixed(3));
+                        }),
+                      ],
+                    ),
+                  ],
                 ),
               );
-            }
-
-            final regular = fuels.firstWhere(
-                (fuel) => fuel.fuelName == 'regular',
-                orElse: () => Fuel(
-                    fuelName: 'regular',
-                    costPrice: 0.000,
-                    salePrice: 0.00,
-                    statusId: Status(id: '', statusName: ''),
-                    taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
-                    fuelId: ''));
-            final superFuel = fuels.firstWhere(
-                (fuel) => fuel.fuelName == 'super',
-                orElse: () => Fuel(
-                    fuelName: 'super',
-                    costPrice: 0.00,
-                    salePrice: 0.00,
-                    statusId: Status(id: '', statusName: ''),
-                    taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
-                    fuelId: ''));
-            final diesel = fuels.firstWhere((fuel) => fuel.fuelName == 'diesel',
-                orElse: () => Fuel(
-                    fuelName: 'diesel',
-                    costPrice: 0.00,
-                    salePrice: 0.00,
-                    statusId: Status(id: '', statusName: ''),
-                    taxesId: Taxes(id: '', idpName: '', idpAmount: 0.00),
-                    fuelId: ''));
-
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Center(
-                      child: Text('Informacion',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold))),
-                  const SizedBox(height: 16),
-                  const Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text('Regular'),
-                      SizedBox(width: 16),
-                      Text('Super'),
-                      SizedBox(width: 16),
-                      Text('Diesel'),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text('Precios',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Text('${regular.salePrice}'),
-                      const SizedBox(width: 16),
-                      Text('${superFuel.salePrice}'),
-                      const SizedBox(width: 16),
-                      Text('${diesel.salePrice}'),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  const Text('Ventas',
-                      style:
-                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Obx(() {
-                        final reader = dispenserController
-                            .lastGeneralDispenserReader.value;
-                        if (reader == null) {
-                          return const Text('0.00');
-                        }
-                        return Text(
-                            reader.totalMechanicRegular.toStringAsFixed(3));
-                      }),
-                      const SizedBox(width: 16),
-                      Obx(() {
-                        final reader = dispenserController
-                            .lastGeneralDispenserReader.value;
-                        if (reader == null) {
-                          return const Text('0.00');
-                        }
-                        return Text(
-                            reader.totalMechanicSuper.toStringAsFixed(3));
-                      }),
-                      const SizedBox(width: 16),
-                      Obx(() {
-                        final reader = dispenserController
-                            .lastGeneralDispenserReader.value;
-                        if (reader == null) {
-                          return const Text('0.00');
-                        }
-                        return Text(
-                            reader.totalMechanicDiesel.toStringAsFixed(3));
-                      }),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          }),
+            }),
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget buildPriceTextField(String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+        inputFormatters: [
+          FilteringTextInputFormatter.allow(RegExp(
+              r'^\d*\.?\d{0,2}')), // Permite solo un punto y hasta 2 decimales
+        ],
       ),
     );
   }
@@ -529,7 +654,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Center(
-                    child: Text('Payments',
+                    child: Text('Abonos',
                         style: TextStyle(
                             fontSize: 18, fontWeight: FontWeight.bold))),
                 const SizedBox(height: 16),
@@ -874,17 +999,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       return Column(
         children: [
           buildDropdownField(
-            'Banco',
-            bankController.bankList.map((Bank bank) => bank.bankName).toList(),
-            onChanged: (value) {
-              setState(() {
-                selectedBankCheck = value;
-              });
-            },
-          ),
-          buildTextField('No. Cheque', controller: checkNumberController),
-          buildNumberTextField('Valor', controller: checkValueController),
-          buildDropdownField(
             'Clientes',
             clientsController.clientsList
                 .map((Client client) => client.clientName)
@@ -895,33 +1009,77 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               });
             },
           ),
+          buildDropdownField(
+            'Banco',
+            bankController.bankList.map((Bank bank) => bank.bankName).toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedBankCheck = value;
+              });
+            },
+          ),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
               isDateField: true,
               controller: checkDateController),
+          buildTextField('No. Cheque',
+              inputType: TextInputType.number,
+              controller: checkNumberController),
+          buildTextField(
+            'Valor',
+            inputType: TextInputType.numberWithOptions(decimal: true),
+            controller: checkValueController,
+          ),
         ],
       );
     } else if (label == 'Vales') {
       return Column(
         children: [
-          buildTextField('Número de Vale', controller: valeNumberController),
-          buildTextField('Descripción', controller: valeDescriptionController),
-          buildNumberTextField('Valor', controller: valeAmountController),
+          buildTextField('Número de Vale',
+              inputType: TextInputType.number,
+              controller: valeNumberController),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
               isDateField: true,
               controller: valeDateController),
+          buildTextField('Valor',
+              inputType: TextInputType.numberWithOptions(decimal: true),
+              controller: valeAmountController),
+          buildTextField('Descripción', controller: valeDescriptionController),
         ],
       );
     } else if (label == 'Cupones') {
       return Column(
         children: [
-          buildTextField('No. Cupón', controller: couponsNumberController),
-          buildNumberTextField('Valor', controller: couponsAmountController),
+          buildTextField('No. Cupón',
+              inputType: TextInputType.number,
+              controller: couponsNumberController),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
               isDateField: true,
               controller: couponsDateController),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: DropdownButtonFormField<String>(
+              decoration: InputDecoration(
+                labelText: 'Valor',
+                border: const OutlineInputBorder(),
+              ),
+              value: '10', // Valor inicial seleccionado
+              items: ['10', '20', '50', '100', '250']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (newValue) {
+                setState(() {
+                  couponsAmountController.text = newValue ?? '';
+                });
+              },
+            ),
+          ),
         ],
       );
     } else if (label == 'Vouchers') {
@@ -936,13 +1094,16 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               });
             },
           ),
-          buildNumberTextField('Valor', controller: voucherAmountController),
-          buildTextField('No. Autorización',
-              controller: authorizationCodeController),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
               isDateField: true,
               controller: voucherDateController),
+          buildTextField('Valor',
+              inputType: TextInputType.numberWithOptions(decimal: true),
+              controller: voucherAmountController),
+          buildTextField('No. Autorización',
+              inputType: TextInputType.number,
+              controller: authorizationCodeController),
         ],
       );
     } else if (label == 'Depositos') {
@@ -957,12 +1118,16 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               });
             },
           ),
-          buildTextField('No. Boleta', controller: depositNumberController),
-          buildNumberTextField('Valor', controller: depositAmountController),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
               isDateField: true,
               controller: depositDateController),
+          buildTextField('No. Boleta',
+              inputType: TextInputType.number,
+              controller: depositNumberController),
+          buildTextField('Valor',
+              inputType: TextInputType.numberWithOptions(decimal: true),
+              controller: depositAmountController),
         ],
       );
     } else if (label == 'Creditos') {
@@ -983,24 +1148,35 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               inputType: TextInputType.datetime,
               isDateField: true,
               controller: creditDateController),
-          buildTextField('No. Comprobante', controller: creditNumberController),
-          buildTextField('Galones Super', controller: superAmountController),
+          buildTextField('No. Comprobante',
+              inputType: TextInputType.number,
+              controller: creditNumberController),
+          buildTextField('Galones Super',
+              inputType: TextInputType.numberWithOptions(decimal: true),
+              controller: superAmountController),
           buildTextField('Galones Regular',
               controller: regularAmountController),
-          buildTextField('Galones Diesel', controller: dieselAmountController),
-          buildNumberTextField('Valor', controller: creditAmountController),
+          buildTextField('Galones Diesel',
+              inputType: TextInputType.numberWithOptions(decimal: true),
+              controller: dieselAmountController),
+          buildTextField('Valor',
+              inputType: TextInputType.numberWithOptions(decimal: true),
+              controller: creditAmountController),
         ],
       );
     } else if (label == 'Gastos') {
       return Column(
         children: [
           buildTextField('Número Correlativo',
+              inputType: TextInputType.number,
               controller: billNumberController),
           buildTextField('Fecha',
               inputType: TextInputType.datetime,
               isDateField: true,
               controller: billDateController),
-          buildTextField('Monto', controller: billAmountController),
+          buildTextField('Valor',
+              inputType: TextInputType.numberWithOptions(decimal: true),
+              controller: billAmountController),
           buildTextField('Descripción', controller: billDescriptionController),
         ],
       );
@@ -1022,6 +1198,13 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           border: const OutlineInputBorder(),
         ),
         keyboardType: inputType,
+        inputFormatters:
+            inputType == const TextInputType.numberWithOptions(decimal: true)
+                ? [
+                    FilteringTextInputFormatter.allow(RegExp(
+                        r'^\d*\.?\d{0,2}')), // Permite solo un punto y hasta 2 decimales
+                  ]
+                : [],
         readOnly: isDateField,
         onTap: isDateField
             ? () async {
@@ -1057,7 +1240,8 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         ),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         inputFormatters: [
-          ThousandsFormatter(),
+          FilteringTextInputFormatter.allow(RegExp(
+              r'^\d*\.?\d{0,2}')), // Permite solo un punto y hasta 2 decimales
         ],
       ),
     );

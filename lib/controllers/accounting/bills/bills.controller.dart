@@ -45,7 +45,7 @@ class BillsController extends GetxController {
 
       if (response != null && response.ok && response.bills.isNotEmpty) {
         billsListResponse.value = response;
-        Get.snackbar('Éxito', 'Facturas obtenidas exitosamente');
+        // Get.snackbar('Éxito', 'Facturas obtenidas exitosamente');
       } else if (response != null && !response.ok) {
         Get.snackbar('Error', 'Error en la respuesta: ${response.bills}');
       } else {

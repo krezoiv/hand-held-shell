@@ -48,7 +48,7 @@ class DepositsController extends GetxController {
 
       if (response != null && response.ok && response.deposits.isNotEmpty) {
         depositsitsListResponse.value = response;
-        Get.snackbar('Éxito', 'Depósitos obtenidos exitosamente');
+        // Get.snackbar('Éxito', 'Depósitos obtenidos exitosamente');
       } else if (response != null && !response.ok) {
         Get.snackbar('Error', 'Error en la respuesta: ${response.deposits}');
       } else {

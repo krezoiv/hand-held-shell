@@ -11,7 +11,7 @@ class SalesControlController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool isSummaryCardEnabled = true.obs;
 
-  Future<void> createNewSalesControl() async {
+  Future<bool> createNewSalesControl() async {
     try {
       isLoading.value = true;
 
@@ -38,9 +38,13 @@ class SalesControlController extends GetxController {
 
       // Deshabilitar el summary card
       isSummaryCardEnabled.value = false;
+
+      return true; // Retornar true si todo sale bien
     } catch (e) {
       // Mostrar un mensaje de error en caso de falla
       Get.snackbar('Error', e.toString());
+
+      return false; // Retornar false en caso de error
     } finally {
       isLoading.value = false;
     }

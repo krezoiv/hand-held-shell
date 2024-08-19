@@ -51,7 +51,7 @@ class VoucherController extends GetxController {
 
       if (response != null && response.ok && response.vouchers.isNotEmpty) {
         voucherListResponse.value = response;
-        Get.snackbar('Éxito', 'Vouchers obtenidas exitosamente');
+        //Get.snackbar('Éxito', 'Vouchers obtenidas exitosamente');
       } else if (response != null && !response.ok) {
         Get.snackbar('Error', 'Error en la respuesta: ${response.vouchers}');
       } else {

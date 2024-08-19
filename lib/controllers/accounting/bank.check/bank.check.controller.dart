@@ -49,7 +49,7 @@ class BankCheckController extends GetxController {
 
       if (response != null && response.ok && response.bankCheck.isNotEmpty) {
         bankCheckListResponse.value = response;
-        Get.snackbar('Éxito', 'Cheques obtenidos exitosamente');
+        // Get.snackbar('Éxito', 'Cheques obtenidos exitosamente');
       } else if (response != null && !response.ok) {
         Get.snackbar('Error', 'Error en la respuesta: ${response.bankCheck}');
       } else {

@@ -50,7 +50,7 @@ class CouponsController extends GetxController {
 
       if (response != null && response.ok && response.coupons.isNotEmpty) {
         couponsListResponse.value = response;
-        Get.snackbar('Éxito', 'Cupones obtenidas exitosamente');
+        // Get.snackbar('Éxito', 'Cupones obtenidas exitosamente');
       } else if (response != null && !response.ok) {
         Get.snackbar('Error', 'Error en la respuesta: ${response.coupons}');
       } else {

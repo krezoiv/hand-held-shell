@@ -6,7 +6,7 @@ import 'package:hand_held_shell/models/mappers/sales/update.last.sales.control.r
 import 'package:http/http.dart' as http;
 
 class SalesControlService extends GetxService {
-  static const String baseUrl = 'http://192.168.1.148:3000/api';
+  static const String baseUrl = 'http://192.168.0.103:3000/api';
 
   Future<NewSalesControlResponse> createSalesControl(
       Map<String, dynamic> requestBody, String token) async {
