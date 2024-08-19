@@ -42,7 +42,8 @@ class SalesControlController extends GetxController {
       return true; // Retornar true si todo sale bien
     } catch (e) {
       // Mostrar un mensaje de error en caso de falla
-      Get.snackbar('Error', e.toString());
+      //Get.snackbar('Error', e.toString());
+      Get.offAllNamed('/sales');
 
       return false; // Retornar false en caso de error
     } finally {

@@ -36,4 +36,9 @@ const appDispenserMenuItems = <DispenserMenuItem>[
       subTitle: "eliminar numeración completa",
       link: RoutesPaths.deleteAllRegisterDispenserScreen,
       icon: Icons.folder_delete_outlined),
+  DispenserMenuItem(
+      title: 'Realizar Cuadre',
+      subTitle: "cuadred DLP",
+      link: RoutesPaths.newSales,
+      icon: Icons.folder_delete_outlined),
 ];

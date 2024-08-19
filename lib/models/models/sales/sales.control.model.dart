@@ -6,6 +6,7 @@ import 'package:hand_held_shell/models/models/acocounting/voucher.model.dart';
 
 class SalesControl {
   DateTime salesDate;
+  bool applied;
   int noDocument;
   num regularPrice;
   num superPrice;
@@ -28,10 +29,11 @@ class SalesControl {
   List<BankCheck> bankCheckIds;
   num abonos;
   String userName;
-  GeneralDispenserReader generalDispenserReaderId;
+  String generalDispenserReaderId;
   String salesControlId;
 
   SalesControl({
+    required this.applied,
     required this.salesDate,
     required this.noDocument,
     required this.regularPrice,
@@ -60,6 +62,7 @@ class SalesControl {
   });
 
   factory SalesControl.fromJson(Map<String, dynamic> json) => SalesControl(
+        applied: json['applied'] ?? false,
         salesDate: DateTime.parse(json["salesDate"]),
         noDocument: json["noDocument"],
         regularPrice: json["regularPrice"].toDouble(),
@@ -88,12 +91,12 @@ class SalesControl {
             json["bankCheckIds"].map((x) => BankCheck.fromJson(x))),
         abonos: json["abonos"].toDouble(),
         userName: json["userName"],
-        generalDispenserReaderId:
-            GeneralDispenserReader.fromJson(json["generalDispenserReaderId"]),
+        generalDispenserReaderId: json["generalDispenserReaderId"] ?? '',
         salesControlId: json["salesControlId"],
       );
 
   Map<String, dynamic> toJson() => {
+        'applied': applied,
         "salesDate": salesDate.toIso8601String(),
         "noDocument": noDocument,
         "regularPrice": regularPrice,
@@ -117,7 +120,7 @@ class SalesControl {
         "bankCheckIds": List<dynamic>.from(bankCheckIds.map((x) => x.toJson())),
         "abonos": abonos,
         "userName": userName,
-        "generalDispenserReaderId": generalDispenserReaderId.toJson(),
+        "generalDispenserReaderId": generalDispenserReaderId,
         "salesControlId": salesControlId,
       };
 }

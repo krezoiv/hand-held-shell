@@ -17,12 +17,10 @@ import 'package:hand_held_shell/controllers/pos/pos.controller.dart';
 import 'package:hand_held_shell/controllers/sales/new.sales.controller.dart';
 import 'package:hand_held_shell/models/models/acocounting/bank.model.dart';
 import 'package:hand_held_shell/models/models/acocounting/pos.model.dart';
-
 import 'package:hand_held_shell/models/models/fuel.station/fuel.model.dart';
 import 'package:hand_held_shell/models/models/persons/client.model.dart';
 import 'package:hand_held_shell/models/models/status/status.model.dart';
 import 'package:hand_held_shell/models/models/taxes/taxes.model.dart';
-import 'package:hand_held_shell/shared/helpers/Thousands.formatter.dart';
 import 'package:hand_held_shell/shared/helpers/show.confirm.dialog.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/sales/widgets/side.menu.sale.dart';
@@ -114,6 +112,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   @override
   void initState() {
     super.initState();
+
     dispenserController = Get.put(DispenserController());
     fuelController = Get.put(FuelController());
     posController = Get.put(PosController());
@@ -138,37 +137,24 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       appBar: AppBar(
         title: const Text('Cuadre DLP'),
         actions: [
-          Obx(() {
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: ElevatedButton(
-                onPressed: dispenserController.isDataLoaded.value
-                    ? () async {
-                        showConfirmationDialog(
-                          title: 'Confirmación',
-                          message: '¿Deseas guardar los cambios?',
-                          confirmText: 'Sí',
-                          cancelText: 'No',
-                          onConfirm: () async {
-                            Get.back(); // Cierra el diálogo de confirmación
+          GetBuilder<DispenserController>(
+            init: DispenserController(),
+            builder: (controller) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: ElevatedButton(
+                  onPressed: controller.isDataLoaded.value
+                      ? () async {
+                          showConfirmationDialog(
+                            title: 'Confirmación',
+                            message: '¿Deseas guardar los cambios?',
+                            confirmText: 'Sí',
+                            cancelText: 'No',
+                            onConfirm: () async {
+                              Get.back(); // Cierra el diálogo de confirmación
 
-                            // Muestra el spinner
-                            showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (BuildContext context) {
-                                return const Center(
-                                  child: CircularProgressIndicator(),
-                                );
-                              },
-                            );
-
-                            try {
                               // Llama al método _updateSalesControl
                               await _updateSalesControl();
-
-                              // Cierra el spinner
-                              Navigator.pop(context);
 
                               // Limpia todos los campos
                               clearFields();
@@ -177,49 +163,33 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                               await clearState();
 
                               // Reinicia el Summary Card para mostrar el mensaje de no hay información
-                              dispenserController.isSummaryCardEnabled.value =
-                                  true;
-                              dispenserController
-                                  .lastGeneralDispenserReader.value = null;
+                              controller.isSummaryCardEnabled.value = true;
+                              controller.lastGeneralDispenserReader.value =
+                                  null;
 
                               // Restablece la pantalla como un "hot restart"
                               resetScreenState();
 
                               // Restablece las pantallas NewRegisterDispenserScreen y RegisterDispenserPage
-                              final dispenserControllerReset =
-                                  Get.find<DispenserController>();
-                              await dispenserControllerReset
-                                  .clearSharedPreferences();
-                              dispenserController.resetState();
+                              await controller.clearSharedPreferences();
+                              controller.resetState();
 
                               // Mostrar mensaje de éxito
                               Get.snackbar('Éxito',
                                   'Datos guardados y pantallas actualizadas correctamente');
-                            } catch (e) {
-                              // Cierra el spinner en caso de error
-                              Navigator.pop(context);
-
-                              Get.snackbar('Error',
-                                  'Hubo un error al guardar los datos: $e');
-                            }
-                          },
-                          onCancel: () {
-                            // Cierra el diálogo de confirmación
-                            Get.back();
-                          },
-                        );
-                      }
-                    : null,
-                child: const Text('Guardar'),
-              ),
-            );
-          }),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () async {
-              await clearState();
+                            },
+                            onCancel: () {
+                              // Cierra el diálogo de confirmación
+                              Get.back();
+                            },
+                          );
+                        }
+                      : null,
+                  child: const Text('Guardar'),
+                ),
+              );
             },
-          ),
+          )
         ],
       ),
       drawer: SideMenuSale(scaffoldKey: scaffoldKey),
@@ -280,24 +250,24 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
             cancelText: 'cancelar',
             onConfirm: () async {
               try {
-                Get.back();
-
-                // Llamada a createNewSalesControl y verificación de éxito
-                bool isSalesControlCreated =
+                // Crea un nuevo DLP
+                bool isCreated =
                     await salesControlController.createNewSalesControl();
 
-                // Solo continuar si la creación de SalesControl fue exitosa
-                if (isSalesControlCreated) {
+                if (isCreated) {
                   await dispenserController
                       .fetchLastGeneralDispenserReaderData();
                   await fuelController.fetchFuels();
                   calculateTotalSales();
                   updatePayments();
                   saveState();
+                  Get.snackbar('Éxito', 'Nuevo DLP creado exitosamente.');
+                } else {
+                  Get.snackbar('Advertencia',
+                      'No se pudo crear el nuevo DLP, no se ha aperturado el día.');
                 }
               } catch (e) {
-                // Manejo de cualquier excepción no prevista
-                Get.snackbar('Error', e.toString());
+                Get.snackbar('Error', 'Ocurrió un error: $e');
               }
             },
             onCancel: () {
@@ -963,13 +933,11 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               ),
             ),
             confirmDismiss: (direction) async {
-              // Aquí se puede implementar la lógica para eliminar el item
-              // Por ahora, no hará nada cuando se deslice hacia la izquierda
               return false;
             },
             child: SizedBox(
               width: MediaQuery.of(context).size.width *
-                  0.99, // El 95% del ancho de la pantalla
+                  0.99, // El 99% del ancho de la pantalla
               child: Card(
                 elevation: 4,
                 margin: const EdgeInsets.symmetric(
@@ -1181,8 +1149,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         ],
       );
     }
-    // Otros campos específicos según el tipo de label.
-    return Container(); // Fallback si no hay un tipo específico
+    return Container();
   }
 
   Widget buildTextField(String label,
@@ -1217,7 +1184,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 );
 
                 if (pickedDate != null) {
-                  // Formatea la fecha seleccionada como dd-MM-yyyy
                   String formattedDate =
                       DateFormat('dd-MM-yyyy').format(pickedDate);
                   controller?.text = formattedDate;
@@ -1322,7 +1288,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
   Future<void> createBill() async {
     final billDescription = billDescriptionController.text;
-
     final billNumber = billNumberController.text;
     final billAmount =
         num.tryParse(billAmountController.text.replaceAll(',', ''));
@@ -1353,8 +1318,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     final valeNumber = valeNumberController.text;
     final valeAmount =
         num.tryParse(valeAmountController.text.replaceAll(',', ''));
-    final valeDate = DateFormat('dd-MM-yyyy').parse(valeDateController
-        .text); // Cambia el formato al que esperas en el TextField
+    final valeDate = DateFormat('dd-MM-yyyy').parse(valeDateController.text);
 
     if (valeDescription.isEmpty) {
       Get.snackbar('Error', 'Por favor, ingrese una descripción para el vale');
@@ -1365,7 +1329,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       return;
     }
 
-    // Aquí, estamos enviando `valeDate` como un objeto `DateTime`, que es lo correcto si la base de datos espera un DateTime.
     await valesController.createVale(
         valeNumber: valeNumber,
         valeAmount: valeAmount,
@@ -1422,10 +1385,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         return;
       }
 
-      // Depura los valores de los posNames disponibles
-      for (var pos in posController.posList) {}
-
-      // Busca el posId correspondiente al selectedPOS
       final pos = posController.posList.firstWhere(
         (pos) => pos.posName == selectedPOS,
         orElse: () => Pos(posName: '', posId: ''),
@@ -1434,8 +1393,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       final posId = pos.posId.isNotEmpty
           ? pos.posId
           : throw Exception('ID de POS no válida');
-
-      // Depura el valor de posId
 
       final success = await voucherController!.createVoucher(
         authorizationCode: authorizationCode,
@@ -1691,6 +1648,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   }
 
   void resetScreenState() {
+    if (!mounted) return;
     Get.delete<DispenserController>();
     Get.delete<SalesControlController>();
     Get.delete<FuelController>();
@@ -1719,7 +1677,9 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     depositsController = Get.put(DepositsController());
     creditsController = Get.put(CreditsController());
 
-    setState(() {});
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> saveState() async {

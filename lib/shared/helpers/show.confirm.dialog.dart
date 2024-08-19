@@ -17,11 +17,17 @@ void showConfirmationDialog({
         content: Text(message),
         actions: [
           CupertinoDialogAction(
-            onPressed: onCancel,
+            onPressed: () {
+              Get.back(); // Cerrar el diálogo
+              onCancel(); // Ejecutar la acción de cancelar
+            },
             child: Text(cancelText),
           ),
           CupertinoDialogAction(
-            onPressed: onConfirm,
+            onPressed: () {
+              Get.back(); // Cerrar el diálogo
+              onConfirm(); // Ejecutar la acción de confirmar
+            },
             child: Text(confirmText),
           ),
         ],
@@ -34,8 +40,14 @@ void showConfirmationDialog({
       middleText: message,
       textConfirm: confirmText,
       textCancel: cancelText,
-      onConfirm: onConfirm,
-      onCancel: onCancel,
+      onConfirm: () {
+        Get.back(); // Cerrar el diálogo
+        onConfirm(); // Ejecutar la acción de confirmar
+      },
+      onCancel: () {
+        Get.back(); // Cerrar el diálogo
+        onCancel(); // Ejecutar la acción de cancelar
+      },
       barrierDismissible: false,
       confirmTextColor: Colors.black,
       cancelTextColor: Colors.black,

@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:get/get.dart';
 
 class PosService extends GetxController {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
+  static const String baseUrl = 'http://192.168.1.148:3000/api';
 
   Future<List<Pos>> getAllPOS() async {
     try {
