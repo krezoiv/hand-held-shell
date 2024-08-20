@@ -1,13 +1,12 @@
 import 'dart:convert';
 
+import 'package:hand_held_shell/config/database/apis/accounting/credits.api.dart';
 import 'package:hand_held_shell/models/mappers/credits/list.credits.sales.control.response.dart';
 import 'package:hand_held_shell/models/mappers/credits/new.credit.response.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 
 class CreditsService {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
-
   Future<NewCreditResponse?> createCredit({
     required int creditNumber,
     required num creditAmount,
@@ -24,7 +23,7 @@ class CreditsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/credits/createCredits');
+      final url = Uri.parse(CreditsApi.createCredit());
       final response = await http.post(
         url,
         headers: {
@@ -60,7 +59,7 @@ class CreditsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/credits/getCreditsSalesControl');
+      final url = Uri.parse(CreditsApi.getCredits());
       final response = await http.get(
         url,
         headers: {
@@ -87,7 +86,7 @@ class CreditsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/credits/deleteCredit/$creditId');
+      final url = Uri.parse(CreditsApi.deleteCredit(creditId));
       final response = await http.delete(
         url,
         headers: {

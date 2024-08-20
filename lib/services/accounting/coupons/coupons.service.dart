@@ -1,4 +1,7 @@
 import 'dart:convert';
+
+import 'package:hand_held_shell/config/database/apis/accounting/coupons.api.dart';
+
 import 'package:hand_held_shell/models/mappers/accounting/coupons/list.coupons.sales.control.response.dart';
 import 'package:hand_held_shell/models/mappers/accounting/coupons/new.coupons.response.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
@@ -6,6 +9,7 @@ import 'package:http/http.dart' as http;
 
 class CouponsService {
   static const String baseUrl = 'http://192.168.0.103:3000/api';
+
   Future<NewCouponsResponse?> createCoupons({
     required String cuponesNumber,
     required DateTime cuponesDate,
@@ -18,7 +22,8 @@ class CouponsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/coupons/createCoupons');
+      final url = Uri.parse(CouponApi.createCoupon());
+      print('URL: $url');
       final response = await http.post(
         url,
         headers: {
@@ -50,7 +55,8 @@ class CouponsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/coupons/getCouponsSalesControl');
+      final url = Uri.parse(CouponApi.getCoupons());
+      print('URL: $url');
       final response = await http.get(
         url,
         headers: {
@@ -77,7 +83,8 @@ class CouponsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/coupons/deleteCoupons/$couponId');
+      final url = Uri.parse(CouponApi.deleteCoupon(couponId));
+      print('URL: $url');
       final response = await http.delete(
         url,
         headers: {

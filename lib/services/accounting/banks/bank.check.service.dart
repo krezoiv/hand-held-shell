@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:hand_held_shell/config/database/apis/accounting/banks.checks.api.dart';
 import 'package:hand_held_shell/models/mappers/accounting/banks/list.bank.checks.sales.control.dart';
 import 'package:http/http.dart' as http;
 import 'package:hand_held_shell/services/services.exports.files.dart';
@@ -21,7 +22,7 @@ class BankCheckService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/bankCheck/createBankCheck');
+      final url = Uri.parse(BanksChecksApi.createBankCheck());
       final response = await http.post(
         url,
         headers: {
@@ -56,7 +57,7 @@ class BankCheckService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/bankCheck/getBankChecksSalesControl');
+      final url = Uri.parse(BanksChecksApi.getBankCheck());
       final response = await http.get(
         url,
         headers: {
@@ -83,7 +84,7 @@ class BankCheckService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/bankCheck/deleteBankCheck/$bankCheckId');
+      final url = Uri.parse(BanksChecksApi.deleteBankCheck(bankCheckId));
       final response = await http.delete(
         url,
         headers: {

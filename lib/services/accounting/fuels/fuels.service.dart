@@ -1,20 +1,19 @@
 import 'dart:convert';
 
+import 'package:hand_held_shell/config/database/apis/fuel.station/fuels.api.dart';
 import 'package:hand_held_shell/models/mappers/fuel.station/fuels.response.dart';
 import 'package:hand_held_shell/models/mappers/fuel.station/update.fuel.price.response.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 
 class FuelService {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
-
   static Future<FuelsDataResponse?> getAllFuels() async {
     try {
       final String? token = await AuthService.getToken();
       if (token == null) throw Exception('Token is null');
 
       final response = await http.get(
-        Uri.parse('$baseUrl/fuels/getFuels'),
+        Uri.parse(FuelsApi.getFuels()),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
@@ -37,7 +36,7 @@ class FuelService {
     required num superPrice,
     required num dieselPrice,
   }) async {
-    final url = Uri.parse('$baseUrl/fuels/updatePrices');
+    final url = Uri.parse(FuelsApi.updateFuelPrices());
 
     final response = await http.put(
       url,

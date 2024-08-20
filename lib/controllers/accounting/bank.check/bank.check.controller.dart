@@ -68,7 +68,6 @@ class BankCheckController extends GetxController {
       final success = await _bankCheckService.deleteBankCheck(bankCheckId);
 
       if (success) {
-        Get.snackbar('Éxito', 'Cheque eliminado exitosamente');
         return true;
       } else {
         Get.snackbar('Error', 'No se pudo eliminar el cheque');

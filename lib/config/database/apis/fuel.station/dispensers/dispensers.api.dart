@@ -10,8 +10,11 @@ class DispensersApi {
   static String deleteLastGeneralDispenserReaderApi =
       ('${Environment.apiUrl}/generalDispenserReader/general-dispenser-reader/last');
 
-  static String getLastGeneralDispenserReaderApi =
-      ('${Environment.apiUrl}/generalDispenserReader/lastGeneralDispenser');
+  static String deleteLastGeneralDispenserReaderIdApi =
+      ('${Environment.apiUrl}/generalDispenserReader/lastGeneralDispenserId');
+
+  static String getLastGeneralDispenserReaderIdApi =
+      ('${Environment.apiUrl}/generalDispenserReader/lastGeneralDispenserId');
 
   static String addNewDispenserReaderApi =
       ('${Environment.apiUrl}/dispenser-Reader/addDispenserReader');
@@ -19,8 +22,9 @@ class DispensersApi {
   static String updateGeneralDispenserReaderApi =
       ('${Environment.apiUrl}/generalDispenserReader/updateGeneralDispenserReader');
 
-  static String getDispenserReaderByIdApi =
-      ('${Environment.apiUrl}/dispenser-Reader/dispenserReadarById');
+  static String getDispenserReaderByIdApi(String dispenserReaderId) {
+    return '${Environment.apiUrl}/dispenser-Reader/dispenserReadarById/$dispenserReaderId';
+  }
 
   static String updateDispenserReaderApi =
       ('${Environment.apiUrl}/dispenser-reader/updateDispenserReader');
@@ -37,8 +41,12 @@ class DispensersApi {
     return deleteLastGeneralDispenserReaderApi;
   }
 
+  static deleteLastGeneralDispenserReaderId() {
+    return deleteLastGeneralDispenserReaderIdApi;
+  }
+
   static getLastGeneralDispenserReaderId() {
-    return getLastGeneralDispenserReaderApi;
+    return getLastGeneralDispenserReaderIdApi;
   }
 
   static addNewDispenserReader() {
@@ -49,8 +57,8 @@ class DispensersApi {
     return updateGeneralDispenserReaderApi;
   }
 
-  static getDispenserReaderById() {
-    return getDispenserReaderByIdApi;
+  static getDispenserReaderById(String dispenserReaderId) {
+    return getDispenserReaderByIdApi(dispenserReaderId);
   }
 
   static updateDispenserReader() {

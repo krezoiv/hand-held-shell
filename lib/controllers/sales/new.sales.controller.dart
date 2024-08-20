@@ -67,7 +67,7 @@ class SalesControlController extends GetxController {
       salesControl.value = response.salesControl;
       Get.snackbar('Success', response.message);
     } catch (e) {
-      Get.snackbar('Error', e.toString());
+      //  Get.snackbar('Error', e.toString());
     } finally {
       isLoading.value = false;
     }

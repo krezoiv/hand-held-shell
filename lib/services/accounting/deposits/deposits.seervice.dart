@@ -1,13 +1,12 @@
 import 'dart:convert';
 
+import 'package:hand_held_shell/config/database/apis/accounting/deposits.api.dart';
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:hand_held_shell/models/mappers/accounting/deposits/list.deposits.sales.control.response.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 
 class DepositsService {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
-
   Future<NewDepositsResponse?> createDeposits({
     required int depositNumber,
     required num depositAmount,
@@ -21,7 +20,7 @@ class DepositsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/deposits/createDeposits');
+      final url = Uri.parse(DepositsApi.createDeposits());
       final response = await http.post(
         url,
         headers: {
@@ -54,7 +53,7 @@ class DepositsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/deposits/getDepositsSaleControl');
+      final url = Uri.parse(DepositsApi.getDeposits());
       final response = await http.get(
         url,
         headers: {
@@ -81,7 +80,7 @@ class DepositsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/deposits/deleteDeposit/$depositId');
+      final url = Uri.parse(DepositsApi.deleteDeposit(depositId));
       final response = await http.delete(
         url,
         headers: {

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:get/get.dart';
+import 'package:hand_held_shell/config/database/apis/sales/sales.control.api.dart';
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:hand_held_shell/models/mappers/sales/last.sale.control.response.dart';
 import 'package:hand_held_shell/models/mappers/sales/update.last.sales.control.response.dart';
@@ -7,10 +8,9 @@ import 'package:hand_held_shell/models/mappers/sales/update.last.sales.control.r
 import 'package:http/http.dart' as http;
 
 class SalesControlService extends GetxService {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
   Future<NewSalesControlResponse> createSalesControl(
       Map<String, dynamic> requestBody, String token) async {
-    final uri = Uri.parse('$baseUrl/sales/newSalesControl');
+    final uri = Uri.parse(SalesControlApi.createSalesControl());
 
     final response = await http.post(
       uri,
@@ -30,7 +30,7 @@ class SalesControlService extends GetxService {
 
   Future<UpdateLastSalesControlResponse> updateLastSalesControl(
       Map<String, dynamic> requestBody, String token) async {
-    final uri = Uri.parse('$baseUrl/sales/updateSalesControl');
+    final uri = Uri.parse(SalesControlApi.updateLastSalesControl());
 
     final response = await http.put(
       uri,
@@ -49,7 +49,7 @@ class SalesControlService extends GetxService {
   }
 
   Future<GetLastSaleControlResponse> getLastSalesControl(String token) async {
-    final uri = Uri.parse('$baseUrl/sales/lastSalesControl');
+    final uri = Uri.parse(SalesControlApi.getLastSalesControl());
 
     final response = await http.get(
       uri,

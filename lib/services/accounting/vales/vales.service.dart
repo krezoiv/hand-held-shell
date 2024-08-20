@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:hand_held_shell/config/database/apis/accounting/vales.api.dart';
 import 'package:hand_held_shell/models/mappers/accounting/vales/list.vales.sales.control.response.dart';
 import 'package:hand_held_shell/models/mappers/accounting/vales/new.vale.response.dart';
 
@@ -7,8 +8,6 @@ import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 
 class ValessService {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
-
   Future<NewValeResponse?> createVale({
     required String valeNumber,
     required DateTime valeDate,
@@ -22,7 +21,7 @@ class ValessService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/vales/createVales');
+      final url = Uri.parse(ValesApi.createVale());
       final response = await http.post(
         url,
         headers: {
@@ -56,7 +55,7 @@ class ValessService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/vales/getValesSalesControl');
+      final url = Uri.parse(ValesApi.getVales());
       final response = await http.get(
         url,
         headers: {
@@ -83,7 +82,7 @@ class ValessService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/vales/deleteVale/$valeId');
+      final url = Uri.parse(ValesApi.deleteVale(valeId));
       final response = await http.delete(
         url,
         headers: {

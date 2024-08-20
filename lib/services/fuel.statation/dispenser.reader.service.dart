@@ -1,15 +1,14 @@
+import 'package:hand_held_shell/config/database/apis/fuel.station/dispensers/dispensers.api.dart';
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class DispenserReaderService {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
-
   static Future<List<dynamic>> fetchDispenserReaders(String token) async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/dispenser-Reader/lastReaderNumeration'),
+        Uri.parse(DispensersApi.fetchDispenserReaders()),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
@@ -34,8 +33,7 @@ class DispenserReaderService {
       if (token == null) throw Exception('Token is null');
 
       final response = await http.post(
-        Uri.parse(
-            '$baseUrl/generalDispenserReader/creatGeneralDispenserReader'),
+        Uri.parse(DispensersApi.createGeneralDispenserReader()),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
@@ -60,8 +58,7 @@ class DispenserReaderService {
       if (token == null) throw Exception('Token is null');
 
       final response = await http.delete(
-        Uri.parse(
-            '$baseUrl/generalDispenserReader/general-dispenser-reader/last'),
+        Uri.parse(DispensersApi.deleteLastGeneralDispenserReader()),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
@@ -83,7 +80,7 @@ class DispenserReaderService {
       if (token == null) throw Exception('Token is null');
 
       final response = await http.get(
-        Uri.parse('$baseUrl/generalDispenserReader/lastGeneralDispenserId'),
+        Uri.parse(DispensersApi.deleteLastGeneralDispenserReaderId()),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
@@ -109,7 +106,7 @@ class DispenserReaderService {
       if (token == null) throw Exception('Token is null');
 
       final response = await http.get(
-        Uri.parse('$baseUrl/generalDispenserReader/lastGeneralDispenserId'),
+        Uri.parse(DispensersApi.getLastGeneralDispenserReaderId()),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
@@ -145,7 +142,7 @@ class DispenserReaderService {
       if (token == null) throw Exception('Token is null');
 
       final response = await http.post(
-        Uri.parse('$baseUrl/dispenser-Reader/addDispenserReader'),
+        Uri.parse(DispensersApi.addNewDispenserReader()),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
@@ -191,8 +188,7 @@ class DispenserReaderService {
       if (token == null) throw Exception('Token is null');
 
       final response = await http.put(
-        Uri.parse(
-            '$baseUrl/generalDispenserReader/updateGeneralDispenserReader'),
+        Uri.parse(DispensersApi.updateGeneralDispenserReader()),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
@@ -224,8 +220,7 @@ class DispenserReaderService {
       if (token == null) throw Exception('Token is null');
 
       final response = await http.get(
-        Uri.parse(
-            '$baseUrl/dispenser-Reader/dispenserReadarById/$dispenserReaderId'),
+        Uri.parse(DispensersApi.getDispenserReaderById(dispenserReaderId)),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,
@@ -253,7 +248,7 @@ class DispenserReaderService {
       if (token == null) throw Exception('Token is null');
 
       final response = await http.put(
-        Uri.parse('$baseUrl/dispenser-reader/updateDispenserReader'),
+        Uri.parse(DispensersApi.updateDispenserReader()),
         headers: {
           'Content-Type': 'application/json',
           'x-token': token,

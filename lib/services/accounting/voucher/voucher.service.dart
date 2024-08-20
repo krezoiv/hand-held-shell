@@ -1,10 +1,10 @@
+import 'package:hand_held_shell/config/database/apis/accounting/voucher.api.dart';
 import 'package:hand_held_shell/models/mappers/accounting/vouchers/new.voucher.response.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class VoucherService {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
   Future<NewVoucherResponse?> createVoucher({
     required String authorizationCode,
     required String posId,
@@ -18,7 +18,7 @@ class VoucherService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/vouchers/createVouchers');
+      final url = Uri.parse(VoucherApi.createVoucher());
       final body = json.encode({
         'authorizationCode': authorizationCode,
         'voucherDate': voucherDate.toIso8601String(),
@@ -56,7 +56,7 @@ class VoucherService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/vouchers/getVouchersSaleControl');
+      final url = Uri.parse(VoucherApi.getVouchers());
       final response = await http.get(
         url,
         headers: {
@@ -83,7 +83,7 @@ class VoucherService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/vouchers/deleteVoucher/$voucherId');
+      final url = Uri.parse(VoucherApi.deleteVoucher(voucherId));
       final response = await http.delete(
         url,
         headers: {

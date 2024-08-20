@@ -1,11 +1,10 @@
 import 'dart:convert';
+import 'package:hand_held_shell/config/database/apis/accounting/bills.api.dart';
 import 'package:hand_held_shell/models/mappers/accounting/Bills/new.bill.response.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 
 class BillsService {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
-
   Future<NewValesResponse?> createBill({
     required String billNumber,
     required DateTime billDate,
@@ -19,7 +18,8 @@ class BillsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/bills/createBills');
+      final url = Uri.parse(BillsApi.createBills());
+      print('URL: $url');
       final response = await http.post(
         url,
         headers: {
@@ -53,7 +53,7 @@ class BillsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/bills/getBillsSalesControl');
+      final url = Uri.parse(BillsApi.getBill());
       final response = await http.get(
         url,
         headers: {
@@ -80,7 +80,7 @@ class BillsService {
         throw Exception('Token no disponible');
       }
 
-      final url = Uri.parse('$baseUrl/bills/deleteBill/$billId');
+      final url = Uri.parse(BillsApi.deleteBill(billId));
       final response = await http.delete(
         url,
         headers: {
