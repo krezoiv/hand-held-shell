@@ -58,4 +58,24 @@ class ValesController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<bool> deleteVale(String billId) async {
+    try {
+      isLoading.value = true;
+      final success = await _valesService.deleteVale(billId);
+
+      if (success) {
+        // Get.snackbar('Éxito', 'Vale eliminado exitosamente');
+        return true;
+      } else {
+        Get.snackbar('Error', 'No se pudo eliminar el vale');
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Ocurrió un error al eliminar el vale: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

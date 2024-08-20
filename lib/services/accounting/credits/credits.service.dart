@@ -6,7 +6,7 @@ import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 
 class CreditsService {
-  static const String baseUrl = 'http://192.168.1.148:3000/api';
+  static const String baseUrl = 'http://192.168.0.103:3000/api';
 
   Future<NewCreditResponse?> createCredit({
     required int creditNumber,
@@ -77,6 +77,36 @@ class CreditsService {
       }
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<bool> deleteCredit(String creditId) async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) {
+        throw Exception('Token no disponible');
+      }
+
+      final url = Uri.parse('$baseUrl/credits/deleteCredit/$creditId');
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Verificar si la eliminación fue exitosa
+        final responseBody = json.decode(response.body);
+        return responseBody['ok'] == true;
+      } else {
+        final errorResponse = json.decode(response.body);
+        throw Exception(errorResponse['message'] ?? 'Error desconocido');
+      }
+    } catch (e) {
+      // Manejar errores y devolver false en caso de error
+      return false;
     }
   }
 }

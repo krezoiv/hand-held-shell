@@ -61,4 +61,24 @@ class BankCheckController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<bool> deleteBankCheck(String bankCheckId) async {
+    try {
+      isLoading.value = true;
+      final success = await _bankCheckService.deleteBankCheck(bankCheckId);
+
+      if (success) {
+        Get.snackbar('Éxito', 'Cheque eliminado exitosamente');
+        return true;
+      } else {
+        Get.snackbar('Error', 'No se pudo eliminar el cheque');
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Ocurrió un error al eliminar el cheque: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

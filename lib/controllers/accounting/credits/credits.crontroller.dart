@@ -68,4 +68,24 @@ class CreditsController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<bool> deleteCredit(String creditId) async {
+    try {
+      isLoading.value = true;
+      final success = await _creditService.deleteCredit(creditId);
+
+      if (success) {
+        Get.snackbar('Éxito', 'Crédito eliminado exitosamente');
+        return true;
+      } else {
+        Get.snackbar('Error', 'No se pudo eliminar el crédito');
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Ocurrió un error al eliminar el crédito: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

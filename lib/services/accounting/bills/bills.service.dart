@@ -4,7 +4,7 @@ import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 
 class BillsService {
-  static const String baseUrl = 'http://192.168.1.148:3000/api';
+  static const String baseUrl = 'http://192.168.0.103:3000/api';
 
   Future<NewValesResponse?> createBill({
     required String billNumber,
@@ -70,6 +70,36 @@ class BillsService {
       }
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<bool> deleteBill(String billId) async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) {
+        throw Exception('Token no disponible');
+      }
+
+      final url = Uri.parse('$baseUrl/bills/deleteBill/$billId');
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Verificar si la eliminación fue exitosa
+        final responseBody = json.decode(response.body);
+        return responseBody['ok'] == true;
+      } else {
+        final errorResponse = json.decode(response.body);
+        throw Exception(errorResponse['message'] ?? 'Error desconocido');
+      }
+    } catch (e) {
+      // Manejar errores y devolver false en caso de error
+      return false;
     }
   }
 }

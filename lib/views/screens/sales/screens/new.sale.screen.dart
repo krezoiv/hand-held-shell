@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:hand_held_shell/controllers/accounting/coupons/coupons.controller.dart';
-import 'package:hand_held_shell/controllers/accounting/credis/credits.crontroller.dart';
+import 'package:hand_held_shell/controllers/accounting/credits/credits.crontroller.dart';
 import 'package:hand_held_shell/controllers/accounting/deposits/deposits.controller.dart';
 import 'package:hand_held_shell/controllers/accounting/voucher/voucher.controller.dart';
 import 'package:hand_held_shell/controllers/accounting/bank.check/bank.check.controller.dart';
@@ -57,7 +57,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   String? selectedClientChecks;
   String? selectedPOS;
   String? selectedClientCredits;
-  bool _isMounted = false;
 
   TextEditingController billNumberController = TextEditingController();
   TextEditingController billDateController = TextEditingController();
@@ -113,7 +112,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   @override
   void initState() {
     super.initState();
-    _isMounted = true;
 
     dispenserController = Get.put(DispenserController());
     fuelController = Get.put(FuelController());
@@ -959,7 +957,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                     AlertDialog(
                       title: const Text('Confirmación'),
                       content: const Text(
-                          '¿Estás seguro de que deseas eliminar este voucher?'),
+                          '¿Estás seguro de que deseas eliminar este ítem?'),
                       actions: <Widget>[
                         TextButton(
                           onPressed: () {
@@ -980,26 +978,89 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
               if (confirmDelete) {
                 try {
-                  if (type == TabType.Vouchers && voucherController != null) {
-                    final success =
-                        await voucherController!.deleteVoucher(item.voucherId);
+                  bool success = false;
 
-                    if (success) {
-                      // Resta el valor del voucher eliminado del campo correspondiente
+                  if (type == TabType.Vouchers && voucherController != null) {
+                    success =
+                        await voucherController!.deleteVoucher(item.voucherId);
+                  } else if (type == TabType.Cheques) {
+                    success = await bankCheckController
+                        .deleteBankCheck(item.bankCheckId);
+                  } else if (type == TabType.Gastos) {
+                    success = await billsController.deleteBill(item.billId);
+                  } else if (type == TabType.Cupones &&
+                      couponsController != null) {
+                    success =
+                        await couponsController!.deleteCoupon(item.couponId);
+                  } else if (type == TabType.Creditos &&
+                      creditsController != null) {
+                    success =
+                        await creditsController!.deleteCredit(item.creditId);
+                  } else if (type == TabType.Depositos &&
+                      depositsController != null) {
+                    success =
+                        await depositsController!.deleteDeposit(item.depositId);
+                  } else if (type == TabType.Vales) {
+                    success = await valesController.deleteVale(item.valeId);
+                  }
+                  if (success) {
+                    // Resta el valor del ítem eliminado del campo correspondiente
+                    if (type == TabType.Vouchers) {
                       vouchers.value =
                           (double.parse(vouchers.value) - item.voucherAmount!)
                               .toStringAsFixed(2);
-
-                      // Elimina el item de la lista y refresca
-                      items.removeAt(index);
-                      voucherController?.voucherListResponse.refresh();
-
-                      Get.snackbar('Éxito', 'Voucher eliminado correctamente');
-                      return true;
-                    } else {
-                      Get.snackbar('Error', 'No se pudo eliminar el voucher.');
-                      return false;
+                    } else if (type == TabType.Cheques) {
+                      cheques.value =
+                          (double.parse(cheques.value) - item.checkValue!)
+                              .toStringAsFixed(2);
+                    } else if (type == TabType.Gastos) {
+                      gastos.value =
+                          (double.parse(gastos.value) - item.billAmount!)
+                              .toStringAsFixed(2);
+                    } else if (type == TabType.Cupones) {
+                      cupones.value =
+                          (double.parse(cupones.value) - item.cuponesAmount!)
+                              .toStringAsFixed(2);
+                    } else if (type == TabType.Creditos) {
+                      creditos.value =
+                          (double.parse(creditos.value) - item.creditAmount!)
+                              .toStringAsFixed(2);
+                    } else if (type == TabType.Depositos) {
+                      depositos.value =
+                          (double.parse(depositos.value) - item.depositAmount!)
+                              .toStringAsFixed(2);
+                    } else if (type == TabType.Vales) {
+                      vales.value =
+                          (double.parse(vales.value) - item.valeAmount!)
+                              .toStringAsFixed(2);
                     }
+
+                    // Recalcula los totales
+                    calculateTotalSales();
+
+                    // Elimina el ítem de la lista y refresca
+                    items.removeAt(index);
+                    if (type == TabType.Vouchers) {
+                      voucherController?.voucherListResponse.refresh();
+                    } else if (type == TabType.Cheques) {
+                      bankCheckController.bankCheckListResponse.refresh();
+                    } else if (type == TabType.Gastos) {
+                      billsController.billsListResponse.refresh();
+                    } else if (type == TabType.Cupones) {
+                      couponsController!.couponsListResponse.refresh();
+                    } else if (type == TabType.Creditos) {
+                      creditsController!.creditsListResponse.refresh();
+                    } else if (type == TabType.Depositos) {
+                      depositsController!.depositsitsListResponse.refresh();
+                    } else if (type == TabType.Vales) {
+                      valesController.valesListResponse.refresh();
+                    }
+
+                    //Get.snackbar('Éxito', 'Ítem eliminado correctamente');
+                    return true;
+                  } else {
+                    Get.snackbar('Error', 'No se pudo eliminar el ítem.');
+                    return false;
                   }
                 } catch (e) {
                   Get.snackbar('Error', 'Hubo un error al eliminar: $e');

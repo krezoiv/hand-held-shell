@@ -62,4 +62,24 @@ class CouponsController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<bool> deleteCoupon(String couponId) async {
+    try {
+      isLoading.value = true;
+      final success = await _couponsService.deleteCoupon(couponId);
+
+      if (success) {
+        Get.snackbar('Éxito', 'Cupón eliminado exitosamente');
+        return true;
+      } else {
+        Get.snackbar('Error', 'No se pudo eliminar el cupón');
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Ocurrió un error al eliminar el cupón: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

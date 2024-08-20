@@ -5,7 +5,7 @@ import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 
 class BankCheckService {
-  static const String baseUrl = 'http://192.168.1.148:3000/api';
+  static const String baseUrl = 'http://192.168.0.103:3000/api';
 
   Future<NewBankCheckResponse?> createBankCheck({
     required int checkNumber,
@@ -73,6 +73,36 @@ class BankCheckService {
       }
     } catch (e) {
       return null;
+    }
+  }
+
+  Future<bool> deleteBankCheck(String bankCheckId) async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) {
+        throw Exception('Token no disponible');
+      }
+
+      final url = Uri.parse('$baseUrl/bankCheck/deleteBankCheck/$bankCheckId');
+      final response = await http.delete(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Verificar si la eliminación fue exitosa
+        final responseBody = json.decode(response.body);
+        return responseBody['ok'] == true;
+      } else {
+        final errorResponse = json.decode(response.body);
+        throw Exception(errorResponse['message'] ?? 'Error desconocido');
+      }
+    } catch (e) {
+      // Manejar errores y devolver false en caso de error
+      return false;
     }
   }
 }

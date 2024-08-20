@@ -57,4 +57,24 @@ class BillsController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<bool> deleteBill(String billId) async {
+    try {
+      isLoading.value = true;
+      final success = await _billsService.deleteBill(billId);
+
+      if (success) {
+        Get.snackbar('Éxito', 'Gasto eliminado exitosamente');
+        return true;
+      } else {
+        Get.snackbar('Error', 'No se pudo eliminar el gasto');
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Ocurrió un error al eliminar el gasto: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

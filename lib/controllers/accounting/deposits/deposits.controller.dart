@@ -60,4 +60,24 @@ class DepositsController extends GetxController {
       isLoading.value = false;
     }
   }
+
+  Future<bool> deleteDeposit(String creditId) async {
+    try {
+      isLoading.value = true;
+      final success = await _depostisService.deleteDeposit(creditId);
+
+      if (success) {
+        Get.snackbar('Éxito', 'Depósito eliminado exitosamente');
+        return true;
+      } else {
+        Get.snackbar('Error', 'No se pudo eliminar el depósito');
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Ocurrió un error al eliminar el depósito: $e');
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }
