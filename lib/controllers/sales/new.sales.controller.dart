@@ -34,7 +34,7 @@ class SalesControlController extends GetxController {
 
       // Actualizar el estado de salesControl y mostrar un mensaje de éxito
       salesControl.value = response.salesControl;
-      Get.snackbar('Success', response.message);
+      // Get.snackbar('Success', response.message);
 
       // Deshabilitar el summary card
       isSummaryCardEnabled.value = false;
@@ -43,7 +43,7 @@ class SalesControlController extends GetxController {
     } catch (e) {
       // Mostrar un mensaje de error en caso de falla
       //Get.snackbar('Error', e.toString());
-      Get.offAllNamed('/sales');
+      Get.offAllNamed('/home-view');
 
       return false; // Retornar false en caso de error
     } finally {

@@ -150,6 +150,7 @@ class DispenserController extends GetxController {
           ),
         );
 
+        ensureFocusNodesInitialized();
         isLoading.value = false;
         hasSharedPreferencesData.value = true;
         showCalculatorButtons.value = true;
@@ -254,6 +255,7 @@ class DispenserController extends GetxController {
 
   void setFocusToFirstField(int pageIndex) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      ensureFocusNodesInitialized();
       if (focusNodes.isNotEmpty &&
           focusNodes[pageIndex].isNotEmpty &&
           focusNodes[pageIndex][0].canRequestFocus) {
@@ -568,6 +570,7 @@ class DispenserController extends GetxController {
     dataSubmitted.clear();
     differences.clear();
     showCalculatorButtonsPerPage.clear();
+    ensureFocusNodesInitialized();
   }
 
   @override
@@ -664,6 +667,17 @@ class DispenserController extends GetxController {
           'Error', 'Failed to fetch last GeneralDispenserReader data: $e');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void ensureFocusNodesInitialized() {
+    if (focusNodes.isEmpty || focusNodes.any((list) => list.isEmpty)) {
+      focusNodes.assignAll(
+        List.generate(
+          dispenserReaders.length,
+          (index) => List.generate(3, (_) => FocusNode()),
+        ),
+      );
     }
   }
 }

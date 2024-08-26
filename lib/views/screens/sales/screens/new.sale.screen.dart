@@ -113,19 +113,33 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   void initState() {
     super.initState();
 
-    dispenserController = Get.put(DispenserController());
-    fuelController = Get.put(FuelController());
-    posController = Get.put(PosController());
-    bankController = Get.put(BankController());
-    clientsController = Get.put(ClientsController());
-    salesControlController = Get.put(SalesControlController());
-    bankCheckController = Get.put(BankCheckController());
-    billsController = Get.put(BillsController());
-    valesController = Get.put(ValesController());
-    couponsController = Get.put(CouponsController());
-    voucherController = Get.put(VoucherController());
-    depositsController = Get.put(DepositsController());
-    creditsController = Get.put(CreditsController());
+    Get.put(DispenserController(), permanent: true);
+    Get.put(FuelController(), permanent: true);
+    Get.put(PosController(), permanent: true);
+    Get.put(BankController(), permanent: true);
+    Get.put(ClientsController(), permanent: true);
+    Get.put(SalesControlController(), permanent: true);
+    Get.put(BankCheckController(), permanent: true);
+    Get.put(BillsController(), permanent: true);
+    Get.put(ValesController(), permanent: true);
+    Get.put(CouponsController(), permanent: true);
+    Get.put(VoucherController(), permanent: true);
+    Get.put(DepositsController(), permanent: true);
+    Get.put(CreditsController(), permanent: true);
+
+    dispenserController = Get.find<DispenserController>();
+    fuelController = Get.find<FuelController>();
+    posController = Get.find<PosController>();
+    bankController = Get.find<BankController>();
+    clientsController = Get.find<ClientsController>();
+    salesControlController = Get.find<SalesControlController>();
+    bankCheckController = Get.find<BankCheckController>();
+    billsController = Get.find<BillsController>();
+    valesController = Get.find<ValesController>();
+    couponsController = Get.find<CouponsController>();
+    voucherController = Get.find<VoucherController>();
+    depositsController = Get.find<DepositsController>();
+    creditsController = Get.find<CreditsController>();
 
     loadState();
   }
@@ -180,12 +194,20 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                                 controller.lastGeneralDispenserReader.value =
                                     null;
 
+                                if (Get.isRegistered<DispenserController>()) {
+                                  final dispenserController =
+                                      Get.find<DispenserController>();
+                                  await dispenserController
+                                      .clearSharedPreferences();
+                                  dispenserController
+                                      .resetState(); // Implementa este método en DispenserController
+                                }
                                 // Restablece la pantalla como un "hot restart"
                                 resetScreenState();
 
                                 // Restablece las pantallas NewRegisterDispenserScreen y RegisterDispenserPage
-                                await controller.clearSharedPreferences();
-                                controller.resetState();
+                                //await controller.clearSharedPreferences();
+                                //controller.resetState();
 
                                 // Mostrar mensaje de éxito
                                 Get.snackbar('Éxito',
@@ -1169,7 +1191,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                 border: const OutlineInputBorder(),
               ),
               value: '10', // Valor inicial seleccionado
-              items: ['10', '20', '50', '100', '250']
+              items: ['10', '20', '50', '100', '250', '500', '1000']
                   .map<DropdownMenuItem<String>>((String value) {
                 return DropdownMenuItem<String>(
                   value: value,
@@ -1258,6 +1280,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
               inputType: TextInputType.numberWithOptions(decimal: true),
               controller: superAmountController),
           buildTextField('Galones Regular',
+              inputType: TextInputType.numberWithOptions(decimal: true),
               controller: regularAmountController),
           buildTextField('Galones Diesel',
               inputType: TextInputType.numberWithOptions(decimal: true),
@@ -1784,33 +1807,36 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
   void resetScreenState() {
     if (!mounted) return;
-    Get.delete<DispenserController>();
-    Get.delete<SalesControlController>();
-    Get.delete<FuelController>();
-    Get.delete<PosController>();
-    Get.delete<BankController>();
-    Get.delete<ClientsController>();
-    Get.delete<BankCheckController>();
-    Get.delete<BillsController>();
-    Get.delete<ValesController>();
-    Get.delete<CouponsController>();
-    Get.delete<VoucherController>();
-    Get.delete<DepositsController>();
-    Get.delete<CreditsController>();
 
-    dispenserController = Get.put(DispenserController());
-    fuelController = Get.put(FuelController());
-    posController = Get.put(PosController());
-    bankController = Get.put(BankController());
-    clientsController = Get.put(ClientsController());
-    salesControlController = Get.put(SalesControlController());
-    bankCheckController = Get.put(BankCheckController());
-    billsController = Get.put(BillsController());
-    valesController = Get.put(ValesController());
-    couponsController = Get.put(CouponsController());
-    voucherController = Get.put(VoucherController());
-    depositsController = Get.put(DepositsController());
-    creditsController = Get.put(CreditsController());
+    // Reinicia los controladores en lugar de eliminarlos y volverlos a crear
+    Get.find<DispenserController>().onInit();
+    Get.find<SalesControlController>().onInit();
+    Get.find<FuelController>().onInit();
+    Get.find<PosController>().onInit();
+    Get.find<BankController>().onInit();
+    Get.find<ClientsController>().onInit();
+    Get.find<BankCheckController>().onInit();
+    Get.find<BillsController>().onInit();
+    Get.find<ValesController>().onInit();
+    Get.find<CouponsController>().onInit();
+    Get.find<VoucherController>().onInit();
+    Get.find<DepositsController>().onInit();
+    Get.find<CreditsController>().onInit();
+
+    // Actualiza las referencias locales
+    dispenserController = Get.find<DispenserController>();
+    fuelController = Get.find<FuelController>();
+    posController = Get.find<PosController>();
+    bankController = Get.find<BankController>();
+    clientsController = Get.find<ClientsController>();
+    salesControlController = Get.find<SalesControlController>();
+    bankCheckController = Get.find<BankCheckController>();
+    billsController = Get.find<BillsController>();
+    valesController = Get.find<ValesController>();
+    couponsController = Get.find<CouponsController>();
+    voucherController = Get.find<VoucherController>();
+    depositsController = Get.find<DepositsController>();
+    creditsController = Get.find<CreditsController>();
 
     if (mounted) {
       setState(() {});
@@ -1874,17 +1900,17 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
   @override
   void dispose() {
-    dispenserController.dispose();
-    fuelController.dispose();
-    posController.dispose();
-    bankController.dispose();
-    clientsController.dispose();
-    billsController.dispose();
-    valesController.dispose();
-    couponsController?.dispose();
-    voucherController?.dispose();
-    depositsController?.dispose();
-    creditsController?.dispose();
+    // dispenserController.dispose();
+    // fuelController.dispose();
+    // posController.dispose();
+    // bankController.dispose();
+    // clientsController.dispose();
+    // billsController.dispose();
+    // valesController.dispose();
+    // couponsController?.dispose();
+    // voucherController?.dispose();
+    // depositsController?.dispose();
+    // creditsController?.dispose();
     super.dispose();
   }
 }

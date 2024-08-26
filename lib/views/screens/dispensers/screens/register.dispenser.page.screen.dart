@@ -36,20 +36,22 @@ class RegisterDispenserPage extends StatefulWidget {
 
 class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   final themeController = Get.find<ThemeController>();
-  final dispenserController = Get.find<DispenserController>();
+  late DispenserController dispenserController =
+      Get.find<DispenserController>();
   late RegisterButtonsController calculatorCtrl;
   late PageController verticalPageController;
 
   @override
   void initState() {
     super.initState();
+    dispenserController = Get.find<DispenserController>();
     calculatorCtrl = Get.put(RegisterButtonsController());
     calculatorCtrl.setDispenserController(dispenserController);
     verticalPageController = PageController();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      FocusScope.of(context)
-          .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
+      dispenserController.ensureFocusNodesInitialized();
+      dispenserController.setFocusToFirstField(widget.pageIndex);
     });
 
     widget.mainPageController.addListener(_onPageChanged);
@@ -65,9 +67,19 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
   void _onPageChanged() {
     if (widget.mainPageController.page == widget.pageIndex) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context)
-            .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
+        _setFocusToFirstField();
       });
+    }
+  }
+
+  void _setFocusToFirstField() {
+    if (mounted &&
+        dispenserController.focusNodes.isNotEmpty &&
+        dispenserController.focusNodes[widget.pageIndex].isNotEmpty &&
+        dispenserController.focusNodes[widget.pageIndex][0] != null &&
+        dispenserController.focusNodes[widget.pageIndex][0].canRequestFocus) {
+      FocusScope.of(context)
+          .requestFocus(dispenserController.focusNodes[widget.pageIndex][0]);
     }
   }
 
