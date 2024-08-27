@@ -853,8 +853,8 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
                               if (success) {
                                 clearFields();
-                                Navigator.pop(
-                                    context); // Cierra el BottomSheet solo si fue exitoso
+                                // Cambiar al TabTab
+                                DefaultTabController.of(context)?.animateTo(1);
                                 Get.snackbar(
                                     'Éxito', 'Operación realizada con éxito');
                               } else {
