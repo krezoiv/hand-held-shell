@@ -30,13 +30,18 @@ class CouponsController extends GetxController {
 
       if (response != null && response.ok) {
         newCouponsResponse.value = response;
-        // Get.snackbar('Éxito', 'Cupón creado exitosamenteeee');
+        Get.snackbar('Éxito', 'Cupón creado exitosamente');
+        return true;
+      } else {
+        return false;
       }
-
-      return true;
     } catch (e) {
-      Get.snackbar(
-          'Error', 'Ocurrió un error al crear el cupón: ${e.toString()}');
+      if (e.toString().contains('Ya existe un cupón con este número')) {
+        Get.snackbar('Error', 'Ya existe una cupón con este número');
+      } else {
+        Get.snackbar(
+            'Error', 'Ocurrió un error al crear el cupón: ${e.toString()}');
+      }
       return false;
     } finally {
       isLoading.value = false;

@@ -39,12 +39,14 @@ class CouponsService {
 
       if (response.statusCode == 201) {
         return newCouponsResponseFromJson(response.body);
-      } else {
+      } else if (response.statusCode == 400) {
         final errorResponse = json.decode(response.body);
         throw Exception(errorResponse['message'] ?? 'Error desconocido');
+      } else {
+        throw Exception('Error desconocido');
       }
     } catch (e) {
-      return null;
+      rethrow;
     }
   }
 

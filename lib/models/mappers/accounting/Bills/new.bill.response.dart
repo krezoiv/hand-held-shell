@@ -6,25 +6,25 @@ import 'dart:convert';
 
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 
-NewValesResponse newBillResponseFromJson(String str) =>
-    NewValesResponse.fromJson(json.decode(str));
+NewBillsResponse newBillResponseFromJson(String str) =>
+    NewBillsResponse.fromJson(json.decode(str));
 
-String newBillResponseToJson(NewValesResponse data) =>
+String newBillResponseToJson(NewBillsResponse data) =>
     json.encode(data.toJson());
 
-class NewValesResponse {
+class NewBillsResponse {
   bool ok;
   String message;
   Bill bill;
 
-  NewValesResponse({
+  NewBillsResponse({
     required this.ok,
     required this.message,
     required this.bill,
   });
 
-  factory NewValesResponse.fromJson(Map<String, dynamic> json) =>
-      NewValesResponse(
+  factory NewBillsResponse.fromJson(Map<String, dynamic> json) =>
+      NewBillsResponse(
         ok: json["ok"],
         message: json["message"],
         bill: Bill.fromJson(json["bill"] ?? {}),

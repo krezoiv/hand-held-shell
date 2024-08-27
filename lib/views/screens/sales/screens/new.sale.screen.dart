@@ -177,7 +177,10 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                             confirmText: 'Sí',
                             cancelText: 'No',
                             onConfirm: () async {
-                              Get.back(); // Cierra el diálogo de confirmación
+                              Navigator.of(context).pop();
+
+                              Get.offAllNamed(
+                                  '/home'); //cierra el diálogo de confirmación
 
                               try {
                                 // Llama al método _updateSalesControl
@@ -800,42 +803,64 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                             );
 
                             try {
+                              bool success = false;
                               // Verificar el label y ejecutar la acción correspondiente
                               if (label == 'Gastos') {
-                                await createBill();
-                                await billsController
-                                    .fetchBillsBySalesControl();
+                                success = await createBill();
+                                if (success) {
+                                  await billsController
+                                      .fetchBillsBySalesControl();
+                                }
                               } else if (label == 'Vouchers') {
-                                await createVoucher();
-                                await voucherController
-                                    ?.fetchVoucherBySalesControl();
+                                success = await createVoucher();
+                                if (success) {
+                                  await voucherController
+                                      ?.fetchVoucherBySalesControl();
+                                }
                               } else if (label == 'Vales') {
-                                await createVale();
-                                await valesController
-                                    .fetchValesBySalesControl();
+                                success = await createVale();
+                                if (success) {
+                                  await valesController
+                                      .fetchValesBySalesControl();
+                                }
                               } else if (label == "Cupones") {
-                                await createCoupon();
-                                await couponsController
-                                    ?.fetchCouponsBySalesControl();
+                                success = await createCoupon();
+                                if (success) {
+                                  await couponsController
+                                      ?.fetchCouponsBySalesControl();
+                                }
                               } else if (label == "Depositos") {
-                                await createDeposits();
-                                await depositsController
-                                    ?.fetchDepositsBySalesControl();
+                                success = await createDeposits();
+                                if (success) {
+                                  await depositsController
+                                      ?.fetchDepositsBySalesControl();
+                                }
                               } else if (label == "Creditos") {
-                                await createCredit();
-                                await creditsController
-                                    ?.fetchCreditsBySalesControl();
+                                success = await createCredit();
+                                if (success) {
+                                  await creditsController
+                                      ?.fetchCreditsBySalesControl();
+                                }
                               } else if (label == "Cheques") {
-                                await createBankCheck();
-                                await bankCheckController
-                                    .fetchBankCheckBySalesControl();
+                                success = await createBankCheck();
+                                if (success) {
+                                  await bankCheckController
+                                      .fetchBankCheckBySalesControl();
+                                }
                               }
 
                               Navigator.pop(context); // Cierra el spinner
 
-                              clearFields();
-
-                              Navigator.pop(context); // Cierra el BottomSheet
+                              if (success) {
+                                clearFields();
+                                Navigator.pop(
+                                    context); // Cierra el BottomSheet solo si fue exitoso
+                                Get.snackbar(
+                                    'Éxito', 'Operación realizada con éxito');
+                              } else {
+                                Get.snackbar('Error',
+                                    'No se pudo completar la operación');
+                              }
                             } catch (e) {
                               Navigator.pop(
                                   context); // Cierra el spinner en caso de error
@@ -1408,128 +1433,170 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
     );
   }
 
-  Future<void> createBankCheck() async {
-    if (selectedBankCheck == null || selectedClientChecks == null) {
-      Get.snackbar('Error', 'Por favor, seleccione un banco y un cliente');
-      return;
-    }
+  Future<bool> createBankCheck() async {
+    try {
+      if (selectedBankCheck == null || selectedClientChecks == null) {
+        Get.snackbar('Error', 'Por favor, seleccione un banco y un cliente');
+        return false;
+      }
 
-    final checkNumber = int.tryParse(checkNumberController.text);
-    final checkValue =
-        num.tryParse(checkValueController.text.replaceAll(',', ''));
-    final checkDate = DateFormat('dd-MM-yyyy').parse(checkDateController.text);
+      final checkNumber = int.tryParse(checkNumberController.text);
+      final checkValue =
+          num.tryParse(checkValueController.text.replaceAll(',', ''));
+      final checkDate =
+          DateFormat('dd-MM-yyyy').parse(checkDateController.text);
 
-    if (checkNumber == null || checkValue == null) {
-      Get.snackbar('Error', 'Por favor, ingrese valores válidos');
-      return;
-    }
+      if (checkNumber == null || checkValue == null) {
+        Get.snackbar('Error', 'Por favor, ingrese valores válidos');
+        return false;
+      }
 
-    final bankId = bankController.bankList
-        .firstWhere((bank) => bank.bankName == selectedBankCheck)
-        .bankId;
-    final clientId = clientsController.clientsList
-        .firstWhere((client) => client.clientName == selectedClientChecks)
-        .clientId;
+      final bankId = bankController.bankList
+          .firstWhere((bank) => bank.bankName == selectedBankCheck)
+          .bankId;
+      final clientId = clientsController.clientsList
+          .firstWhere((client) => client.clientName == selectedClientChecks)
+          .clientId;
 
-    await bankCheckController.createBankCheck(
-      checkNumber: checkNumber,
-      checkValue: checkValue,
-      checkDate: checkDate,
-      bankId: bankId,
-      clientId: clientId,
-    );
+      final success = await bankCheckController.createBankCheck(
+        checkNumber: checkNumber,
+        checkValue: checkValue,
+        checkDate: checkDate,
+        bankId: bankId,
+        clientId: clientId,
+      );
 
-    cheques.value = (num.parse(cheques.value) + checkValue).toStringAsFixed(2);
-    calculateTotalSales();
-    saveState();
-  }
-
-  Future<void> createBill() async {
-    final billDescription = billDescriptionController.text;
-    final billNumber = billNumberController.text;
-    final billAmount =
-        num.tryParse(billAmountController.text.replaceAll(',', ''));
-    final billDate = DateFormat('dd-MM-yyyy').parse(billDateController.text);
-
-    if (billAmount == null) {
-      Get.snackbar('Error', 'Por favor, ingrese valores válidos');
-      return;
-    }
-    if (billDescription.isEmpty || billNumber.isEmpty) {
-      Get.snackbar('Error', 'Por favor, ingrese una descripción para el gasto');
-      return;
-    }
-
-    await billsController.createBill(
-        billNumber: billNumber,
-        billDate: billDate,
-        billAmount: billAmount,
-        billDescription: billDescription);
-
-    gastos.value = (num.parse(gastos.value) + billAmount).toStringAsFixed(2);
-    calculateTotalSales();
-    saveState();
-  }
-
-  Future<void> createVale() async {
-    final valeDescription = valeDescriptionController.text;
-    final valeNumber = valeNumberController.text;
-    final valeAmount =
-        num.tryParse(valeAmountController.text.replaceAll(',', ''));
-    final valeDate = DateFormat('dd-MM-yyyy').parse(valeDateController.text);
-
-    if (valeDescription.isEmpty) {
-      Get.snackbar('Error', 'Por favor, ingrese una descripción para el vale');
-      return;
-    }
-    if (valeAmount == null || valeNumber.isEmpty) {
-      Get.snackbar('Error', 'Por favor, ingrese valores válidos');
-      return;
-    }
-
-    await valesController.createVale(
-        valeNumber: valeNumber,
-        valeAmount: valeAmount,
-        valeDate: valeDate,
-        valeDescription: valeDescription);
-
-    vales.value = (num.parse(vales.value) + valeAmount).toStringAsFixed(2);
-    calculateTotalSales();
-    saveState();
-  }
-
-  Future<void> createCoupon() async {
-    final cuponesNumber = couponsNumberController.text;
-    final cuponesAmount =
-        num.tryParse(couponsAmountController.text.replaceAll(',', ''));
-    final cuponesDate =
-        DateFormat('dd-MM-yyyy').parse(couponsDateController.text);
-
-    if (cuponesAmount == null || cuponesNumber.isEmpty) {
-      return;
-    }
-
-    final success = await couponsController!.createCoupons(
-      cuponesNumber: cuponesNumber,
-      cuponesDate: cuponesDate,
-      cuponesAmount: cuponesAmount,
-    );
-
-    if (success) {
-      cupones.value =
-          (num.parse(cupones.value) + cuponesAmount).toStringAsFixed(2);
-      calculateTotalSales();
-      saveState();
-
-      Get.snackbar('Éxito', 'Cupón creado exitosamente');
+      if (success) {
+        cheques.value =
+            (num.parse(cheques.value) + checkValue).toStringAsFixed(2);
+        calculateTotalSales();
+        saveState();
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Hubo un error al crear cheque: ${e.toString()}');
+      return false;
     }
   }
 
-  Future<void> createVoucher() async {
+  Future<bool> createBill() async {
+    try {
+      final billDescription = billDescriptionController.text;
+      final billNumber = billNumberController.text;
+      final billAmount =
+          num.tryParse(billAmountController.text.replaceAll(',', ''));
+      final billDate = DateFormat('dd-MM-yyyy').parse(billDateController.text);
+
+      if (billAmount == null) {
+        Get.snackbar('Error', 'Por favor, ingrese valores válidos');
+        return false;
+      }
+      if (billDescription.isEmpty || billNumber.isEmpty) {
+        Get.snackbar(
+            'Error', 'Por favor, ingrese una descripción para el gasto');
+        return false;
+      }
+
+      final success = await billsController.createBill(
+          billNumber: billNumber,
+          billDate: billDate,
+          billAmount: billAmount,
+          billDescription: billDescription);
+
+      if (success) {
+        gastos.value =
+            (num.parse(gastos.value) + billAmount).toStringAsFixed(2);
+        calculateTotalSales();
+        saveState();
+        return true;
+      } else {
+        // Si no fue exitoso, no actualizamos los valores y permanecemos en el DataTab
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Hubo un error al crear el gasto: ${e.toString()}');
+      return false;
+    }
+  }
+
+  Future<bool> createVale() async {
+    try {
+      final valeDescription = valeDescriptionController.text;
+      final valeNumber = valeNumberController.text;
+      final valeAmount =
+          num.tryParse(valeAmountController.text.replaceAll(',', ''));
+      final valeDate = DateFormat('dd-MM-yyyy').parse(valeDateController.text);
+
+      if (valeDescription.isEmpty) {
+        Get.snackbar(
+            'Error', 'Por favor, ingrese una descripción para el vale');
+        return false;
+      }
+      if (valeAmount == null || valeNumber.isEmpty) {
+        Get.snackbar('Error', 'Por favor, ingrese valores válidos');
+        return false;
+      }
+
+      final success = await valesController.createVale(
+          valeNumber: valeNumber,
+          valeAmount: valeAmount,
+          valeDate: valeDate,
+          valeDescription: valeDescription);
+
+      if (success) {
+        vales.value = (num.parse(vales.value) + valeAmount).toStringAsFixed(2);
+        calculateTotalSales();
+        saveState();
+        return true;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Hubo un error al crear el vale: ${e.toString()}');
+      return false;
+    }
+  }
+
+  Future<bool> createCoupon() async {
+    try {
+      final cuponesNumber = couponsNumberController.text;
+      final cuponesAmount =
+          num.tryParse(couponsAmountController.text.replaceAll(',', ''));
+      final cuponesDate =
+          DateFormat('dd-MM-yyyy').parse(couponsDateController.text);
+
+      if (cuponesAmount == null || cuponesNumber.isEmpty) {
+        Get.snackbar('Error', 'Por favor, ingrese todos los datos requeridos');
+        return false;
+      }
+
+      final success = await couponsController!.createCoupons(
+        cuponesNumber: cuponesNumber,
+        cuponesDate: cuponesDate,
+        cuponesAmount: cuponesAmount,
+      );
+
+      if (success) {
+        cupones.value =
+            (num.parse(cupones.value) + cuponesAmount).toStringAsFixed(2);
+        calculateTotalSales();
+        saveState();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      Get.snackbar('Error', 'Hubo un error al crear el cupón: ${e.toString()}');
+      return false;
+    }
+  }
+
+  Future<bool> createVoucher() async {
     try {
       if (selectedPOS == null || selectedPOS!.isEmpty) {
         Get.snackbar('Error', 'Por favor, seleccione un POS');
-        return;
+        return false;
       }
 
       final authorizationCode = authorizationCodeController.text;
@@ -1540,7 +1607,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
       if (voucherAmount == null) {
         Get.snackbar('Error', 'Por favor, ingrese un monto válido');
-        return;
+        return false;
       }
 
       final pos = posController.posList.firstWhere(
@@ -1564,20 +1631,22 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
             (num.parse(vouchers.value) + voucherAmount).toStringAsFixed(2);
         calculateTotalSales();
         saveState();
-
-        Get.snackbar('Éxito', 'Voucher creado exitosamente');
+        return true;
+      } else {
+        return false;
       }
     } catch (e) {
       Get.snackbar(
           'Error', 'Hubo un error al crear el voucher: ${e.toString()}');
+      return false;
     }
   }
 
-  Future<void> createDeposits() async {
+  Future<bool> createDeposits() async {
     try {
       if (selectedBankDeposit == null) {
         Get.snackbar('Error', 'Por favor, seleccione un banco');
-        return;
+        return false;
       }
 
       final depositNumber = int.parse(depositNumberController.text);
@@ -1588,7 +1657,7 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
       if (depositAmount == null) {
         Get.snackbar('Error', 'Por favor, ingrese un monto válido');
-        return;
+        return false;
       }
 
       final bankId = bankController.bankList
@@ -1607,20 +1676,22 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
             (num.parse(depositos.value) + depositAmount).toStringAsFixed(2);
         calculateTotalSales();
         saveState();
-
-        Get.snackbar('Éxito', 'Depósito creado exitosamente');
+        return true;
+      } else {
+        return false;
       }
     } catch (e) {
       Get.snackbar(
           'Error', 'Hubo un error al crear el depósito: ${e.toString()}');
+      return false;
     }
   }
 
-  Future<void> createCredit() async {
+  Future<bool> createCredit() async {
     try {
       if (selectedClientCredits == null) {
         Get.snackbar('Error', 'Por favor, seleccione un cliente');
-        return;
+        return false;
       }
 
       final creditNumber = int.parse(creditNumberController.text);
@@ -1634,12 +1705,13 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           num.tryParse(superAmountController.text.replaceAll(',', ''));
       final dieselAmount =
           num.tryParse(dieselAmountController.text.replaceAll(',', ''));
+
       if (creditAmount == null ||
           regularAmount == null ||
           superAmount == null ||
           dieselAmount == null) {
         Get.snackbar('Error', 'Por favor, ingrese un monto válido');
-        return;
+        return false;
       }
 
       final clientId = clientsController.clientsList
@@ -1655,16 +1727,19 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         dieselAmount: dieselAmount,
         clientId: clientId,
       );
+
       if (success) {
         creditos.value =
             (num.parse(creditos.value) + creditAmount).toStringAsFixed(2);
         calculateTotalSales();
         saveState();
-
-        Get.snackbar('Éxito', 'Crédito creado exitosamente');
+        return true;
+      } else {
+        return false;
       }
     } catch (e) {
       Get.snackbar('Error', 'Hubo un error al crear crédito: ${e.toString()}');
+      return false;
     }
   }
 

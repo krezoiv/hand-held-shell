@@ -6,13 +6,13 @@ import 'package:hand_held_shell/services/accounting/vales/vales.service.dart';
 
 class ValesController extends GetxController {
   final ValessService _valesService = ValessService();
-  final Rx<NewValesResponse?> newVoucherResponse = Rx<NewValesResponse?>(null);
+  final Rx<NewBillsResponse?> newVoucherResponse = Rx<NewBillsResponse?>(null);
   final Rx<GetValesListSaleControlResponse?> valesListResponse =
       Rx<GetValesListSaleControlResponse?>(null);
   final Rx<NewValeResponse?> newValeResponse = Rx<NewValeResponse?>(null);
   final RxBool isLoading = false.obs;
 
-  Future<void> createVale({
+  Future<bool> createVale({
     required String valeNumber,
     required DateTime valeDate,
     required num valeAmount,
@@ -30,10 +30,18 @@ class ValesController extends GetxController {
       if (response != null && response.ok) {
         newValeResponse.value = response;
         Get.snackbar('Éxito', 'Vale creado exitosamente');
+        return true;
+      } else {
+        return false;
       }
     } catch (e) {
-      Get.snackbar(
-          'Error', 'Ocurrió un error al crear el vale: ${e.toString()}');
+      if (e.toString().contains('Ya existe un vale con este número')) {
+        Get.snackbar('Error', 'Ya existe una vale con este número');
+      } else {
+        Get.snackbar(
+            'Error', 'Ocurrió un error al crear el vale: ${e.toString()}');
+      }
+      return false;
     } finally {
       isLoading.value = false;
     }

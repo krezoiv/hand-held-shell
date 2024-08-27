@@ -40,12 +40,14 @@ class BankCheckService {
 
       if (response.statusCode == 201) {
         return newBankCheckResponseFromJson(response.body);
-      } else {
+      } else if (response.statusCode == 400) {
         final errorResponse = json.decode(response.body);
         throw Exception(errorResponse['message'] ?? 'Error desconocido');
+      } else {
+        throw Exception('Error desconocido');
       }
     } catch (e) {
-      return null;
+      rethrow;
     }
   }
 

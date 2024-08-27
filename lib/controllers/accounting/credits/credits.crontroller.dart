@@ -36,13 +36,18 @@ class CreditsController extends GetxController {
 
       if (response != null && response.ok) {
         newCreditsResponse.value = response;
-        // Get.snackbar('Éxito', 'Cupón creado exitosamenteeee');
+        Get.snackbar('Éxito', 'Crédito creado exitosamente');
+        return true;
+      } else {
+        return false;
       }
-
-      return true;
     } catch (e) {
-      Get.snackbar(
-          'Error', 'Ocurrió un error al crear el crédito: ${e.toString()}');
+      if (e.toString().contains('Ya existe una crédito con este número')) {
+        Get.snackbar('Error', 'Ya existe una crédito con este número');
+      } else {
+        Get.snackbar(
+            'Error', 'Ocurrió un error al crear el crédito: ${e.toString()}');
+      }
       return false;
     } finally {
       isLoading.value = false;

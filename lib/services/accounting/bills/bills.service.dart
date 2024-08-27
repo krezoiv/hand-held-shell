@@ -5,7 +5,7 @@ import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
 
 class BillsService {
-  Future<NewValesResponse?> createBill({
+  Future<NewBillsResponse?> createBill({
     required String billNumber,
     required DateTime billDate,
     required num billAmount,
@@ -34,14 +34,16 @@ class BillsService {
         }),
       );
 
-      if (response.statusCode == 400) {
+      if (response.statusCode == 200) {
         return newBillResponseFromJson(response.body);
-      } else {
+      } else if (response.statusCode == 400) {
         final errorResponse = json.decode(response.body);
         throw Exception(errorResponse['message'] ?? 'Error desconocido');
+      } else {
+        throw Exception('Error desconocido');
       }
     } catch (e) {
-      return null;
+      rethrow; // Re-lanzamos la excepción para manejarla en el controlador
     }
   }
 

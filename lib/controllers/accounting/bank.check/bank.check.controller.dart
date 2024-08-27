@@ -13,7 +13,7 @@ class BankCheckController extends GetxController {
       Rx<GetBankChecksListSaleControlResponse?>(null);
   final RxBool isLoading = false.obs;
 
-  Future<void> createBankCheck({
+  Future<bool> createBankCheck({
     required int checkNumber,
     required num checkValue,
     required DateTime checkDate,
@@ -32,11 +32,19 @@ class BankCheckController extends GetxController {
 
       if (response != null && response.ok) {
         newBankCheckResponse.value = response;
-        Get.snackbar('Éxito', 'Cheque bancario creado exitosamente');
+        Get.snackbar('Éxito', 'Cheque creado exitosamente');
+        return true;
+      } else {
+        return false;
       }
     } catch (e) {
-      Get.snackbar('Error',
-          'Ocurrió un error al crear el cheque bancario: ${e.toString()}');
+      if (e.toString().contains('Ya existe un cheque con este número')) {
+        Get.snackbar('Error', 'Ya existe un cheque con este número');
+      } else {
+        Get.snackbar(
+            'Error', 'Ocurrió un error al crear el cheque: ${e.toString()}');
+      }
+      return false;
     } finally {
       isLoading.value = false;
     }

@@ -6,12 +6,12 @@ import 'package:hand_held_shell/services/services.exports.files.dart';
 class BillsController extends GetxController {
   final BillsService _billsService = BillsService();
 
-  final Rx<NewValesResponse?> newBillResponse = Rx<NewValesResponse?>(null);
+  final Rx<NewBillsResponse?> newBillResponse = Rx<NewBillsResponse?>(null);
   final Rx<GetBillsListSaleControlResponse?> billsListResponse =
       Rx<GetBillsListSaleControlResponse?>(null);
   final RxBool isLoading = false.obs;
 
-  Future<void> createBill({
+  Future<bool> createBill({
     required String billNumber,
     required DateTime billDate,
     required num billAmount,
@@ -29,10 +29,18 @@ class BillsController extends GetxController {
       if (response != null && response.ok) {
         newBillResponse.value = response;
         Get.snackbar('Éxito', 'Gasto creado exitosamente');
+        return true;
+      } else {
+        return false;
       }
     } catch (e) {
-      Get.snackbar(
-          'Error', 'Ocurrió un error al crear el gasto: ${e.toString()}');
+      if (e.toString().contains('Ya existe una factura con este número')) {
+        Get.snackbar('Error', 'Ya existe una gastoooo con este número');
+      } else {
+        Get.snackbar(
+            'Error', 'Ocurrió un error al crear el gasto: ${e.toString()}');
+      }
+      return false;
     } finally {
       isLoading.value = false;
     }
