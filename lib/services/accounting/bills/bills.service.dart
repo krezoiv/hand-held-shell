@@ -34,7 +34,7 @@ class BillsService {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
         return newBillResponseFromJson(response.body);
       } else if (response.statusCode == 400) {
         final errorResponse = json.decode(response.body);

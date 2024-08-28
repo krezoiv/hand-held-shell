@@ -10,6 +10,7 @@ void showConfirmationDialog({
   required VoidCallback onConfirm,
   required VoidCallback onCancel,
 }) {
+  FocusScope.of(Get.context!).unfocus();
   if (GetPlatform.isIOS) {
     Get.dialog(
       CupertinoAlertDialog(
@@ -19,7 +20,7 @@ void showConfirmationDialog({
           CupertinoDialogAction(
             onPressed: () {
               Get.back(); // Cerrar el diálogo
-              onCancel(); // Ejecutar la acción de cancelar
+              // No llamamos a onCancel() aquí
             },
             child: Text(cancelText),
           ),
@@ -35,26 +36,28 @@ void showConfirmationDialog({
       barrierDismissible: false,
     );
   } else {
-    Get.defaultDialog(
-      title: title,
-      middleText: message,
-      textConfirm: confirmText,
-      textCancel: cancelText,
-      onConfirm: () {
-        Get.back(); // Cerrar el diálogo
-        onConfirm(); // Ejecutar la acción de confirmar
-      },
-      onCancel: () {
-        Get.back(); // Cerrar el diálogo
-        onCancel(); // Ejecutar la acción de cancelar
-      },
+    Get.dialog(
+      AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Get.back(); // Cerrar el diálogo
+              // No llamamos a onCancel() aquí
+            },
+            child: Text(cancelText),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back(); // Cerrar el diálogo
+              onConfirm(); // Ejecutar la acción de confirmar
+            },
+            child: Text(confirmText),
+          ),
+        ],
+      ),
       barrierDismissible: false,
-      confirmTextColor: Colors.black,
-      cancelTextColor: Colors.black,
-      buttonColor: Colors.blue,
-      backgroundColor: Colors.white,
-      contentPadding: EdgeInsets.zero,
-      titlePadding: EdgeInsets.only(top: 20, bottom: 20),
     );
   }
 }

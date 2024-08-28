@@ -183,9 +183,36 @@ class _NewRegisterDispenserScreenState
           controller.showCalculatorButtons.value = true;
           controller.hasSharedPreferencesData.value = true;
           await controller.saveState();
+          Get.snackbar(
+            'Aperturado',
+            'Día aperturado exitosamente',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green[600],
+            icon: Icon(Icons.check_circle_outlined, color: Colors.white),
+            colorText: Colors.white,
+            margin: EdgeInsets.all(10),
+            borderRadius: 20,
+            duration: Duration(seconds: 3),
+            isDismissible: true,
+            dismissDirection: DismissDirection.horizontal,
+            forwardAnimationCurve: Curves.easeOutBack,
+          );
         } catch (e) {
+          Get.snackbar(
+            'Error',
+            'No se pudo aperturar el día',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red[600],
+            icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+            colorText: Colors.white,
+            margin: EdgeInsets.all(10),
+            borderRadius: 20,
+            duration: Duration(seconds: 3),
+            isDismissible: true,
+            dismissDirection: DismissDirection.horizontal,
+            forwardAnimationCurve: Curves.easeOutBack,
+          );
           // Manejar el error
-          print('Error al abrir el día: $e');
         }
       },
       onCancel: () => Get.back(),

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/models/mappers/accounting/Bills/new.bill.response.dart';
 import 'package:hand_held_shell/models/mappers/accounting/vales/list.vales.sales.control.response.dart';
@@ -29,17 +30,58 @@ class ValesController extends GetxController {
 
       if (response != null && response.ok) {
         newValeResponse.value = response;
-        Get.snackbar('Éxito', 'Vale creado exitosamente');
+        Get.snackbar(
+          'Éxito',
+          'Vale creado exitosamente',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green[600],
+          icon: Icon(Icons.check_circle_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
+        FocusScope.of(Get.context!).unfocus();
         return true;
       } else {
         return false;
       }
     } catch (e) {
-      if (e.toString().contains('Ya existe un vale con este número')) {
-        Get.snackbar('Error', 'Ya existe una vale con este número');
+      if (e.toString().contains(
+            'Ya existe un vale con este número',
+          )) {
+        Get.snackbar(
+          'Error',
+          'Ya existe una vale con este número',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.deepOrange[400],
+          icon: Icon(Icons.warning_amber_rounded, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
       } else {
         Get.snackbar(
-            'Error', 'Ocurrió un error al crear el vale: ${e.toString()}');
+          'Error',
+          'Ocurrió un error al crear el vale: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[600],
+          icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
       }
       return false;
     } finally {
@@ -54,14 +96,52 @@ class ValesController extends GetxController {
 
       if (response != null && response.ok && response.vales.isNotEmpty) {
         valesListResponse.value = response;
-        Get.snackbar('Éxito', 'Vales obtenidas exitosamente');
       } else if (response != null && !response.ok) {
-        Get.snackbar('Error', 'Error en la respuesta: ${response.vales}');
+        Get.snackbar(
+          'Error',
+          'Error en la respuesta: ${response.vales}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[600],
+          icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
       } else {
-        Get.snackbar('Error', 'No se encontraron los vales');
+        Get.snackbar(
+          'Error',
+          'No se encontraron los vales',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[600],
+          icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Ocurrió un error al obtener los vales: $e');
+      Get.snackbar(
+        'Error',
+        'Ocurrió un error al obtener los vales: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[600],
+        icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -73,14 +153,53 @@ class ValesController extends GetxController {
       final success = await _valesService.deleteVale(billId);
 
       if (success) {
-        // Get.snackbar('Éxito', 'Vale eliminado exitosamente');
+        Get.snackbar(
+          'Éxito',
+          'Vale eliminado exitosamente',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green[600],
+          icon: Icon(Icons.check_circle_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return true;
       } else {
-        Get.snackbar('Error', 'No se pudo eliminar el vale');
+        Get.snackbar(
+          'Error',
+          'No se pudo eliminar el vale',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[600],
+          icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Ocurrió un error al eliminar el vale: $e');
+      Get.snackbar(
+        'Error',
+        'Ocurrió un error al eliminar el vale: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[600],
+        icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
       return false;
     } finally {
       isLoading.value = false;

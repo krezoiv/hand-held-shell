@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/models/mappers/accounting/vouchers/list.voucher.sales.control.response.dart';
 
@@ -31,17 +32,56 @@ class VoucherController extends GetxController {
 
       if (response != null && response.ok) {
         newVoucherResponse.value = response;
-        Get.snackbar('Éxito', 'Voucher creado exitosamente');
+        Get.snackbar(
+          'Éxito',
+          'Voucher creado exitosamente',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green[600],
+          icon: Icon(Icons.check_circle_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
+        FocusScope.of(Get.context!).unfocus();
         return true;
       } else {
         return false;
       }
     } catch (e) {
       if (e.toString().contains('Ya existe un voucher con este número')) {
-        Get.snackbar('Error', 'Ya existe una voucher con este número');
+        Get.snackbar(
+          'Error',
+          'Ya existe una voucher con este número',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.deepOrange[400],
+          icon: Icon(Icons.warning_amber_rounded, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
       } else {
         Get.snackbar(
-            'Error', 'Ocurrió un error al crear el voucher: ${e.toString()}');
+          'Error',
+          'Ocurrió un error al crear el voucher: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[600],
+          icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
       }
       return false;
     } finally {
@@ -58,12 +98,51 @@ class VoucherController extends GetxController {
         voucherListResponse.value = response;
         //Get.snackbar('Éxito', 'Vouchers obtenidas exitosamente');
       } else if (response != null && !response.ok) {
-        Get.snackbar('Error', 'Error en la respuesta: ${response.vouchers}');
+        Get.snackbar(
+          'Error',
+          'Error en la respuesta: ${response.vouchers}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[600],
+          icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
       } else {
-        Get.snackbar('Error', 'No se encontraron los vouchers');
+        Get.snackbar(
+          'Error',
+          'No se encontraron los vouchers',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[600],
+          icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
       }
     } catch (e) {
-      Get.snackbar('Error', 'Ocurrió un error al obtener los vouchers: $e');
+      Get.snackbar(
+        'Error',
+        'Ocurrió un error al obtener los vouchers: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[600],
+        icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -75,14 +154,53 @@ class VoucherController extends GetxController {
       final success = await _voucherService.deleteVoucher(voucherId);
 
       if (success) {
-        Get.snackbar('Éxito', 'Voucher eliminado exitosamente');
+        Get.snackbar(
+          'Éxito',
+          'Voucher eliminado exitosamente',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green[600],
+          icon: Icon(Icons.check_circle_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return true;
       } else {
-        Get.snackbar('Error', 'No se pudo eliminar el voucher');
+        Get.snackbar(
+          'Error',
+          'No se pudo eliminar el voucher',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red[600],
+          icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Ocurrió un error al eliminar el voucher: $e');
+      Get.snackbar(
+        'Error',
+        'Ocurrió un error al eliminar el voucher: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[600],
+        icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
       return false;
     } finally {
       isLoading.value = false;

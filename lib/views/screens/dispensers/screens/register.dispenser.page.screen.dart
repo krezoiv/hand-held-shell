@@ -215,11 +215,33 @@ class _RegisterDispenserPageState extends State<RegisterDispenserPage> {
                                 .pageIndex); // !se manade a guardar el nuevo dispenserReader
                           } else if (dispenserController
                               .dataSubmitted[widget.pageIndex].value) {
-                            Get.snackbar('Información',
-                                'Los datos ya han sido enviados.');
+                            Get.snackbar(
+                              'Información',
+                              'Los datos ya han sido enviados.',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.green[600],
+                              colorText: Colors.white,
+                              margin: EdgeInsets.all(10),
+                              borderRadius: 20,
+                              duration: Duration(seconds: 3),
+                              isDismissible: true,
+                              dismissDirection: DismissDirection.horizontal,
+                              forwardAnimationCurve: Curves.easeOutBack,
+                            );
                           } else if (dispenserController.isLoading.value) {
-                            Get.snackbar('Información',
-                                'Enviando datos, por favor espere...');
+                            Get.snackbar(
+                              'Información',
+                              'Enviando datos, por favor espere...',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: Colors.green[600],
+                              colorText: Colors.white,
+                              margin: EdgeInsets.all(10),
+                              borderRadius: 20,
+                              duration: Duration(seconds: 3),
+                              isDismissible: true,
+                              dismissDirection: DismissDirection.horizontal,
+                              forwardAnimationCurve: Curves.easeOutBack,
+                            );
                           } else {
                             ShowMissingDataDialog.show(
                                 context, dispenserController, widget.pageIndex);

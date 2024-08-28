@@ -197,14 +197,6 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                                 controller.lastGeneralDispenserReader.value =
                                     null;
 
-                                if (Get.isRegistered<DispenserController>()) {
-                                  final dispenserController =
-                                      Get.find<DispenserController>();
-                                  await dispenserController
-                                      .clearSharedPreferences();
-                                  dispenserController
-                                      .resetState(); // Implementa este método en DispenserController
-                                }
                                 // Restablece la pantalla como un "hot restart"
                                 resetScreenState();
 
@@ -213,13 +205,42 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                                 //controller.resetState();
 
                                 // Mostrar mensaje de éxito
-                                Get.snackbar('Éxito',
-                                    'Datos guardados y pantallas actualizadas correctamente');
+                                Get.snackbar(
+                                  'Éxito',
+                                  'Datos guardados y pantallas actualizadas correctamente',
+                                  backgroundColor: Colors.green[600],
+                                  colorText: Colors.white,
+                                  margin: EdgeInsets.all(10),
+                                  borderRadius: 20,
+                                  duration: Duration(seconds: 3),
+                                  isDismissible: true,
+                                  dismissDirection: DismissDirection.horizontal,
+                                  forwardAnimationCurve: Curves.easeOutBack,
+                                );
                               } catch (e) {
-                                Get.snackbar('Error', 'Ocurrió un error: $e');
+                                Get.snackbar(
+                                  'Error',
+                                  'Ocurrió un error: $e',
+                                  backgroundColor: Colors.red[600],
+                                  colorText: Colors.white,
+                                  margin: EdgeInsets.all(10),
+                                  borderRadius: 20,
+                                  duration: Duration(seconds: 3),
+                                  isDismissible: true,
+                                  dismissDirection: DismissDirection.horizontal,
+                                  forwardAnimationCurve: Curves.easeOutBack,
+                                );
                               } finally {
                                 // Cierra el spinner después de que se complete la operación
-                                Navigator.of(context).pop();
+                                //Navigator.of(context).pop();
+                                if (Get.isRegistered<DispenserController>()) {
+                                  final dispenserController =
+                                      Get.find<DispenserController>();
+                                  await dispenserController
+                                      .clearSharedPreferences();
+                                  dispenserController
+                                      .resetState(); // Implementa este método en DispenserController
+                                }
                               }
                             },
                             onCancel: () {
@@ -306,10 +327,31 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                   calculateTotalSales();
                   updatePayments();
                   saveState();
-                  Get.snackbar('Éxito', 'Nuevo DLP creado exitosamente.');
+                  Get.snackbar(
+                    'Éxito',
+                    'Nuevo DLP creado exitosamente.',
+                    backgroundColor: Colors.purple[300],
+                    colorText: Colors.white,
+                    margin: EdgeInsets.all(10),
+                    borderRadius: 20,
+                    duration: Duration(seconds: 3),
+                    isDismissible: true,
+                    dismissDirection: DismissDirection.horizontal,
+                    forwardAnimationCurve: Curves.easeOutBack,
+                  );
                 } else {
-                  Get.snackbar('Advertencia',
-                      'No se pudo crear el nuevo DLP, no se ha aperturado el día.');
+                  Get.snackbar(
+                    'Advertencia',
+                    'No se pudo crear el nuevo DLP, no se ha aperturado el día.',
+                    backgroundColor: Colors.red[600],
+                    colorText: Colors.white,
+                    margin: EdgeInsets.all(10),
+                    borderRadius: 20,
+                    duration: Duration(seconds: 3),
+                    isDismissible: true,
+                    dismissDirection: DismissDirection.horizontal,
+                    forwardAnimationCurve: Curves.easeOutBack,
+                  );
                 }
               } catch (e) {
                 Get.snackbar('Error', 'Ocurrió un error: $e');
@@ -848,29 +890,50 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                                       .fetchBankCheckBySalesControl();
                                 }
                               }
-
+                              FocusScope.of(Get.context!).unfocus();
                               Navigator.pop(context); // Cierra el spinner
 
                               if (success) {
                                 clearFields();
                                 // Cambiar al TabTab
-                                DefaultTabController.of(context)?.animateTo(1);
-                                Get.snackbar(
-                                    'Éxito', 'Operación realizada con éxito');
+                                DefaultTabController.of(context).animateTo(1);
+                                // Get.snackbar(
+                                //     'Éxito', 'Operación realizada con éxito');
                               } else {
-                                Get.snackbar('Error',
-                                    'No se pudo completar la operación');
+                                FocusScope.of(Get.context!).unfocus();
+                                Get.snackbar(
+                                  'Error',
+                                  'No se pudo completar la operación',
+                                  backgroundColor: Colors.red[600],
+                                  colorText: Colors.white,
+                                  margin: EdgeInsets.all(10),
+                                  borderRadius: 20,
+                                  duration: Duration(seconds: 3),
+                                  isDismissible: true,
+                                  dismissDirection: DismissDirection.horizontal,
+                                  forwardAnimationCurve: Curves.easeOutBack,
+                                );
+                                Navigator.of(context).pop();
                               }
                             } catch (e) {
                               Navigator.pop(
                                   context); // Cierra el spinner en caso de error
                               Get.snackbar(
-                                  'Error', 'Hubo un error al guardar: $e');
+                                'Error',
+                                'Hubo un error al guardar: $e',
+                                backgroundColor: Colors.red[600],
+                                colorText: Colors.white,
+                                margin: EdgeInsets.all(10),
+                                borderRadius: 20,
+                                duration: Duration(seconds: 3),
+                                isDismissible: true,
+                                dismissDirection: DismissDirection.horizontal,
+                                forwardAnimationCurve: Curves.easeOutBack,
+                              );
                             }
                           },
                           onCancel: () {
-                            Navigator.pop(
-                                context); // Cierra el diálogo de confirmación
+                            Navigator.of(context).pop();
                           },
                         );
                       },
@@ -1106,11 +1169,33 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
                     //Get.snackbar('Éxito', 'Ítem eliminado correctamente');
                     return true;
                   } else {
-                    Get.snackbar('Error', 'No se pudo eliminar el ítem.');
+                    Get.snackbar(
+                      'Error',
+                      'No se pudo eliminar el ítem.',
+                      backgroundColor: Colors.red[600],
+                      colorText: Colors.white,
+                      margin: EdgeInsets.all(10),
+                      borderRadius: 20,
+                      duration: Duration(seconds: 3),
+                      isDismissible: true,
+                      dismissDirection: DismissDirection.horizontal,
+                      forwardAnimationCurve: Curves.easeOutBack,
+                    );
                     return false;
                   }
                 } catch (e) {
-                  Get.snackbar('Error', 'Hubo un error al eliminar: $e');
+                  Get.snackbar(
+                    'Error',
+                    'Hubo un error al eliminar: $e',
+                    backgroundColor: Colors.red[600],
+                    colorText: Colors.white,
+                    margin: EdgeInsets.all(10),
+                    borderRadius: 20,
+                    duration: Duration(seconds: 3),
+                    isDismissible: true,
+                    dismissDirection: DismissDirection.horizontal,
+                    forwardAnimationCurve: Curves.easeOutBack,
+                  );
                   return false;
                 }
               }
@@ -1436,7 +1521,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   Future<bool> createBankCheck() async {
     try {
       if (selectedBankCheck == null || selectedClientChecks == null) {
-        Get.snackbar('Error', 'Por favor, seleccione un banco y un cliente');
+        Get.snackbar(
+          'Error',
+          'Por favor, seleccione un banco y un cliente',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
 
@@ -1447,7 +1543,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           DateFormat('dd-MM-yyyy').parse(checkDateController.text);
 
       if (checkNumber == null || checkValue == null) {
-        Get.snackbar('Error', 'Por favor, ingrese valores válidos');
+        Get.snackbar(
+          'Error',
+          'Por favor, ingrese valores válidos',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
 
@@ -1476,7 +1583,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         return false;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Hubo un error al crear cheque: ${e.toString()}');
+      Get.snackbar(
+        'Error',
+        'Hubo un error al crear cheque: ${e.toString()}',
+        backgroundColor: Colors.red[600],
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
       return false;
     }
   }
@@ -1490,12 +1608,33 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       final billDate = DateFormat('dd-MM-yyyy').parse(billDateController.text);
 
       if (billAmount == null) {
-        Get.snackbar('Error', 'Por favor, ingrese valores válidos');
+        Get.snackbar(
+          'Error',
+          'Por favor, ingrese valores válidos',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
       if (billDescription.isEmpty || billNumber.isEmpty) {
         Get.snackbar(
-            'Error', 'Por favor, ingrese una descripción para el gasto');
+          'Error',
+          'Por favor, ingrese una descripción para el gasto',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
 
@@ -1516,7 +1655,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         return false;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Hubo un error al crear el gasto: ${e.toString()}');
+      Get.snackbar(
+        'Error',
+        'Hubo un error al crear el gasto: ${e.toString()}',
+        backgroundColor: Colors.red[600],
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
       return false;
     }
   }
@@ -1531,11 +1681,32 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
 
       if (valeDescription.isEmpty) {
         Get.snackbar(
-            'Error', 'Por favor, ingrese una descripción para el vale');
+          'Error',
+          'Por favor, ingrese una descripción para el vale',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
       if (valeAmount == null || valeNumber.isEmpty) {
-        Get.snackbar('Error', 'Por favor, ingrese valores válidos');
+        Get.snackbar(
+          'Error',
+          'Por favor, ingrese valores válidos',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
 
@@ -1554,7 +1725,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         return false;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Hubo un error al crear el vale: ${e.toString()}');
+      Get.snackbar(
+        'Error',
+        'Hubo un error al crear el vale: ${e.toString()}',
+        backgroundColor: Colors.red[600],
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
       return false;
     }
   }
@@ -1568,7 +1750,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           DateFormat('dd-MM-yyyy').parse(couponsDateController.text);
 
       if (cuponesAmount == null || cuponesNumber.isEmpty) {
-        Get.snackbar('Error', 'Por favor, ingrese todos los datos requeridos');
+        Get.snackbar(
+          'Error',
+          'Por favor, ingrese todos los datos requeridos',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
 
@@ -1584,10 +1777,22 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         calculateTotalSales();
         saveState();
         return true;
+      } else {
+        return false;
       }
-      return false;
     } catch (e) {
-      Get.snackbar('Error', 'Hubo un error al crear el cupón: ${e.toString()}');
+      Get.snackbar(
+        'Error',
+        'Hubo un error al crear el cupón: ${e.toString()}',
+        backgroundColor: Colors.red[600],
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
       return false;
     }
   }
@@ -1595,7 +1800,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   Future<bool> createVoucher() async {
     try {
       if (selectedPOS == null || selectedPOS!.isEmpty) {
-        Get.snackbar('Error', 'Por favor, seleccione un POS');
+        Get.snackbar(
+          'Error',
+          'Por favor, seleccione un POS',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
 
@@ -1606,7 +1822,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           DateFormat('dd-MM-yyyy').parse(voucherDateController.text);
 
       if (voucherAmount == null) {
-        Get.snackbar('Error', 'Por favor, ingrese un monto válido');
+        Get.snackbar(
+          'Error',
+          'Por favor, ingrese un monto válido',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
 
@@ -1637,7 +1864,17 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       }
     } catch (e) {
       Get.snackbar(
-          'Error', 'Hubo un error al crear el voucher: ${e.toString()}');
+        'Error',
+        'Hubo un error al crear el voucher: ${e.toString()}',
+        backgroundColor: Colors.red[600],
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
       return false;
     }
   }
@@ -1645,7 +1882,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   Future<bool> createDeposits() async {
     try {
       if (selectedBankDeposit == null) {
-        Get.snackbar('Error', 'Por favor, seleccione un banco');
+        Get.snackbar(
+          'Error',
+          'Por favor, seleccione un banco',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
 
@@ -1656,7 +1904,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           DateFormat('dd-MM-yyyy').parse(depositDateController.text);
 
       if (depositAmount == null) {
-        Get.snackbar('Error', 'Por favor, ingrese un monto válido');
+        Get.snackbar(
+          'Error',
+          'Por favor, ingrese un monto válido',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
 
@@ -1682,7 +1941,17 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
       }
     } catch (e) {
       Get.snackbar(
-          'Error', 'Hubo un error al crear el depósito: ${e.toString()}');
+        'Error',
+        'Hubo un error al crear el depósito: ${e.toString()}',
+        backgroundColor: Colors.red[600],
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
       return false;
     }
   }
@@ -1690,7 +1959,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
   Future<bool> createCredit() async {
     try {
       if (selectedClientCredits == null) {
-        Get.snackbar('Error', 'Por favor, seleccione un cliente');
+        Get.snackbar(
+          'Error',
+          'Por favor, seleccione un cliente',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
 
@@ -1710,7 +1990,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
           regularAmount == null ||
           superAmount == null ||
           dieselAmount == null) {
-        Get.snackbar('Error', 'Por favor, ingrese un monto válido');
+        Get.snackbar(
+          'Error',
+          'Por favor, ingrese un monto válido',
+          backgroundColor: Colors.deepOrange[400],
+          colorText: Colors.white,
+          margin: EdgeInsets.all(10),
+          borderRadius: 20,
+          duration: Duration(seconds: 3),
+          isDismissible: true,
+          dismissDirection: DismissDirection.horizontal,
+          forwardAnimationCurve: Curves.easeOutBack,
+        );
         return false;
       }
 
@@ -1738,7 +2029,18 @@ class _NewSalesScreenState extends State<NewSalesScreen> {
         return false;
       }
     } catch (e) {
-      Get.snackbar('Error', 'Hubo un error al crear crédito: ${e.toString()}');
+      Get.snackbar(
+        'Error',
+        'Hubo un error al crear crédito: ${e.toString()}',
+        backgroundColor: Colors.red[600],
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
       return false;
     }
   }

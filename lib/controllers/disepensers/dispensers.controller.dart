@@ -364,7 +364,10 @@ class DispenserController extends GetxController {
 
         if (currMechanic < prevMechanic) {
           showValidationAlert(
-              pageIndex, cardIndex, "El campo no puede ser menor al anterior");
+            pageIndex,
+            cardIndex,
+            "El campo no puede ser menor al anterior",
+          );
           return;
         }
 
@@ -504,15 +507,42 @@ class DispenserController extends GetxController {
           }
 
           Get.snackbar(
-              'Éxito', 'Los datos se han enviado y actualizado correctamente.');
+            'Éxito',
+            'numeración guardada correctamente.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green[600],
+            icon: Icon(Icons.check_circle_outlined, color: Colors.white),
+            colorText: Colors.white,
+            margin: EdgeInsets.all(10),
+            borderRadius: 20,
+            duration: Duration(seconds: 3),
+            isDismissible: true,
+            dismissDirection: DismissDirection.horizontal,
+            forwardAnimationCurve: Curves.easeOutBack,
+          );
         } else {
-          throw Exception('Failed to update GeneralDispenserReader');
+          throw Exception(
+            'Failed to update GeneralDispenserReader',
+          );
         }
       } else {
         throw Exception('Failed to add new dispenser reader');
       }
     } catch (e) {
-      Get.snackbar('Error', 'No se pudo enviar los datos. Intente nuevamente.');
+      Get.snackbar(
+        'Error',
+        'No se pudo enviar los datos. Intente nuevamente.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[600],
+        icon: Icon(Icons.error_outline_outlined, color: Colors.white),
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
     } finally {
       isLoading.value = false;
       saveState();
@@ -527,11 +557,21 @@ class DispenserController extends GetxController {
 
   void showValidationAlert(int pageIndex, int cardIndex, String message) {
     Get.snackbar(
-      "Validación fallida",
-      message,
-      snackPosition: SnackPosition.BOTTOM,
+      "Alerta de Validación", // Título
+      message, // Mensaje de error
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: Colors.deepOrange[400],
+      colorText: Colors.white,
+      icon: Icon(Icons.warning_amber_rounded, color: Colors.white),
       duration: Duration(seconds: 3),
+      margin: EdgeInsets.all(10),
+      borderRadius: 10,
+      isDismissible: true,
+      dismissDirection: DismissDirection.horizontal,
+      forwardAnimationCurve: Curves.easeOutBack,
     );
+
+    // Mantener el focus en el campo que causó el error
     focusNodes[pageIndex][cardIndex].requestFocus();
   }
 
@@ -664,7 +704,19 @@ class DispenserController extends GetxController {
       }
     } catch (e) {
       Get.snackbar(
-          'Error', 'Failed to fetch last GeneralDispenserReader data: $e');
+        'Error',
+        'Failed to fetch last GeneralDispenserReader data: $e',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red[600],
+        icon: Icon(Icons.warning_amber_rounded, color: Colors.white),
+        colorText: Colors.white,
+        margin: EdgeInsets.all(10),
+        borderRadius: 20,
+        duration: Duration(seconds: 3),
+        isDismissible: true,
+        dismissDirection: DismissDirection.horizontal,
+        forwardAnimationCurve: Curves.easeOutBack,
+      );
     } finally {
       isLoading.value = false;
     }
