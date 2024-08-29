@@ -1,3 +1,9 @@
+export 'package:hand_held_shell/models/mappers/persons/stores/stores.list.response.dart';
+export 'package:hand_held_shell/models/models/persons/store.model.dart';
+
+export 'package:hand_held_shell/models/mappers/persons/vehicle/vehicle.list.response.dart';
+export 'package:hand_held_shell/models/models/persons/vehicle.model.dart';
+
 export 'package:hand_held_shell/models/models/acocounting/bank.model.dart';
 
 export 'package:hand_held_shell/models/models/sales/sales.control.model.dart';
@@ -9,7 +15,7 @@ export 'package:hand_held_shell/models/models/persons/client.model.dart';
 export 'package:hand_held_shell/models/mappers/accounting/Bills/new.bill.response.dart';
 export 'package:hand_held_shell/models/mappers/accounting/banks/new.bank.check.response.dart';
 
-export 'package:hand_held_shell/models/mappers/client/client.list.response.dart';
+export 'package:hand_held_shell/models/mappers/persons/client/client.list.response.dart';
 
 export 'package:hand_held_shell/models/mappers/accounting/banks/bank.list.response.dart';
 
