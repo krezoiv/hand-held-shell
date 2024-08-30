@@ -74,7 +74,7 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   }
 
   void _calculateTotals() {
-    totalFactura = subTotal - totalIDP;
+    totalFactura = subTotal + totalIDP;
   }
 
   void _showFuelDialog(String fuelType) {
