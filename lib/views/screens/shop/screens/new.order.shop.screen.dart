@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hand_held_shell/controllers/fuels/fuels.controller.dart';
 import 'package:hand_held_shell/controllers/persons/stores/stores.controller.dart';
 import 'package:hand_held_shell/controllers/persons/vehicles/vehicles.controller.dart';
+import 'package:hand_held_shell/controllers/purchases/orders/purchase.order.controller.dart';
+// Importa el controlador de Fuel
+import 'package:hand_held_shell/shared/helpers/show.confirm.alert.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/shop/widgets/new.order/detail.card.dart';
 import 'package:hand_held_shell/views/screens/shop/widgets/new.order/detail.fuel.card.dart';
 import 'package:hand_held_shell/views/screens/shop/widgets/new.order/fuel.card.dart';
 import 'package:hand_held_shell/views/screens/shop/widgets/new.order/label.row.dart';
-
 import 'package:hand_held_shell/views/screens/shop/widgets/new.order/order.detail.dialog.dart';
 import 'package:hand_held_shell/views/screens/shop/widgets/side.menu.shop.dart';
 
@@ -21,6 +24,10 @@ class NewOrderShopsScreen extends StatefulWidget {
 class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   final VechicleController vehicleController = Get.put(VechicleController());
   final StoresController storesController = Get.put(StoresController());
+  final PurchaseOrderController purchaseOrderController =
+      Get.put(PurchaseOrderController());
+  final FuelController fuelController =
+      Get.put(FuelController()); // Añadir controlador de Fuel
 
   bool isFirstCardEnabled = true;
   bool isDetailsCardEnabled = false;
@@ -71,6 +78,9 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
     orderDateController.text = orderDate;
     dispatchDateController.text = dispatchDate;
     shiftTimeController.text = shiftTime;
+
+    // Fetch Fuel IDs when the screen is initialized
+    fuelController.fetchFuelIds();
   }
 
   void _calculateTotals() {
@@ -86,6 +96,8 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
     String originalIdp;
     String originalTotal;
 
+    String? fuelId; // Variable para almacenar el ID del combustible
+
     if (fuelType == 'Super') {
       montoController = superMontoController;
       idpController = superIdpController;
@@ -95,6 +107,8 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       originalMonto = superMonto;
       originalIdp = superIdpController.text;
       originalTotal = superTotalController.text;
+
+      fuelId = fuelController.fuelIds['super'];
     } else if (fuelType == 'Regular') {
       montoController = regularMontoController;
       idpController = regularIdpController;
@@ -104,6 +118,8 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       originalMonto = regularMonto;
       originalIdp = regularIdpController.text;
       originalTotal = regularTotalController.text;
+
+      fuelId = fuelController.fuelIds['regular'];
     } else {
       montoController = dieselMontoController;
       idpController = dieselIdpController;
@@ -113,6 +129,8 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       originalMonto = dieselMonto;
       originalIdp = dieselIdpController.text;
       originalTotal = dieselTotalController.text;
+
+      fuelId = fuelController.fuelIds['diesel'];
     }
 
     FuelDetailDialog(
@@ -160,6 +178,79 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
     ).show();
   }
 
+  void _onFirstCardDoubleTap() async {
+    showConfirmationDialog(
+      title: 'Confirmar Acción',
+      message: '¿Deseas crear una nueva orden de compra?',
+      confirmText: 'Confirmar',
+      cancelText: 'Cancelar',
+      onConfirm: () async {
+        // Llama al método createPurchaseOrder
+        await purchaseOrderController.createPurchaseOrder();
+
+        if (purchaseOrderController.purchaseOrderId.isNotEmpty) {
+          setState(() {
+            isFirstCardEnabled = false;
+            isDetailsCardEnabled = true; // Habilitar solo el DetailsCard
+            areFuelCardsEnabled = false; // Mantener los FuelCards inhabilitados
+          });
+
+          Get.snackbar(
+            'Éxito',
+            'Orden creada con ID: ${purchaseOrderController.purchaseOrderId}',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        } else {
+          Get.snackbar(
+            'Error',
+            'No se pudo crear la orden',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
+      },
+      onCancel: () {
+        // Acción opcional al cancelar
+      },
+    );
+  }
+
+  void _onDetailsCardDoubleTap() {
+    // Muestra el diálogo con los campos de texto al hacer doble tap en el DetailsCard
+    OrderDetailsDialog(
+      context: context,
+      vehicleController: vehicleController,
+      storesController: storesController,
+      orderDateController: orderDateController,
+      dispatchDateController: dispatchDateController,
+      shiftTimeController: shiftTimeController,
+      selectedStore: selectedStore,
+      selectedStoreId: selectedStoreId,
+      selectedVehicle: selectedVehicle,
+      selectedVehicleId: selectedVehicleId,
+      onSave: (String newOrderDate,
+          String newDispatchDate,
+          String newOrderNumber,
+          String newStore,
+          String newStoreId,
+          String newVehicle,
+          String newVehicleId,
+          String newShiftTime) {
+        setState(() {
+          orderDate = newOrderDate;
+          dispatchDate = newDispatchDate;
+          orderNumber = newOrderNumber;
+          selectedStore = newStore;
+          selectedStoreId = newStoreId;
+          selectedVehicle = newVehicle;
+          selectedVehicleId = newVehicleId;
+          shiftTime = newShiftTime;
+          areFuelCardsEnabled = true;
+        });
+      },
+      purchaseOrderController: purchaseOrderController,
+    ).show();
+  }
+
   @override
   Widget build(BuildContext context) {
     final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -176,12 +267,7 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             GestureDetector(
-              onDoubleTap: () {
-                setState(() {
-                  isFirstCardEnabled = false;
-                  isDetailsCardEnabled = true;
-                });
-              },
+              onDoubleTap: isFirstCardEnabled ? _onFirstCardDoubleTap : null,
               child: Card(
                 elevation: isFirstCardEnabled ? 4.0 : 0.0,
                 shape: RoundedRectangleBorder(
@@ -247,42 +333,9 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
                 childAspectRatio: 3 / 2,
                 children: [
                   GestureDetector(
-                    onDoubleTap: () {
-                      if (isDetailsCardEnabled) {
-                        OrderDetailsDialog(
-                          storesController: storesController,
-                          context: context,
-                          vehicleController: vehicleController,
-                          orderDateController: orderDateController,
-                          dispatchDateController: dispatchDateController,
-                          shiftTimeController: shiftTimeController,
-                          selectedStore: selectedStore,
-                          selectedStoreId: selectedStoreId,
-                          selectedVehicle: selectedVehicle,
-                          selectedVehicleId: selectedVehicleId,
-                          onSave: (String newOrderDate,
-                              String newDispatchDate,
-                              String newOrderNumber,
-                              String newStore,
-                              String newStoreId,
-                              String newVehicle,
-                              String newVehicleId,
-                              String newShiftTime) {
-                            setState(() {
-                              orderDate = newOrderDate;
-                              dispatchDate = newDispatchDate;
-                              orderNumber = newOrderNumber;
-                              selectedStore = newStore;
-                              selectedStoreId = newStoreId;
-                              selectedVehicle = newVehicle;
-                              selectedVehicleId = newVehicleId;
-                              shiftTime = newShiftTime;
-                              areFuelCardsEnabled = true;
-                            });
-                          },
-                        ).show();
-                      }
-                    },
+                    onDoubleTap: isDetailsCardEnabled
+                        ? _onDetailsCardDoubleTap
+                        : null, // Mostrar el diálogo con los campos de texto
                     child: DetailsCard(
                       icon: Icons.info,
                       label: 'Detalles',

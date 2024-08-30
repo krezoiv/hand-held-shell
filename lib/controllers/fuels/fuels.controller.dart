@@ -11,6 +11,15 @@ class FuelController extends GetxController {
       Rx<UpdateFuelPriceResponse?>(null);
   final RxBool isLoading = false.obs;
 
+  // Añadir variable para guardar los Fuel IDs
+  final RxMap<String, String> fuelIds = <String, String>{}.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchFuelIds(); // Llama al método para obtener los Fuel IDs al iniciar
+  }
+
   Future<void> fetchFuels() async {
     try {
       isLoading.value = true;
@@ -22,6 +31,23 @@ class FuelController extends GetxController {
       }
     } catch (e) {
       Get.snackbar('Error', 'Failed to fetch fuels: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Nuevo método para obtener los Fuel IDs
+  Future<void> fetchFuelIds() async {
+    try {
+      isLoading.value = true;
+      final ids = await FuelService.getFuelIds();
+      if (ids != null) {
+        fuelIds.assignAll(ids);
+      } else {
+        throw Exception('Failed to fetch fuel IDs');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to fetch fuel IDs: $e');
     } finally {
       isLoading.value = false;
     }

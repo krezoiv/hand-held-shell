@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hand_held_shell/controllers/persons/stores/stores.controller.dart';
 import 'package:hand_held_shell/controllers/persons/vehicles/vehicles.controller.dart';
+import 'package:hand_held_shell/controllers/purchases/orders/purchase.order.controller.dart';
 import 'package:intl/intl.dart';
 
 class OrderDetailsDialog {
@@ -11,6 +12,7 @@ class OrderDetailsDialog {
   final TextEditingController shiftTimeController;
   final VechicleController vehicleController;
   final StoresController storesController;
+  final PurchaseOrderController purchaseOrderController;
   final Function(
     String orderDate,
     String dispatchDate,
@@ -31,6 +33,7 @@ class OrderDetailsDialog {
     required this.context,
     required this.vehicleController,
     required this.storesController,
+    required this.purchaseOrderController,
     required this.orderDateController,
     required this.dispatchDateController,
     required this.shiftTimeController,
@@ -69,7 +72,7 @@ class OrderDetailsDialog {
     }
   }
 
-  void _saveOrderDetails() {
+  Future<void> _saveOrderDetails() async {
     onSave(
       orderDateController.text,
       dispatchDateController.text,
@@ -80,6 +83,12 @@ class OrderDetailsDialog {
       selectedVehicleId,
       shiftTimeController.text,
     );
+
+    // Llamar al método para crear los detalles de la orden de compra
+    await purchaseOrderController.createDetailPurchaseOrders(
+      purchaseOrderController.purchaseOrderId.value,
+    );
+
     Navigator.of(context).pop(); // Cierra el diálogo después de guardar
   }
 
@@ -204,7 +213,7 @@ class OrderDetailsDialog {
                     color: Colors.blue,
                   ),
                   onPressed: () {
-                    _saveOrderDetails();
+                    _saveOrderDetails(); // Llama al método de guardar
                   },
                 ),
                 IconButton(

@@ -6,8 +6,6 @@ import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:hand_held_shell/models/enteties.exports.files.dart';
 
 class BankCheckService {
-  static const String baseUrl = 'http://192.168.0.103:3000/api';
-
   Future<NewBankCheckResponse?> createBankCheck({
     required int checkNumber,
     required num checkValue,

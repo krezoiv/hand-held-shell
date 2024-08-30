@@ -10,11 +10,17 @@ class FuelsApi {
     return '${Environment.apiUrl}/fuels/updatePrices';
   }
 
+  static String getFuelsIdsApi = '${Environment.apiUrl}/fuels/fuelIds';
+
   static String getFuels() {
     return getFuelsApi;
   }
 
   static String updateFuelPrices() {
     return updateFuelPricesApi;
+  }
+
+  static String getFuelsIds() {
+    return getFuelsIdsApi;
   }
 }
