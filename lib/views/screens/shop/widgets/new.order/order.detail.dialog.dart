@@ -13,6 +13,7 @@ class OrderDetailsDialog {
   final VechicleController vehicleController;
   final StoresController storesController;
   final PurchaseOrderController purchaseOrderController;
+  final TextEditingController orderNumberController;
   final Function(
     String orderDate,
     String dispatchDate,
@@ -41,6 +42,7 @@ class OrderDetailsDialog {
     required this.selectedStoreId,
     required this.selectedVehicle,
     required this.selectedVehicleId,
+    required this.orderNumberController,
     required this.onSave,
   });
 
@@ -72,11 +74,28 @@ class OrderDetailsDialog {
     }
   }
 
-  Future<void> _saveOrderDetails() async {
+  void _saveOrderDetails() async {
+    // Validación: Verificar que todos los campos tengan información
+    if (orderDateController.text.isEmpty ||
+        dispatchDateController.text.isEmpty ||
+        orderNumberController.text.isEmpty ||
+        selectedStoreId.isEmpty ||
+        selectedVehicleId.isEmpty ||
+        shiftTimeController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Por favor, completa todos los campos antes de guardar.'),
+        ),
+      );
+      return;
+    }
+
+    // Guardar los detalles de la orden si todos los campos están completos
     onSave(
       orderDateController.text,
       dispatchDateController.text,
-      shiftTimeController.text,
+      orderNumberController.text,
       selectedStore,
       selectedStoreId,
       selectedVehicle,
@@ -125,8 +144,9 @@ class OrderDetailsDialog {
                       },
                     ),
                     const SizedBox(height: 16.0),
-                    const TextField(
-                      decoration: InputDecoration(
+                    TextField(
+                      controller: orderNumberController,
+                      decoration: const InputDecoration(
                         labelText: 'No. de Orden',
                       ),
                       keyboardType: TextInputType.number,

@@ -25,7 +25,11 @@ class FuelController extends GetxController {
       isLoading.value = true;
       final response = await FuelService.getAllFuels();
       if (response != null && response.ok) {
-        fuels.assignAll(response.fuels);
+        if (response.fuels.isNotEmpty) {
+          fuels.assignAll(response.fuels);
+        } else {
+          throw Exception('No fuels found in the response');
+        }
       } else {
         throw Exception('Failed to fetch fuels');
       }

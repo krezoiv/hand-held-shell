@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'package:hand_held_shell/controllers/fuels/fuels.controller.dart';
 import 'package:hand_held_shell/controllers/persons/stores/stores.controller.dart';
 import 'package:hand_held_shell/controllers/persons/vehicles/vehicles.controller.dart';
 import 'package:hand_held_shell/controllers/purchases/orders/purchase.order.controller.dart';
-// Importa el controlador de Fuel
+import 'package:hand_held_shell/models/models/fuel.station/fuel.model.dart';
+import 'package:hand_held_shell/models/models/status/status.model.dart';
+import 'package:hand_held_shell/models/models/taxes/taxes.model.dart';
 import 'package:hand_held_shell/shared/helpers/show.confirm.alert.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
-import 'package:hand_held_shell/views/screens/shop/widgets/new.order/detail.card.dart';
 import 'package:hand_held_shell/views/screens/shop/widgets/new.order/detail.fuel.card.dart';
-import 'package:hand_held_shell/views/screens/shop/widgets/new.order/fuel.card.dart';
-import 'package:hand_held_shell/views/screens/shop/widgets/new.order/label.row.dart';
+
 import 'package:hand_held_shell/views/screens/shop/widgets/new.order/order.detail.dialog.dart';
+import 'package:hand_held_shell/views/screens/shop/widgets/new.order/order.screen.builder.dart';
 import 'package:hand_held_shell/views/screens/shop/widgets/side.menu.shop.dart';
 
 class NewOrderShopsScreen extends StatefulWidget {
@@ -26,8 +28,7 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   final StoresController storesController = Get.put(StoresController());
   final PurchaseOrderController purchaseOrderController =
       Get.put(PurchaseOrderController());
-  final FuelController fuelController =
-      Get.put(FuelController()); // Añadir controlador de Fuel
+  final FuelController fuelController = Get.put(FuelController());
 
   bool isFirstCardEnabled = true;
   bool isDetailsCardEnabled = false;
@@ -44,33 +45,39 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   String shiftTime = '00:00 am';
 
   // Variables para los montos y totales
-  String superMonto = '0';
-  String regularMonto = '0';
-  String dieselMonto = '0';
-  double subTotal = 0.0;
-  double totalIDP = 0.0;
-  double totalFactura = 0.0;
+  String superValue = '';
+  String regularValue = '';
+  String dieselValue = '';
+  String subTotalValue = '';
+  String totalIDPValue = '';
+  String totalFacturaValue = '';
 
   // Controladores para los campos de texto
   final TextEditingController orderDateController = TextEditingController();
   final TextEditingController dispatchDateController = TextEditingController();
   final TextEditingController shiftTimeController = TextEditingController();
+  final TextEditingController orderNumberController = TextEditingController();
 
   // Controladores para los diálogos de Fuel
   final TextEditingController superMontoController = TextEditingController();
   final TextEditingController superIdpController = TextEditingController();
   final TextEditingController superPrecioController = TextEditingController();
   final TextEditingController superTotalController = TextEditingController();
+  final TextEditingController superTotalIdpController = TextEditingController();
 
   final TextEditingController regularMontoController = TextEditingController();
   final TextEditingController regularIdpController = TextEditingController();
   final TextEditingController regularPrecioController = TextEditingController();
   final TextEditingController regularTotalController = TextEditingController();
+  final TextEditingController regularTotalIdpController =
+      TextEditingController();
 
   final TextEditingController dieselMontoController = TextEditingController();
   final TextEditingController dieselIdpController = TextEditingController();
   final TextEditingController dieselPrecioController = TextEditingController();
   final TextEditingController dieselTotalController = TextEditingController();
+  final TextEditingController dieselTotalIdpController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -84,7 +91,10 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   }
 
   void _calculateTotals() {
-    totalFactura = subTotal + totalIDP;
+    double subTotal = double.tryParse(subTotalValue) ?? 0.0;
+    double totalIDP = double.tryParse(totalIDPValue) ?? 0.0;
+
+    totalFacturaValue = (subTotal + totalIDP).toStringAsFixed(2);
   }
 
   void _showFuelDialog(String fuelType) {
@@ -92,32 +102,62 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
     TextEditingController idpController;
     TextEditingController precioController;
     TextEditingController totalController;
+    TextEditingController totalIdpController;
     String originalMonto;
     String originalIdp;
     String originalTotal;
+    String originalTotalIdp;
 
-    String? fuelId; // Variable para almacenar el ID del combustible
+    String? fuelId;
+    double idpAmount = 0.0;
 
-    if (fuelType == 'Super') {
+    fuelType = fuelType.toLowerCase();
+
+    var fuel = fuelController.fuels.firstWhere(
+      (fuel) => fuel.fuelName.toLowerCase() == fuelType,
+      orElse: () {
+        return Fuel(
+          fuelName: 'not_found',
+          costPrice: 0.0,
+          salePrice: 0.0,
+          statusId: Status(id: '', statusName: 'not_found'),
+          taxesId: Taxes(id: '', idpName: 'not_found', idpAmount: 0.0),
+          fuelId: '',
+        );
+      },
+    );
+
+    if (fuel.fuelName != 'not_found') {
+      idpAmount = fuel.taxesId.idpAmount;
+    } else {
+      Get.snackbar('Error', 'Fuel type not found: $fuelType');
+      return;
+    }
+
+    if (fuelType == 'super') {
       montoController = superMontoController;
       idpController = superIdpController;
       precioController = superPrecioController;
       totalController = superTotalController;
+      totalIdpController = superTotalIdpController;
 
-      originalMonto = superMonto;
+      originalMonto = superValue;
       originalIdp = superIdpController.text;
       originalTotal = superTotalController.text;
+      originalTotalIdp = superTotalIdpController.text;
 
       fuelId = fuelController.fuelIds['super'];
-    } else if (fuelType == 'Regular') {
+    } else if (fuelType == 'regular') {
       montoController = regularMontoController;
       idpController = regularIdpController;
       precioController = regularPrecioController;
       totalController = regularTotalController;
+      totalIdpController = regularTotalIdpController;
 
-      originalMonto = regularMonto;
+      originalMonto = regularValue;
       originalIdp = regularIdpController.text;
       originalTotal = regularTotalController.text;
+      originalTotalIdp = regularTotalIdpController.text;
 
       fuelId = fuelController.fuelIds['regular'];
     } else {
@@ -125,13 +165,19 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       idpController = dieselIdpController;
       precioController = dieselPrecioController;
       totalController = dieselTotalController;
+      totalIdpController = dieselTotalIdpController;
 
-      originalMonto = dieselMonto;
+      originalMonto = dieselValue;
       originalIdp = dieselIdpController.text;
       originalTotal = dieselTotalController.text;
+      originalTotalIdp = dieselTotalIdpController.text;
 
       fuelId = fuelController.fuelIds['diesel'];
     }
+
+    // Calcula el valor de Total IDP basado en el Monto y el IDP al abrir el diálogo
+    double monto = double.tryParse(montoController.text) ?? 0.0;
+    totalIdpController.text = (monto * idpAmount).toStringAsFixed(2);
 
     FuelDetailDialog(
       context: context,
@@ -140,39 +186,33 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       idpController: idpController,
       precioController: precioController,
       totalController: totalController,
+      totalIdpController: totalIdpController,
+      fuelId: fuelId!,
+      purchaseOrderId: purchaseOrderController.purchaseOrderId.value,
+      purchaseOrderController: purchaseOrderController,
+      idpAmount: idpAmount,
       onSave: () {
         setState(() {
           double newMonto = double.tryParse(montoController.text) ?? 0.0;
-          double newIdp = double.tryParse(idpController.text) ?? 0.0;
+          double newTotalIdp = double.tryParse(totalIdpController.text) ?? 0.0;
           double newTotal = double.tryParse(totalController.text) ?? 0.0;
 
-          // Multiplicar Monto por IDP y calcular el nuevo total IDP
-          double idpTotal = newMonto * newIdp;
-
-          // Solo actualizar si hay cambios
-          if (montoController.text != originalMonto ||
-              idpController.text != originalIdp ||
-              totalController.text != originalTotal) {
-            // Restar los valores anteriores del Sub Total y Total IDP
-            subTotal -= double.tryParse(originalTotal) ?? 0.0;
-            totalIDP -= (double.tryParse(originalMonto) ?? 0.0) *
-                (double.tryParse(originalIdp) ?? 0.0);
-
-            // Agregar los valores nuevos al Sub Total y Total IDP
-            subTotal += newTotal;
-            totalIDP += idpTotal;
-
-            // Actualizar los montos específicos
-            if (fuelType == 'Super') {
-              superMonto = newMonto.toString();
-            } else if (fuelType == 'Regular') {
-              regularMonto = newMonto.toString();
-            } else if (fuelType == 'Diesel') {
-              dieselMonto = newMonto.toString();
-            }
-
-            _calculateTotals();
+          // Actualiza los valores en el primer card
+          if (fuelType == 'super') {
+            superValue = newMonto.toString();
+          } else if (fuelType == 'regular') {
+            regularValue = newMonto.toString();
+          } else if (fuelType == 'diesel') {
+            dieselValue = newMonto.toString();
           }
+
+          totalIDPValue = (double.tryParse(totalIDPValue) ?? 0.0 + newTotalIdp)
+              .toStringAsFixed(2);
+          subTotalValue = (double.tryParse(subTotalValue) ?? 0.0 + newTotal)
+              .toStringAsFixed(2);
+
+          // Recalcula el total de la factura
+          _calculateTotals();
         });
       },
     ).show();
@@ -185,14 +225,13 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       confirmText: 'Confirmar',
       cancelText: 'Cancelar',
       onConfirm: () async {
-        // Llama al método createPurchaseOrder
         await purchaseOrderController.createPurchaseOrder();
 
         if (purchaseOrderController.purchaseOrderId.isNotEmpty) {
           setState(() {
             isFirstCardEnabled = false;
-            isDetailsCardEnabled = true; // Habilitar solo el DetailsCard
-            areFuelCardsEnabled = false; // Mantener los FuelCards inhabilitados
+            isDetailsCardEnabled = true;
+            areFuelCardsEnabled = true;
           });
 
           Get.snackbar(
@@ -215,7 +254,6 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   }
 
   void _onDetailsCardDoubleTap() {
-    // Muestra el diálogo con los campos de texto al hacer doble tap en el DetailsCard
     OrderDetailsDialog(
       context: context,
       vehicleController: vehicleController,
@@ -227,6 +265,7 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       selectedStoreId: selectedStoreId,
       selectedVehicle: selectedVehicle,
       selectedVehicleId: selectedVehicleId,
+      orderNumberController: orderNumberController,
       onSave: (String newOrderDate,
           String newDispatchDate,
           String newOrderNumber,
@@ -261,132 +300,40 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       ),
       drawer: SideMenuShop(scaffoldKey: scaffoldKey),
       bottomNavigationBar: const CustomBottomNavigation(),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(10.0, 0.0, 10.0, 10.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            GestureDetector(
-              onDoubleTap: isFirstCardEnabled ? _onFirstCardDoubleTap : null,
-              child: Card(
-                elevation: isFirstCardEnabled ? 4.0 : 0.0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      LabelRow(label: 'Fecha de orden:', value: orderDate),
-                      const SizedBox(height: 10.0),
-                      LabelRow(
-                          label: 'Fecha de despacho:', value: dispatchDate),
-                      const SizedBox(height: 10.0),
-                      LabelRow(label: 'No. Orden:', value: orderNumber),
-                      const SizedBox(height: 10.0),
-                      LabelRow(label: 'Planta:', value: selectedStore),
-                      const SizedBox(height: 10.0),
-                      Visibility(
-                          visible: false,
-                          child: LabelRow(
-                              label: 'storeId:', value: selectedStoreId)),
-                      LabelRow(label: 'Vehiculo:', value: selectedVehicle),
-                      const SizedBox(height: 10.0),
-                      Visibility(
-                          visible: false,
-                          child: LabelRow(
-                            label: 'VehicleId:',
-                            value: selectedVehicleId,
-                          )),
-                      LabelRow(label: 'Turno:', value: shiftTime),
-                      const SizedBox(height: 10.0),
-                      LabelRow(label: 'Super:', value: superMonto),
-                      const SizedBox(height: 10.0),
-                      LabelRow(label: 'Regular:', value: regularMonto),
-                      const SizedBox(height: 10.0),
-                      LabelRow(label: 'Diesel:', value: dieselMonto),
-                      const SizedBox(height: 10.0),
-                      LabelRow(
-                          label: 'Sub Total:',
-                          value: subTotal.toStringAsFixed(2)),
-                      const SizedBox(height: 10.0),
-                      LabelRow(
-                          label: 'Total IDP:',
-                          value: totalIDP.toStringAsFixed(2)),
-                      const SizedBox(height: 10.0),
-                      LabelRow(
-                          label: 'Total Factura:',
-                          value: totalFactura.toStringAsFixed(2)),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10.0),
-            Expanded(
-              child: GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10.0,
-                mainAxisSpacing: 10.0,
-                childAspectRatio: 3 / 2,
-                children: [
-                  GestureDetector(
-                    onDoubleTap: isDetailsCardEnabled
-                        ? _onDetailsCardDoubleTap
-                        : null, // Mostrar el diálogo con los campos de texto
-                    child: DetailsCard(
-                      icon: Icons.info,
-                      label: 'Detalles',
-                      iconSize: 48.0,
-                      isEnabled: isDetailsCardEnabled,
-                    ),
-                  ),
-                  GestureDetector(
-                    onDoubleTap: () {
-                      if (areFuelCardsEnabled) {
-                        _showFuelDialog('Super');
-                      }
-                    },
-                    child: FuelCard(
-                      icon: Icons.local_gas_station,
-                      label: 'Super',
-                      iconSize: 48.0,
-                      isEnabled: areFuelCardsEnabled,
-                    ),
-                  ),
-                  GestureDetector(
-                    onDoubleTap: () {
-                      if (areFuelCardsEnabled) {
-                        _showFuelDialog('Regular');
-                      }
-                    },
-                    child: FuelCard(
-                      icon: Icons.local_gas_station,
-                      label: 'Regular',
-                      iconSize: 48.0,
-                      isEnabled: areFuelCardsEnabled,
-                    ),
-                  ),
-                  GestureDetector(
-                    onDoubleTap: () {
-                      if (areFuelCardsEnabled) {
-                        _showFuelDialog('Diesel');
-                      }
-                    },
-                    child: FuelCard(
-                      icon: Icons.local_gas_station,
-                      label: 'Diesel',
-                      iconSize: 48.0,
-                      isEnabled: areFuelCardsEnabled,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+      body: FutureBuilder(
+        future: fuelController.fetchFuels(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error loading fuels'));
+          } else if (fuelController.fuels.isEmpty) {
+            return Center(child: Text('No fuels available'));
+          } else {
+            return OrderScreenBuilder(
+              isFirstCardEnabled: isFirstCardEnabled,
+              isDetailsCardEnabled: isDetailsCardEnabled,
+              areFuelCardsEnabled: areFuelCardsEnabled,
+              orderDate: orderDate,
+              dispatchDate: dispatchDate,
+              orderNumber: orderNumber,
+              selectedStore: selectedStore,
+              selectedStoreId: selectedStoreId,
+              selectedVehicle: selectedVehicle,
+              selectedVehicleId: selectedVehicleId,
+              shiftTime: shiftTime,
+              superValue: superValue,
+              regularValue: regularValue,
+              dieselValue: dieselValue,
+              subTotalValue: subTotalValue,
+              totalIDPValue: totalIDPValue,
+              totalFacturaValue: totalFacturaValue,
+              onFirstCardDoubleTap: _onFirstCardDoubleTap,
+              onDetailsCardDoubleTap: _onDetailsCardDoubleTap,
+              showFuelDialog: _showFuelDialog,
+            ).buildOrderScreen();
+          }
+        },
       ),
     );
   }
