@@ -48,8 +48,8 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   String superValue = '';
   String regularValue = '';
   String dieselValue = '';
-  String subTotalValue = '';
-  String totalIDPValue = '';
+  String subTotalValue = '0.0';
+  String totalIDPValue = '0.0';
   String totalFacturaValue = '';
 
   // Controladores para los campos de texto
@@ -104,7 +104,6 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
     TextEditingController totalController;
     TextEditingController totalIdpController;
     String originalMonto;
-    String originalIdp;
     String originalTotal;
     String originalTotalIdp;
 
@@ -142,7 +141,6 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       totalIdpController = superTotalIdpController;
 
       originalMonto = superValue;
-      originalIdp = superIdpController.text;
       originalTotal = superTotalController.text;
       originalTotalIdp = superTotalIdpController.text;
 
@@ -155,7 +153,6 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       totalIdpController = regularTotalIdpController;
 
       originalMonto = regularValue;
-      originalIdp = regularIdpController.text;
       originalTotal = regularTotalController.text;
       originalTotalIdp = regularTotalIdpController.text;
 
@@ -168,7 +165,6 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       totalIdpController = dieselTotalIdpController;
 
       originalMonto = dieselValue;
-      originalIdp = dieselIdpController.text;
       originalTotal = dieselTotalController.text;
       originalTotalIdp = dieselTotalIdpController.text;
 
@@ -194,22 +190,31 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       onSave: () {
         setState(() {
           double newMonto = double.tryParse(montoController.text) ?? 0.0;
-          double newTotalIdp = double.tryParse(totalIdpController.text) ?? 0.0;
           double newTotal = double.tryParse(totalController.text) ?? 0.0;
+          double newTotalIdp = double.tryParse(totalIdpController.text) ?? 0.0;
 
-          // Actualiza los valores en el primer card
-          if (fuelType == 'super') {
-            superValue = newMonto.toString();
-          } else if (fuelType == 'regular') {
-            regularValue = newMonto.toString();
-          } else if (fuelType == 'diesel') {
-            dieselValue = newMonto.toString();
+          // Verificar si hay cambios en los valores
+          if (newMonto.toStringAsFixed(2) == originalMonto &&
+              newTotal.toStringAsFixed(2) == originalTotal &&
+              newTotalIdp.toStringAsFixed(2) == originalTotalIdp) {
+            // Si los valores son los mismos, no hacer nada
+            return;
           }
 
-          totalIDPValue = (double.tryParse(totalIDPValue) ?? 0.0 + newTotalIdp)
+          // Sumar los nuevos valores a los valores actuales en los LabelRow del primer Card
+          totalIDPValue = (double.tryParse(totalIDPValue)! + newTotalIdp)
               .toStringAsFixed(2);
-          subTotalValue = (double.tryParse(subTotalValue) ?? 0.0 + newTotal)
-              .toStringAsFixed(2);
+          subTotalValue =
+              (double.tryParse(subTotalValue)! + newTotal).toStringAsFixed(2);
+
+          // Actualiza los valores individuales si es necesario
+          if (fuelType == 'super') {
+            superValue = newMonto.toStringAsFixed(2);
+          } else if (fuelType == 'regular') {
+            regularValue = newMonto.toStringAsFixed(2);
+          } else if (fuelType == 'diesel') {
+            dieselValue = newMonto.toStringAsFixed(2);
+          }
 
           // Recalcula el total de la factura
           _calculateTotals();
@@ -231,7 +236,7 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
           setState(() {
             isFirstCardEnabled = false;
             isDetailsCardEnabled = true;
-            areFuelCardsEnabled = true;
+            areFuelCardsEnabled = false;
           });
 
           Get.snackbar(
@@ -283,7 +288,8 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
           selectedVehicle = newVehicle;
           selectedVehicleId = newVehicleId;
           shiftTime = newShiftTime;
-          areFuelCardsEnabled = true;
+          areFuelCardsEnabled =
+              true; // Habilitar los Fuel Cards después de guardar
         });
       },
       purchaseOrderController: purchaseOrderController,
