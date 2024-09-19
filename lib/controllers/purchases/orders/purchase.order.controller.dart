@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
+import 'package:hand_held_shell/models/mappers/purchases/orders/create.purchase.order.reponse.dart';
 import 'package:hand_held_shell/models/mappers/purchases/orders/update.order.detail.dart';
 
 import 'package:hand_held_shell/services/purchases/orders/purchases.orders.service.dart';
+import 'package:hand_held_shell/services/services.exports.files.dart';
 
 class PurchaseOrderController extends GetxController {
   final PurchaseOrderService _purchaseOrderService = PurchaseOrderService();
@@ -9,6 +11,8 @@ class PurchaseOrderController extends GetxController {
   final RxBool isLoading = false.obs;
   Rx<UpdateOrderDetailResponse?> updateOrderDetailResponse =
       Rx<UpdateOrderDetailResponse?>(null);
+  Rx<CreateUpdatePurchaseOrderResponse?> createUpdatePurchaseOrderResponse =
+      Rx<CreateUpdatePurchaseOrderResponse?>(null);
 
   Future<void> createPurchaseOrder() async {
     try {
@@ -23,6 +27,61 @@ class PurchaseOrderController extends GetxController {
       }
     } catch (e) {
       Get.snackbar('Error', e.toString());
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> createOrUpdatePurchaseOrder({
+    required String orderNumber,
+    required DateTime orderDate,
+    required DateTime deliveryDate,
+    required num totalPurchaseOrder,
+    required num totalIDPPurchaseOrder,
+    required String storeId,
+    required String vehicleId,
+    required bool applied,
+    required String turn,
+    required int totalGallonRegular,
+    required int totalGallonSuper,
+    required int totalGallonDiesel,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      // Obtener el userName desde el almacenamiento seguro
+      final String? userName = await AuthService.getFirstName();
+
+      if (userName == null) {
+        throw Exception('Username is null');
+      }
+
+      final response = await _purchaseOrderService.createUpdatePurchaseOrder(
+        orderNumber: orderNumber,
+        orderDate: orderDate,
+        deliveryDate: deliveryDate,
+        totalPurchaseOrder: totalPurchaseOrder,
+        totalIDPPurchaseOrder: totalIDPPurchaseOrder,
+        storeId: storeId,
+        vehicleId: vehicleId,
+        applied: applied,
+        turn: turn,
+        totalGallonRegular: totalGallonRegular,
+        totalGallonSuper: totalGallonSuper,
+        totalGallonDiesel: totalGallonDiesel,
+        userName:
+            userName, // Usar el userName obtenido del almacenamiento seguro
+      );
+
+      if (response.ok) {
+        createUpdatePurchaseOrderResponse.value = response;
+        Get.snackbar(
+            'Success', 'PurchaseOrder created or updated successfully');
+      } else {
+        Get.snackbar('Error', response.message);
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to create or update PurchaseOrder: $e');
     } finally {
       isLoading.value = false;
     }

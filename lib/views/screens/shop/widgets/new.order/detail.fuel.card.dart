@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hand_held_shell/controllers/purchases/orders/purchase.order.controller.dart';
 
 class FuelDetailDialog {
@@ -63,12 +64,11 @@ class FuelDetailDialog {
               content: SingleChildScrollView(
                 child: Column(
                   children: [
-                    TextField(
+                    buildTextField(
+                      'Monto',
+                      inputType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       controller: montoController,
-                      decoration: const InputDecoration(
-                        labelText: 'Monto',
-                      ),
-                      keyboardType: TextInputType.number,
                       onChanged: (value) {
                         setState(() {
                           _calculateTotal();
@@ -76,12 +76,11 @@ class FuelDetailDialog {
                       },
                     ),
                     const SizedBox(height: 16.0),
-                    TextField(
+                    buildTextFieldWithMoreDecimals(
+                      'Precio',
+                      inputType:
+                          const TextInputType.numberWithOptions(decimal: true),
                       controller: precioController,
-                      decoration: const InputDecoration(
-                        labelText: 'Precio',
-                      ),
-                      keyboardType: TextInputType.number,
                       onChanged: (value) {
                         setState(() {
                           _calculateTotal();
@@ -194,6 +193,58 @@ class FuelDetailDialog {
           },
         );
       },
+    );
+  }
+
+  Widget buildTextField(String label,
+      {TextInputType inputType = TextInputType.text,
+      TextEditingController? controller,
+      bool readOnly = false,
+      required Function(String) onChanged}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        keyboardType: inputType,
+        inputFormatters: inputType ==
+                const TextInputType.numberWithOptions(decimal: true)
+            ? [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+              ]
+            : [],
+        readOnly: readOnly,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget buildTextFieldWithMoreDecimals(String label,
+      {TextInputType inputType = TextInputType.text,
+      TextEditingController? controller,
+      bool readOnly = false,
+      required Function(String) onChanged}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+        keyboardType: inputType,
+        inputFormatters: inputType ==
+                const TextInputType.numberWithOptions(decimal: true)
+            ? [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,8}')),
+              ]
+            : [],
+        readOnly: readOnly,
+        onChanged: onChanged,
+      ),
     );
   }
 }

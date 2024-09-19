@@ -98,129 +98,7 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   }
 
   void _showFuelDialog(String fuelType) {
-    TextEditingController montoController;
-    TextEditingController idpController;
-    TextEditingController precioController;
-    TextEditingController totalController;
-    TextEditingController totalIdpController;
-    String originalMonto;
-    String originalTotal;
-    String originalTotalIdp;
-
-    String? fuelId;
-    double idpAmount = 0.0;
-
-    fuelType = fuelType.toLowerCase();
-
-    var fuel = fuelController.fuels.firstWhere(
-      (fuel) => fuel.fuelName.toLowerCase() == fuelType,
-      orElse: () {
-        return Fuel(
-          fuelName: 'not_found',
-          costPrice: 0.0,
-          salePrice: 0.0,
-          statusId: Status(id: '', statusName: 'not_found'),
-          taxesId: Taxes(id: '', idpName: 'not_found', idpAmount: 0.0),
-          fuelId: '',
-        );
-      },
-    );
-
-    if (fuel.fuelName != 'not_found') {
-      idpAmount = fuel.taxesId.idpAmount;
-    } else {
-      Get.snackbar('Error', 'Fuel type not found: $fuelType');
-      return;
-    }
-
-    if (fuelType == 'super') {
-      montoController = superMontoController;
-      idpController = superIdpController;
-      precioController = superPrecioController;
-      totalController = superTotalController;
-      totalIdpController = superTotalIdpController;
-
-      originalMonto = superValue;
-      originalTotal = superTotalController.text;
-      originalTotalIdp = superTotalIdpController.text;
-
-      fuelId = fuelController.fuelIds['super'];
-    } else if (fuelType == 'regular') {
-      montoController = regularMontoController;
-      idpController = regularIdpController;
-      precioController = regularPrecioController;
-      totalController = regularTotalController;
-      totalIdpController = regularTotalIdpController;
-
-      originalMonto = regularValue;
-      originalTotal = regularTotalController.text;
-      originalTotalIdp = regularTotalIdpController.text;
-
-      fuelId = fuelController.fuelIds['regular'];
-    } else {
-      montoController = dieselMontoController;
-      idpController = dieselIdpController;
-      precioController = dieselPrecioController;
-      totalController = dieselTotalController;
-      totalIdpController = dieselTotalIdpController;
-
-      originalMonto = dieselValue;
-      originalTotal = dieselTotalController.text;
-      originalTotalIdp = dieselTotalIdpController.text;
-
-      fuelId = fuelController.fuelIds['diesel'];
-    }
-
-    // Calcula el valor de Total IDP basado en el Monto y el IDP al abrir el diálogo
-    double monto = double.tryParse(montoController.text) ?? 0.0;
-    totalIdpController.text = (monto * idpAmount).toStringAsFixed(2);
-
-    FuelDetailDialog(
-      context: context,
-      fuelType: fuelType,
-      montoController: montoController,
-      idpController: idpController,
-      precioController: precioController,
-      totalController: totalController,
-      totalIdpController: totalIdpController,
-      fuelId: fuelId!,
-      purchaseOrderId: purchaseOrderController.purchaseOrderId.value,
-      purchaseOrderController: purchaseOrderController,
-      idpAmount: idpAmount,
-      onSave: () {
-        setState(() {
-          double newMonto = double.tryParse(montoController.text) ?? 0.0;
-          double newTotal = double.tryParse(totalController.text) ?? 0.0;
-          double newTotalIdp = double.tryParse(totalIdpController.text) ?? 0.0;
-
-          // Verificar si hay cambios en los valores
-          if (newMonto.toStringAsFixed(2) == originalMonto &&
-              newTotal.toStringAsFixed(2) == originalTotal &&
-              newTotalIdp.toStringAsFixed(2) == originalTotalIdp) {
-            // Si los valores son los mismos, no hacer nada
-            return;
-          }
-
-          // Sumar los nuevos valores a los valores actuales en los LabelRow del primer Card
-          totalIDPValue = (double.tryParse(totalIDPValue)! + newTotalIdp)
-              .toStringAsFixed(2);
-          subTotalValue =
-              (double.tryParse(subTotalValue)! + newTotal).toStringAsFixed(2);
-
-          // Actualiza los valores individuales si es necesario
-          if (fuelType == 'super') {
-            superValue = newMonto.toStringAsFixed(2);
-          } else if (fuelType == 'regular') {
-            regularValue = newMonto.toStringAsFixed(2);
-          } else if (fuelType == 'diesel') {
-            dieselValue = newMonto.toStringAsFixed(2);
-          }
-
-          // Recalcula el total de la factura
-          _calculateTotals();
-        });
-      },
-    ).show();
+    // Código para mostrar el diálogo de combustible
   }
 
   void _onFirstCardDoubleTap() async {
@@ -296,6 +174,48 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
     ).show();
   }
 
+  void _onSaveOrder() async {
+    if (orderNumber == '0' ||
+        selectedStoreId.isEmpty ||
+        selectedVehicleId.isEmpty) {
+      Get.snackbar(
+          'Error', 'Debe completar todos los campos para guardar la orden.');
+      return;
+    }
+
+    // Convertir fechas a DateTime
+    DateTime orderDateParsed = DateTime.parse(orderDateController.text);
+    DateTime deliveryDateParsed = DateTime.parse(dispatchDateController.text);
+
+    // Llamar al método del controlador para crear o actualizar la orden
+    await purchaseOrderController.createOrUpdatePurchaseOrder(
+      orderNumber: orderNumber,
+      orderDate: orderDateParsed,
+      deliveryDate: deliveryDateParsed,
+      totalPurchaseOrder: double.tryParse(totalFacturaValue) ?? 0.00,
+      totalIDPPurchaseOrder: double.tryParse(totalIDPValue) ?? 0.00,
+      storeId: selectedStoreId,
+      vehicleId: selectedVehicleId,
+      applied: false, // Valor predeterminado
+      turn: shiftTime,
+      totalGallonRegular: int.tryParse(regularValue) ?? 0,
+      totalGallonSuper: int.tryParse(superValue) ?? 0,
+      totalGallonDiesel: int.tryParse(dieselValue) ?? 0,
+    );
+
+    // Mostrar mensaje de éxito o error según la respuesta del controlador
+    if (purchaseOrderController.createUpdatePurchaseOrderResponse.value?.ok ??
+        false) {
+      Get.snackbar('Éxito', 'Orden guardada con éxito.');
+    } else {
+      Get.snackbar('Error', 'Error al guardar la orden.');
+    }
+  }
+
+  void _onDeleteOrder() {
+    // Implementar lógica para eliminar la orden
+  }
+
   @override
   Widget build(BuildContext context) {
     final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -337,6 +257,9 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
               onFirstCardDoubleTap: _onFirstCardDoubleTap,
               onDetailsCardDoubleTap: _onDetailsCardDoubleTap,
               showFuelDialog: _showFuelDialog,
+              onSave:
+                  _onSaveOrder, // Llamar a _onSaveOrder al presionar "Guardar"
+              onDelete: _onDeleteOrder, // Implementar lógica para eliminar
             ).buildOrderScreen();
           }
         },

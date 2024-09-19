@@ -24,6 +24,8 @@ class OrderScreenBuilder {
   final VoidCallback onFirstCardDoubleTap;
   final VoidCallback onDetailsCardDoubleTap;
   final Function(String) showFuelDialog;
+  final VoidCallback onSave; // Callback para el botón de guardar
+  final VoidCallback onDelete; // Callback para el botón de eliminar
 
   OrderScreenBuilder({
     required this.isFirstCardEnabled,
@@ -46,6 +48,8 @@ class OrderScreenBuilder {
     required this.onFirstCardDoubleTap,
     required this.onDetailsCardDoubleTap,
     required this.showFuelDialog,
+    required this.onSave, // Requerido para guardar
+    required this.onDelete, // Requerido para eliminar
   });
 
   Widget buildOrderScreen() {
@@ -75,7 +79,11 @@ class OrderScreenBuilder {
                     const SizedBox(height: 10.0),
                     LabelRow(label: 'Planta:', value: selectedStore),
                     const SizedBox(height: 10.0),
+                    LabelRow(label: 'PlantaId:', value: selectedStoreId),
+                    const SizedBox(height: 10.0),
                     LabelRow(label: 'Vehiculo:', value: selectedVehicle),
+                    const SizedBox(height: 10.0),
+                    LabelRow(label: 'IdVehiculo:', value: selectedVehicleId),
                     const SizedBox(height: 10.0),
                     LabelRow(label: 'Turno:', value: shiftTime),
                     const SizedBox(height: 10.0),
@@ -154,6 +162,39 @@ class OrderScreenBuilder {
                 ),
               ],
             ),
+          ),
+          const SizedBox(height: 10.0),
+          // Botones para Guardar y Eliminar
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: onDelete,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 15.0),
+                  ),
+                  child: const Text(
+                    'Eliminar',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10.0),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: onSave,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(vertical: 15.0),
+                  ),
+                  child: const Text(
+                    'Guardar',
+                    style: TextStyle(fontSize: 16.0),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),

@@ -1,3 +1,5 @@
+export 'package:hand_held_shell/models/models/purchases/purchase.order.dart';
+
 export 'package:hand_held_shell/models/mappers/persons/stores/stores.list.response.dart';
 export 'package:hand_held_shell/models/models/persons/store.model.dart';
 
