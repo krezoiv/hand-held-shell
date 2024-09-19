@@ -50,6 +50,9 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   String dieselValue = '';
   String subTotalValue = '0.0';
   String totalIDPValue = '0.0';
+  String totalGallonRegular = '0.0';
+  String totalGallonSuper = '0.0';
+  String totalGallonDiesel = '0.0';
   String totalFacturaValue = '';
 
   // Controladores para los campos de texto
@@ -58,7 +61,7 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   final TextEditingController shiftTimeController = TextEditingController();
   final TextEditingController orderNumberController = TextEditingController();
 
-  // Controladores para los diálogos de Fuel
+  // Controladores para los diálogos de Fuel (Asegúrate de que estén definidos)
   final TextEditingController superMontoController = TextEditingController();
   final TextEditingController superIdpController = TextEditingController();
   final TextEditingController superPrecioController = TextEditingController();
@@ -90,6 +93,35 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
     fuelController.fetchFuelIds();
   }
 
+  @override
+  void dispose() {
+    // Liberar todos los controladores para evitar fugas de memoria
+    orderDateController.dispose();
+    dispatchDateController.dispose();
+    shiftTimeController.dispose();
+    orderNumberController.dispose();
+
+    superMontoController.dispose();
+    superIdpController.dispose();
+    superPrecioController.dispose();
+    superTotalController.dispose();
+    superTotalIdpController.dispose();
+
+    regularMontoController.dispose();
+    regularIdpController.dispose();
+    regularPrecioController.dispose();
+    regularTotalController.dispose();
+    regularTotalIdpController.dispose();
+
+    dieselMontoController.dispose();
+    dieselIdpController.dispose();
+    dieselPrecioController.dispose();
+    dieselTotalController.dispose();
+    dieselTotalIdpController.dispose();
+
+    super.dispose();
+  }
+
   void _calculateTotals() {
     double subTotal = double.tryParse(subTotalValue) ?? 0.0;
     double totalIDP = double.tryParse(totalIDPValue) ?? 0.0;
@@ -98,7 +130,141 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   }
 
   void _showFuelDialog(String fuelType) {
-    // Código para mostrar el diálogo de combustible
+    // Inicialización predeterminada de los controladores
+    TextEditingController montoController = TextEditingController();
+    TextEditingController idpController = TextEditingController();
+    TextEditingController precioController = TextEditingController();
+    TextEditingController totalController = TextEditingController();
+    TextEditingController totalIdpController = TextEditingController();
+    String originalMonto = '';
+    String originalTotal = '';
+    String originalTotalIdp = '';
+
+    String? fuelId;
+    double idpAmount = 0.0;
+
+    fuelType = fuelType.toLowerCase();
+
+    var fuel = fuelController.fuels.firstWhere(
+      (fuel) => fuel.fuelName.toLowerCase() == fuelType,
+      orElse: () {
+        return Fuel(
+          fuelName: 'not_found',
+          costPrice: 0.0,
+          salePrice: 0.0,
+          statusId: Status(id: '', statusName: 'not_found'),
+          taxesId: Taxes(id: '', idpName: 'not_found', idpAmount: 0.0),
+          fuelId: '',
+        );
+      },
+    );
+
+    if (fuel.fuelName != 'not_found') {
+      idpAmount = fuel.taxesId.idpAmount;
+    } else {
+      Get.snackbar('Error', 'Fuel type not found: $fuelType');
+      return;
+    }
+
+    if (fuelType == 'super') {
+      montoController = superMontoController;
+      idpController = superIdpController;
+      precioController = superPrecioController;
+      totalController = superTotalController;
+      totalIdpController = superTotalIdpController;
+
+      originalMonto = superValue;
+      originalTotal = superTotalController.text;
+      originalTotalIdp = superTotalIdpController.text;
+
+      fuelId = fuelController.fuelIds['super'];
+    } else if (fuelType == 'regular') {
+      montoController = regularMontoController;
+      idpController = regularIdpController;
+      precioController = regularPrecioController;
+      totalController = regularTotalController;
+      totalIdpController = regularTotalIdpController;
+
+      originalMonto = regularValue;
+      originalTotal = regularTotalController.text;
+      originalTotalIdp = regularTotalIdpController.text;
+
+      fuelId = fuelController.fuelIds['regular'];
+    } else if (fuelType == 'diesel') {
+      montoController = dieselMontoController;
+      idpController = dieselIdpController;
+      precioController = dieselPrecioController;
+      totalController = dieselTotalController;
+      totalIdpController = dieselTotalIdpController;
+
+      originalMonto = dieselValue;
+      originalTotal = dieselTotalController.text;
+      originalTotalIdp = dieselTotalIdpController.text;
+
+      fuelId = fuelController.fuelIds['diesel'];
+    }
+
+    // Calcula el valor de Total IDP basado en el Monto y el IDP al abrir el diálogo
+    double monto = double.tryParse(montoController.text) ?? 0.0;
+    totalIdpController.text = (monto * idpAmount).toStringAsFixed(2);
+
+    FuelDetailDialog(
+      context: context,
+      fuelType: fuelType,
+      montoController: montoController,
+      idpController: idpController,
+      precioController: precioController,
+      totalController: totalController,
+      totalIdpController: totalIdpController,
+      fuelId: fuelId!,
+      purchaseOrderId: purchaseOrderController.purchaseOrderId.value,
+      purchaseOrderController: purchaseOrderController,
+      idpAmount: idpAmount,
+      onSave: () {
+        setState(() {
+          double newMonto = double.tryParse(montoController.text) ?? 0.0;
+          double newTotal = double.tryParse(totalController.text) ?? 0.0;
+          double newTotalIdp = double.tryParse(totalIdpController.text) ?? 0.0;
+
+          double previousTotalIdp = double.tryParse(originalTotalIdp) ?? 0.0;
+          double previousTotal = double.tryParse(originalTotal) ?? 0.0;
+
+          double currentTotalIdp = double.tryParse(totalIDPValue) ?? 0.0;
+          double currentSubTotal = double.tryParse(subTotalValue) ?? 0.0;
+
+          // Verificar si hay cambios en los valores
+          if (newMonto.toStringAsFixed(2) == originalMonto &&
+              newTotal.toStringAsFixed(2) == originalTotal &&
+              newTotalIdp.toStringAsFixed(2) == originalTotalIdp) {
+            // Si los valores son los mismos, no hacer nada
+            return;
+          }
+
+          // Restar los valores originales de los campos de Total IDP y Sub Total
+          totalIDPValue =
+              (currentTotalIdp - previousTotalIdp).toStringAsFixed(2);
+          subTotalValue = (currentSubTotal - previousTotal).toStringAsFixed(2);
+
+          // Sumar los nuevos valores actualizados
+          totalIDPValue = (double.tryParse(totalIDPValue)! + newTotalIdp)
+              .toStringAsFixed(2);
+          subTotalValue =
+              (double.tryParse(subTotalValue)! + newTotal).toStringAsFixed(2);
+
+          // Actualiza los valores individuales si es necesario
+          if (fuelType == 'super') {
+            superValue = newMonto.toStringAsFixed(0);
+          } else if (fuelType == 'regular') {
+            regularValue = newMonto.toStringAsFixed(0);
+          } else if (fuelType == 'diesel') {
+            dieselValue = newMonto.toStringAsFixed(0);
+          }
+
+          // Recalcula el total de la factura
+          _calculateTotals();
+        });
+      },
+    ).show();
   }
 
   void _onFirstCardDoubleTap() async {
@@ -174,46 +340,49 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
     ).show();
   }
 
-  void _onSaveOrder() async {
-    if (orderNumber == '0' ||
-        selectedStoreId.isEmpty ||
-        selectedVehicleId.isEmpty) {
-      Get.snackbar(
-          'Error', 'Debe completar todos los campos para guardar la orden.');
-      return;
+  String convertDateFormat(String date) {
+    // Separar el día, mes y año
+    List<String> parts = date.split('/');
+    if (parts.length == 3) {
+      // Retornar en el formato esperado por DateTime.parse (YYYY-MM-DD)
+      return '${parts[2]}-${parts[1]}-${parts[0]}';
     }
-
-    // Convertir fechas a DateTime
-    DateTime orderDateParsed = DateTime.parse(orderDateController.text);
-    DateTime deliveryDateParsed = DateTime.parse(dispatchDateController.text);
-
-    // Llamar al método del controlador para crear o actualizar la orden
-    await purchaseOrderController.createOrUpdatePurchaseOrder(
-      orderNumber: orderNumber,
-      orderDate: orderDateParsed,
-      deliveryDate: deliveryDateParsed,
-      totalPurchaseOrder: double.tryParse(totalFacturaValue) ?? 0.00,
-      totalIDPPurchaseOrder: double.tryParse(totalIDPValue) ?? 0.00,
-      storeId: selectedStoreId,
-      vehicleId: selectedVehicleId,
-      applied: false, // Valor predeterminado
-      turn: shiftTime,
-      totalGallonRegular: int.tryParse(regularValue) ?? 0,
-      totalGallonSuper: int.tryParse(superValue) ?? 0,
-      totalGallonDiesel: int.tryParse(dieselValue) ?? 0,
-    );
-
-    // Mostrar mensaje de éxito o error según la respuesta del controlador
-    if (purchaseOrderController.createUpdatePurchaseOrderResponse.value?.ok ??
-        false) {
-      Get.snackbar('Éxito', 'Orden guardada con éxito.');
-    } else {
-      Get.snackbar('Error', 'Error al guardar la orden.');
-    }
+    // Retornar la fecha original si no tiene el formato esperado
+    return date;
   }
 
-  void _onDeleteOrder() {
-    // Implementar lógica para eliminar la orden
+  Future<void> _onSaveButtonPressed() async {
+    try {
+      await purchaseOrderController.createOrUpdatePurchaseOrder(
+        orderNumber: orderNumberController.text,
+        orderDate: DateTime.parse(convertDateFormat(orderDateController.text)),
+        deliveryDate:
+            DateTime.parse(convertDateFormat(dispatchDateController.text)),
+        totalPurchaseOrder: double.tryParse(subTotalValue) ?? 0.0,
+        totalIDPPurchaseOrder: double.tryParse(totalIDPValue) ?? 0.0,
+        storeId: selectedStoreId,
+        vehicleId: selectedVehicleId,
+        applied: true,
+        turn: shiftTime,
+        totalGallonRegular: int.tryParse(regularValue) ?? 0,
+        totalGallonSuper: int.tryParse(superValue) ?? 0,
+        totalGallonDiesel: int.tryParse(dieselValue) ?? 0,
+      );
+      // Mensaje de éxito si la operación es exitosa
+      Get.snackbar('Éxito', 'Orden guardada con éxito');
+    } catch (e) {
+      // Imprime el error completo para más detalles
+      print('Failed to save order: $e');
+
+      // Verifica si la respuesta es un documento HTML (indicando un error del servidor)
+      if (e.toString().contains('<!DOCTYPE html>')) {
+        Get.snackbar(
+            'Error', 'Error del servidor: Verifica la configuración de la API');
+      } else {
+        // Otro tipo de error (posiblemente de formato)
+        Get.snackbar('Error', 'Error al guardar la orden: $e');
+      }
+    }
   }
 
   @override
@@ -257,9 +426,11 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
               onFirstCardDoubleTap: _onFirstCardDoubleTap,
               onDetailsCardDoubleTap: _onDetailsCardDoubleTap,
               showFuelDialog: _showFuelDialog,
-              onSave:
-                  _onSaveOrder, // Llamar a _onSaveOrder al presionar "Guardar"
-              onDelete: _onDeleteOrder, // Implementar lógica para eliminar
+              onSave: _onSaveButtonPressed,
+              onDelete: () {
+                // Implementa aquí la lógica para eliminar la orden
+                // Puedes agregar un método en el controlador de la orden para eliminar
+              },
             ).buildOrderScreen();
           }
         },

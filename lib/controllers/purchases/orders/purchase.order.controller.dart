@@ -42,9 +42,9 @@ class PurchaseOrderController extends GetxController {
     required String vehicleId,
     required bool applied,
     required String turn,
-    required int totalGallonRegular,
-    required int totalGallonSuper,
-    required int totalGallonDiesel,
+    required num totalGallonRegular,
+    required num totalGallonSuper,
+    required num totalGallonDiesel,
   }) async {
     try {
       isLoading.value = true;

@@ -83,7 +83,7 @@ class OrderScreenBuilder {
                     const SizedBox(height: 10.0),
                     LabelRow(label: 'Vehiculo:', value: selectedVehicle),
                     const SizedBox(height: 10.0),
-                    LabelRow(label: 'IdVehiculo:', value: selectedVehicleId),
+                    LabelRow(label: 'VehiculoId:', value: selectedVehicleId),
                     const SizedBox(height: 10.0),
                     LabelRow(label: 'Turno:', value: shiftTime),
                     const SizedBox(height: 10.0),
@@ -124,6 +124,8 @@ class OrderScreenBuilder {
                 GestureDetector(
                   onDoubleTap: () {
                     if (areFuelCardsEnabled) {
+                      print(
+                          'Double Tap Super'); // Agregar mensaje de depuración
                       showFuelDialog('Super');
                     }
                   },
@@ -137,6 +139,8 @@ class OrderScreenBuilder {
                 GestureDetector(
                   onDoubleTap: () {
                     if (areFuelCardsEnabled) {
+                      print(
+                          'Double Tap Regular'); // Agregar mensaje de depuración
                       showFuelDialog('Regular');
                     }
                   },
@@ -150,6 +154,8 @@ class OrderScreenBuilder {
                 GestureDetector(
                   onDoubleTap: () {
                     if (areFuelCardsEnabled) {
+                      print(
+                          'Double Tap Diesel'); // Agregar mensaje de depuración
                       showFuelDialog('Diesel');
                     }
                   },

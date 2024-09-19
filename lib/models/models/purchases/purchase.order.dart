@@ -4,9 +4,9 @@ class PurchaseOrder {
   DateTime orderDate;
   String orderNumber;
   String storeId;
-  int totalGallonDiesel;
-  int totalGallonRegular;
-  int totalGallonSuper;
+  num totalGallonDiesel;
+  num totalGallonRegular;
+  num totalGallonSuper;
   num totalIdpPurchaseOrder;
   num totalPurchaseOrder;
   String turn;

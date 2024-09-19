@@ -45,16 +45,16 @@ class PurchaseOrderService {
     required String vehicleId,
     required bool applied,
     required String turn,
-    required int totalGallonRegular,
-    required int totalGallonSuper,
-    required int totalGallonDiesel,
+    required num totalGallonRegular,
+    required num totalGallonSuper,
+    required num totalGallonDiesel,
     required String userName,
   }) async {
     try {
       final String? token = await AuthService.getToken();
       if (token == null) throw Exception('Token is null');
 
-      final response = await http.post(
+      final response = await http.put(
         Uri.parse(PurchasesOrderApi.createUpdatePurchaseOrder()),
         headers: {
           'Content-Type': 'application/json',
