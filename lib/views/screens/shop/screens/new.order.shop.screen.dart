@@ -30,6 +30,8 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
       Get.put(PurchaseOrderController());
   final FuelController fuelController = Get.put(FuelController());
 
+  bool areButtonsEnabled = false; // Inicialmente deshabilitado
+
   bool isFirstCardEnabled = true;
   bool isDetailsCardEnabled = false;
   bool areFuelCardsEnabled = false;
@@ -120,6 +122,12 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
     dieselTotalIdpController.dispose();
 
     super.dispose();
+  }
+
+  void _enableButtons() {
+    setState(() {
+      areButtonsEnabled = true; // Habilitar los botones
+    });
   }
 
   void resetOrderState() {
@@ -389,6 +397,8 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
           areFuelCardsEnabled =
               true; // Habilitar los Fuel Cards después de guardar
         });
+
+        _enableButtons(); // Llamar a esta función para habilitar los botones
       },
       purchaseOrderController: purchaseOrderController,
     ).show();
@@ -473,6 +483,8 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
               isFirstCardEnabled: isFirstCardEnabled,
               isDetailsCardEnabled: isDetailsCardEnabled,
               areFuelCardsEnabled: areFuelCardsEnabled,
+              areButtonsEnabled:
+                  areButtonsEnabled, // Controlar el estado de los botones
               orderDate: orderDate,
               dispatchDate: dispatchDate,
               orderNumber: orderNumber,

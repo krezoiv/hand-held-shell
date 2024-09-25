@@ -7,6 +7,7 @@ class OrderScreenBuilder {
   final bool isFirstCardEnabled;
   final bool isDetailsCardEnabled;
   final bool areFuelCardsEnabled;
+  final bool areButtonsEnabled; // Nueva propiedad para controlar los botones
   final String orderDate;
   final String dispatchDate;
   final String orderNumber;
@@ -31,6 +32,7 @@ class OrderScreenBuilder {
     required this.isFirstCardEnabled,
     required this.isDetailsCardEnabled,
     required this.areFuelCardsEnabled,
+    required this.areButtonsEnabled, // Nueva propiedad
     required this.orderDate,
     required this.dispatchDate,
     required this.orderNumber,
@@ -175,7 +177,9 @@ class OrderScreenBuilder {
             children: [
               Expanded(
                 child: ElevatedButton(
-                  onPressed: onDelete,
+                  onPressed: areButtonsEnabled
+                      ? onDelete
+                      : null, // Habilitar/deshabilitar
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.red,
                     padding: const EdgeInsets.symmetric(vertical: 15.0),
@@ -189,7 +193,9 @@ class OrderScreenBuilder {
               const SizedBox(width: 10.0),
               Expanded(
                 child: ElevatedButton(
-                  onPressed: onSave,
+                  onPressed: areButtonsEnabled
+                      ? onSave
+                      : null, // Habilitar/deshabilitar
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     padding: const EdgeInsets.symmetric(vertical: 15.0),
