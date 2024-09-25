@@ -122,6 +122,60 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
     super.dispose();
   }
 
+  void resetOrderState() {
+    setState(() {
+      // Restablecer los valores del primer Card
+      orderDate = 'dd/mm/yyyy';
+      dispatchDate = 'dd/mm/yyyy';
+      orderNumber = '0';
+      selectedStore = 'Planta';
+      selectedStoreId = '';
+      selectedVehicle = 'Camión';
+      selectedVehicleId = '';
+      shiftTime = '00:00 am';
+
+      // Restablecer los valores de los montos y totales
+      superValue = '';
+      regularValue = '';
+      dieselValue = '';
+      subTotalValue = '0.0';
+      totalIDPValue = '0.0';
+      totalGallonRegular = '0.0';
+      totalGallonSuper = '0.0';
+      totalGallonDiesel = '0.0';
+      totalFacturaValue = '';
+
+      // Limpiar los controladores de texto
+      orderDateController.clear();
+      dispatchDateController.clear();
+      shiftTimeController.clear();
+      orderNumberController.clear();
+
+      superMontoController.clear();
+      superIdpController.clear();
+      superPrecioController.clear();
+      superTotalController.clear();
+      superTotalIdpController.clear();
+
+      regularMontoController.clear();
+      regularIdpController.clear();
+      regularPrecioController.clear();
+      regularTotalController.clear();
+      regularTotalIdpController.clear();
+
+      dieselMontoController.clear();
+      dieselIdpController.clear();
+      dieselPrecioController.clear();
+      dieselTotalController.clear();
+      dieselTotalIdpController.clear();
+
+      // Reiniciar los estados de los cards
+      isFirstCardEnabled = true;
+      isDetailsCardEnabled = false;
+      areFuelCardsEnabled = false;
+    });
+  }
+
   void _calculateTotals() {
     double subTotal = double.tryParse(subTotalValue) ?? 0.0;
     double totalIDP = double.tryParse(totalIDPValue) ?? 0.0;
@@ -352,37 +406,47 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
   }
 
   Future<void> _onSaveButtonPressed() async {
-    try {
-      await purchaseOrderController.createOrUpdatePurchaseOrder(
-        orderNumber: orderNumberController.text,
-        orderDate: DateTime.parse(convertDateFormat(orderDateController.text)),
-        deliveryDate:
-            DateTime.parse(convertDateFormat(dispatchDateController.text)),
-        totalPurchaseOrder: double.tryParse(subTotalValue) ?? 0.0,
-        totalIDPPurchaseOrder: double.tryParse(totalIDPValue) ?? 0.0,
-        storeId: selectedStoreId,
-        vehicleId: selectedVehicleId,
-        applied: true,
-        turn: shiftTime,
-        totalGallonRegular: int.tryParse(regularValue) ?? 0,
-        totalGallonSuper: int.tryParse(superValue) ?? 0,
-        totalGallonDiesel: int.tryParse(dieselValue) ?? 0,
-      );
-      // Mensaje de éxito si la operación es exitosa
-      Get.snackbar('Éxito', 'Orden guardada con éxito');
-    } catch (e) {
-      // Imprime el error completo para más detalles
-      print('Failed to save order: $e');
+    showConfirmationDialog(
+      title: 'Confirmación',
+      message: '¿Estás seguro de que deseas guardar la orden?',
+      confirmText: 'Guardar',
+      cancelText: 'Cancelar',
+      onConfirm: () async {
+        try {
+          await purchaseOrderController.createOrUpdatePurchaseOrder(
+            orderNumber: orderNumberController.text,
+            orderDate:
+                DateTime.parse(convertDateFormat(orderDateController.text)),
+            deliveryDate:
+                DateTime.parse(convertDateFormat(dispatchDateController.text)),
+            totalPurchaseOrder: double.tryParse(subTotalValue) ?? 0.0,
+            totalIDPPurchaseOrder: double.tryParse(totalIDPValue) ?? 0.0,
+            storeId: selectedStoreId,
+            vehicleId: selectedVehicleId,
+            applied: true,
+            turn: shiftTime,
+            totalGallonRegular: int.tryParse(regularValue) ?? 0,
+            totalGallonSuper: int.tryParse(superValue) ?? 0,
+            totalGallonDiesel: int.tryParse(dieselValue) ?? 0,
+          );
 
-      // Verifica si la respuesta es un documento HTML (indicando un error del servidor)
-      if (e.toString().contains('<!DOCTYPE html>')) {
-        Get.snackbar(
-            'Error', 'Error del servidor: Verifica la configuración de la API');
-      } else {
-        // Otro tipo de error (posiblemente de formato)
-        Get.snackbar('Error', 'Error al guardar la orden: $e');
-      }
-    }
+          // Cierra el diálogo de confirmación después de guardar
+          Navigator.of(context).pop();
+
+          Get.snackbar('Éxito', 'Orden guardada exitosamente',
+              snackPosition: SnackPosition.BOTTOM);
+
+          // Resetea el estado después de guardar
+          resetOrderState();
+        } catch (e) {
+          Get.snackbar('Error', 'No se pudo guardar la orden: $e',
+              snackPosition: SnackPosition.BOTTOM);
+        }
+      },
+      onCancel: () {
+        // Aquí puedes agregar alguna acción al cancelar, si es necesario.
+      },
+    );
   }
 
   @override
