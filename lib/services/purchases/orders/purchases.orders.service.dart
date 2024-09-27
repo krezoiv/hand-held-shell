@@ -5,6 +5,7 @@ import 'package:hand_held_shell/models/mappers/purchases/orders/create.purchase.
 import 'package:hand_held_shell/models/mappers/purchases/orders/create.purchase.order.reponse.dart';
 import 'package:hand_held_shell/models/mappers/purchases/orders/create.purchase.order.response.dart';
 import 'package:hand_held_shell/models/mappers/purchases/orders/update.order.detail.dart';
+import 'package:hand_held_shell/models/models/purchases/purchase.order.dart';
 
 import 'package:hand_held_shell/services/services.exports.files.dart';
 import 'package:http/http.dart' as http;
@@ -155,6 +156,40 @@ class PurchaseOrderService {
       }
     } catch (e) {
       throw Exception('Error updating DetailPurchaseOrder: $e');
+    }
+  }
+
+// Método para buscar PurchaseOrder por número de orden
+  Future<PurchaseOrder?> getPurchaseOrderByOrderNumber(
+      String orderNumber) async {
+    try {
+      final String? token = await AuthService.getToken();
+      if (token == null) throw Exception('Token is null');
+
+      final response = await http.get(
+        Uri.parse(
+            PurchasesOrderApi.getPurchaseOrderByOrderNumberApi(orderNumber)),
+        headers: {
+          'Content-Type': 'application/json',
+          'x-token': token,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        if (responseData['ok'] == true) {
+          return PurchaseOrder.fromJson(responseData['purchaseOrder']);
+        } else {
+          throw Exception(responseData['message']);
+        }
+      } else if (response.statusCode == 404) {
+        throw Exception(
+            'No se encontró ninguna orden de compra con el número de orden: $orderNumber');
+      } else {
+        throw Exception('Error: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      throw Exception('Error getting PurchaseOrder by orderNumber: $e');
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:hand_held_shell/models/mappers/purchases/orders/create.purchase.order.reponse.dart';
 import 'package:hand_held_shell/models/mappers/purchases/orders/update.order.detail.dart';
+import 'package:hand_held_shell/models/models/purchases/purchase.order.dart';
 
 import 'package:hand_held_shell/services/purchases/orders/purchases.orders.service.dart';
 import 'package:hand_held_shell/services/services.exports.files.dart';
@@ -13,6 +14,7 @@ class PurchaseOrderController extends GetxController {
       Rx<UpdateOrderDetailResponse?>(null);
   Rx<CreateUpdatePurchaseOrderResponse?> createUpdatePurchaseOrderResponse =
       Rx<CreateUpdatePurchaseOrderResponse?>(null);
+  final Rx<PurchaseOrder?> purchaseOrder = Rx<PurchaseOrder?>(null);
 
   Future<void> createPurchaseOrder() async {
     try {
@@ -132,6 +134,25 @@ class PurchaseOrderController extends GetxController {
       }
     } catch (e) {
       Get.snackbar('Error', 'Failed to update Detail Purchase Order: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> getPurchaseOrderByOrderNumber(String orderNumber) async {
+    try {
+      isLoading.value = true;
+      final PurchaseOrder? order = await _purchaseOrderService
+          .getPurchaseOrderByOrderNumber(orderNumber);
+      if (order != null) {
+        purchaseOrder.value = order;
+        Get.snackbar('Success', 'PurchaseOrder found successfully');
+      } else {
+        Get.snackbar('Error',
+            'No se encontró ninguna orden de compra con el número de orden: $orderNumber');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to get PurchaseOrder: $e');
     } finally {
       isLoading.value = false;
     }
