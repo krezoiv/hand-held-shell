@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hand_held_shell/controllers/accounting/banks/bank.controller.dart';
 import 'package:hand_held_shell/controllers/purchases/orders/purchase.order.controller.dart';
 import 'package:hand_held_shell/shared/widgets/custom.bottom.navigation.dart';
 import 'package:hand_held_shell/views/screens/shop/widgets/side.menu.shop.dart';
 
 class NewShopsScreen extends StatefulWidget {
-  const NewShopsScreen({super.key});
+  NewShopsScreen({super.key});
+
+  final NewShopsController controller = Get.put(NewShopsController());
 
   @override
   _NewShopsScreenState createState() => _NewShopsScreenState();
@@ -190,6 +193,12 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
                                         'No encontrado',
                                   )),
                               Obx(() => _buildDetailRow(
+                                    'purchaseOrderID',
+                                    _purchaseOrderController.purchaseOrder.value
+                                            ?.purchaseOrderId ??
+                                        'No encontrado',
+                                  )),
+                              Obx(() => _buildDetailRow(
                                     'Fecha de orden',
                                     _purchaseOrderController
                                                 .purchaseOrder.value !=
@@ -219,13 +228,26 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
                       ],
                     ),
                     ExpansionTile(
-                      title: const Text(
-                        'Detalle Factura',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.indigoAccent, // Color del título
-                        ),
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Detalle Factura',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.indigoAccent,
+                            ),
+                          ),
+                          Obx(
+                            () => widget.controller.isFacturaComplete
+                                ? const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                  )
+                                : const SizedBox(),
+                          ),
+                        ],
                       ),
                       children: [
                         Padding(
@@ -233,24 +255,47 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildDetailRow(
-                                  'Fecha de vencimiento', '25/12/2024'),
-                              _buildDetailRow('Serie de factura', 'A001'),
-                              _buildDetailRow('No. de factura', 'INV-12345'),
-                              _buildDetailRow('Forma de pago', 'Transferencia'),
+                              // Muestra la fecha de vencimiento desde el controlador
+                              Obx(() => _buildDetailRow('Fecha de vencimiento',
+                                  widget.controller.fechaVencimiento.value)),
+
+                              // Muestra la serie de factura desde el controlador
+                              Obx(() => _buildDetailRow('Serie de factura',
+                                  widget.controller.serieFactura.value)),
+
+                              // Muestra el número de factura desde el controlador
+                              Obx(() => _buildDetailRow('No. de factura',
+                                  widget.controller.numeroFactura.value)),
+
+                              // Muestra la forma de pago desde el controlador
+                              Obx(() => _buildDetailRow('Forma de pago',
+                                  widget.controller.formaDePago.value)),
                             ],
                           ),
                         ),
                       ],
                     ),
                     ExpansionTile(
-                      title: const Text(
-                        'Detalle Pago',
-                        style: TextStyle(
-                          fontSize: 18.0,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.indigoAccent, // Color del título
-                        ),
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Detalle Pago',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.indigoAccent,
+                            ),
+                          ),
+                          Obx(
+                            () => widget.controller.isCuponesComplete
+                                ? const Icon(
+                                    Icons.check_circle,
+                                    color: Colors.green,
+                                  )
+                                : const SizedBox(),
+                          ),
+                        ],
                       ),
                       children: [
                         Padding(
@@ -258,12 +303,25 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildDetailRow('No. de Cheque', '1234567890'),
-                              _buildDetailRow('Banco', 'Banco XYZ'),
-                              _buildDetailRow('Monto Cheque', '\$500.00'),
-                              _buildDetailRow(
-                                  'No. documento cupones', 'CUP-2024'),
-                              _buildDetailRow('Monto de cupones', '\$50.00'),
+                              // Muestra el número de cheque desde el controlador
+                              Obx(() => _buildDetailRow('No. de Cheque',
+                                  widget.controller.numeroCheque.value)),
+
+                              // Muestra el banco desde el controlador
+                              Obx(() => _buildDetailRow(
+                                  'Banco', widget.controller.banco.value)),
+
+                              // Muestra el monto de cheque desde el controlador
+                              Obx(() => _buildDetailRow('Monto Cheque',
+                                  widget.controller.montoCheque.value)),
+
+                              // Muestra el número de documento de cupones desde el controlador
+                              Obx(() => _buildDetailRow('No. documento cupones',
+                                  widget.controller.documentoCupones.value)),
+
+                              // Muestra el monto de cupones desde el controlador
+                              Obx(() => _buildDetailRow('Monto de cupones',
+                                  widget.controller.montoCupones.value)),
                             ],
                           ),
                         ),
@@ -381,55 +439,56 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
   }
 
   void _showFacturaDialog() {
-    TextEditingController serieController = TextEditingController();
-    TextEditingController numeroFacturaController = TextEditingController();
+    TextEditingController serieController =
+        TextEditingController(text: widget.controller.serieFactura.value);
+    TextEditingController numeroFacturaController =
+        TextEditingController(text: widget.controller.numeroFactura.value);
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Detalles de Factura'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: serieController,
-                    decoration:
-                        const InputDecoration(labelText: 'Serie de factura'),
-                  ),
-                  TextField(
-                    controller: numeroFacturaController,
-                    decoration:
-                        const InputDecoration(labelText: 'No. de Factura'),
-                  ),
-                ],
+        return AlertDialog(
+          title: const Text('Detalles de Factura'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: serieController,
+                decoration:
+                    const InputDecoration(labelText: 'Serie de factura'),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Cancelar'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Guardar la información de la factura
-                    Navigator.of(context).pop();
-                  },
-                  child: const Text('Guardar'),
-                ),
-              ],
-            );
-          },
+              TextField(
+                controller: numeroFacturaController,
+                decoration: const InputDecoration(labelText: 'No. de Factura'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  widget.controller.updateFacturaDetails(
+                      serieController.text, numeroFacturaController.text);
+                });
+                Navigator.of(context).pop();
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
         );
       },
     );
   }
 
   void _showPagosDialog() {
-    TextEditingController fechaVencimientoController = TextEditingController();
+    TextEditingController fechaVencimientoController =
+        TextEditingController(text: widget.controller.fechaVencimiento.value);
 
     showDialog(
       context: context,
@@ -491,7 +550,13 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
                 ),
                 TextButton(
                   onPressed: () {
-                    // Guardar la información del pago
+                    // Guardar la información del pago en el controlador
+                    setState(() {
+                      widget.controller
+                          .updateFormaDePago(isCredit ? 'Crédito' : 'Contado');
+                      widget.controller.updateFechaVencimiento(
+                          fechaVencimientoController.text);
+                    });
                     Navigator.of(context).pop();
                   },
                   child: const Text('Guardar'),
@@ -505,9 +570,19 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
   }
 
   void _showBancosDialog() {
-    TextEditingController numeroChequeController = TextEditingController();
-    TextEditingController montoChequeController = TextEditingController();
-    String selectedBanco = 'Banco A';
+    // Controladores de texto
+    TextEditingController numeroChequeController =
+        TextEditingController(text: widget.controller.numeroCheque.value);
+    TextEditingController montoChequeController =
+        TextEditingController(text: widget.controller.montoCheque.value);
+
+    // Controlador de bancos (BankController)
+    final BankController bankController = Get.put(BankController());
+
+    // Valor inicial del banco seleccionado
+    String selectedBanco = widget.controller.banco.value.isNotEmpty
+        ? widget.controller.banco.value
+        : '';
 
     showDialog(
       context: context,
@@ -519,32 +594,58 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  DropdownButtonFormField<String>(
-                    value: selectedBanco,
-                    decoration: const InputDecoration(labelText: 'Banco'),
-                    items: const [
-                      DropdownMenuItem(
-                          value: 'Banco A', child: Text('Banco A')),
-                      DropdownMenuItem(
-                          value: 'Banco B', child: Text('Banco B')),
-                      DropdownMenuItem(
-                          value: 'Banco C', child: Text('Banco C')),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedBanco = value!;
-                      });
-                    },
-                  ),
+                  // Obx para observar la lista de bancos mientras se carga
+                  Obx(() {
+                    if (bankController.isLoading.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (bankController.bankList.isEmpty) {
+                      return const Text("No se encontraron bancos.");
+                    } else {
+                      // Asegurarse de que el valor seleccionado esté presente en la lista de bancos
+                      if (!bankController.bankList
+                          .any((bank) => bank.bankName == selectedBanco)) {
+                        selectedBanco =
+                            ''; // Opción predeterminada si no coincide
+                      }
+
+                      return DropdownButtonFormField<String>(
+                        value: selectedBanco.isNotEmpty ? selectedBanco : null,
+                        decoration: const InputDecoration(labelText: 'Banco'),
+                        items: [
+                          const DropdownMenuItem<String>(
+                            value: '',
+                            child: Text('Selecciona un banco'),
+                          ),
+                          ...bankController.bankList.map((bank) {
+                            return DropdownMenuItem<String>(
+                              value: bank.bankName,
+                              child: Text(bank.bankName),
+                            );
+                          }),
+                        ],
+                        onChanged: (value) {
+                          setState(() {
+                            selectedBanco = value ?? '';
+                          });
+                        },
+                      );
+                    }
+                  }),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: numeroChequeController,
-                    decoration:
-                        const InputDecoration(labelText: 'No. de Cheque'),
+                    decoration: const InputDecoration(
+                      labelText: 'No. de Cheque',
+                      border: OutlineInputBorder(),
+                    ),
                   ),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: montoChequeController,
-                    decoration:
-                        const InputDecoration(labelText: 'Monto de Cheque'),
+                    decoration: const InputDecoration(
+                      labelText: 'Monto de Cheque',
+                      border: OutlineInputBorder(),
+                    ),
                     keyboardType: TextInputType.number,
                   ),
                 ],
@@ -556,9 +657,16 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
                   },
                   child: const Text('Cancelar'),
                 ),
-                TextButton(
+                ElevatedButton(
                   onPressed: () {
-                    // Guardar la información del cheque
+                    // Guardar la información del banco en el controlador
+                    setState(() {
+                      widget.controller.updateBancoDetails(
+                        selectedBanco,
+                        numeroChequeController.text,
+                        montoChequeController.text,
+                      );
+                    });
                     Navigator.of(context).pop();
                   },
                   child: const Text('Guardar'),
@@ -572,8 +680,35 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
   }
 
   void _showCuponesDialog() {
-    TextEditingController documentoController = TextEditingController();
-    TextEditingController totalController = TextEditingController();
+    TextEditingController documentoController =
+        TextEditingController(text: widget.controller.documentoCupones.value);
+    TextEditingController totalController =
+        TextEditingController(text: widget.controller.montoCupones.value);
+
+    // Controladores para cada denominación
+    TextEditingController cantidad10Controller = TextEditingController();
+    TextEditingController cantidad20Controller = TextEditingController();
+    TextEditingController cantidad50Controller = TextEditingController();
+    TextEditingController cantidad100Controller = TextEditingController();
+    TextEditingController cantidad200Controller = TextEditingController();
+    TextEditingController cantidad250Controller = TextEditingController();
+
+    // Función para calcular el total
+    void calcularTotal() {
+      double total = 0.0;
+
+      total += (10 * (double.tryParse(cantidad10Controller.text) ?? 0));
+      total += (20 * (double.tryParse(cantidad20Controller.text) ?? 0));
+      total += (50 * (double.tryParse(cantidad50Controller.text) ?? 0));
+      total += (100 * (double.tryParse(cantidad100Controller.text) ?? 0));
+      total += (200 * (double.tryParse(cantidad200Controller.text) ?? 0));
+      total += (250 * (double.tryParse(cantidad250Controller.text) ?? 0));
+
+      setState(() {
+        totalController.text =
+            total.toStringAsFixed(2); // Actualiza el total con el resultado
+      });
+    }
 
     showDialog(
       context: context,
@@ -587,29 +722,53 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
                 children: [
                   TextField(
                     controller: documentoController,
-                    decoration:
-                        const InputDecoration(labelText: 'No. de Documento'),
+                    decoration: InputDecoration(
+                      labelText: 'No. de Documento',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                   ),
                   const SizedBox(height: 10),
-                  const Text('Cantidad por denominación'),
+                  const Text(
+                    'Denominacion x Cantidad',
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.indigoAccent,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
                   Table(
                     columnWidths: const {
-                      0: FixedColumnWidth(100.0),
-                      1: FixedColumnWidth(100.0),
+                      0: FlexColumnWidth(
+                          1), // Columna más pequeña para la denominación
+                      1: FlexColumnWidth(
+                          3), // Columna más grande para los TextFields
                     },
                     children: [
-                      _buildTableRow('10', 'Cantidad'),
-                      _buildTableRow('20', 'Cantidad'),
-                      _buildTableRow('50', 'Cantidad'),
-                      _buildTableRow('100', 'Cantidad'),
-                      _buildTableRow('200', 'Cantidad'),
-                      _buildTableRow('250', 'Cantidad'),
+                      _buildTableRow('10', cantidad10Controller, calcularTotal),
+                      _buildTableRow('20', cantidad20Controller, calcularTotal),
+                      _buildTableRow('50', cantidad50Controller, calcularTotal),
+                      _buildTableRow(
+                          '100', cantidad100Controller, calcularTotal),
+                      _buildTableRow(
+                          '200', cantidad200Controller, calcularTotal),
+                      _buildTableRow(
+                          '250', cantidad250Controller, calcularTotal),
                     ],
                   ),
+                  const SizedBox(height: 10),
                   TextField(
                     controller: totalController,
-                    decoration: const InputDecoration(labelText: 'Total'),
+                    decoration: InputDecoration(
+                      labelText: 'Total',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8.0),
+                      ),
+                    ),
                     keyboardType: TextInputType.number,
+                    readOnly: true, // Hace que el campo sea solo de lectura
                   ),
                 ],
               ),
@@ -622,7 +781,13 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
                 ),
                 TextButton(
                   onPressed: () {
-                    // Guardar la información de cupones
+                    // Guardar la información de cupones en el controlador
+                    setState(() {
+                      widget.controller.updateCuponesDetails(
+                        documentoController.text,
+                        totalController.text,
+                      );
+                    });
                     Navigator.of(context).pop();
                   },
                   child: const Text('Guardar'),
@@ -635,29 +800,108 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
     );
   }
 
-  TableRow _buildTableRow(String leftValue, String rightHint) {
-    TextEditingController quantityController = TextEditingController();
+// Método modificado _buildTableRow
+  TableRow _buildTableRow(
+    String denominacion,
+    TextEditingController cantidadController,
+    Function calcularTotal,
+  ) {
     return TableRow(
       children: [
         Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            leftValue,
-            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              denominacion,
+              style:
+                  const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.left,
+            ),
           ),
         ),
         Padding(
-          padding: const EdgeInsets.all(8.0),
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
           child: TextField(
-            controller: quantityController,
+            controller: cantidadController,
             decoration: InputDecoration(
-              border: const OutlineInputBorder(),
-              hintText: rightHint,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.0),
+              ),
+              hintText: 'Cantidad',
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: 12.0,
+                horizontal: 10.0,
+              ), // Aumenta el tamaño interno del TextField
             ),
             keyboardType: TextInputType.number,
+            onChanged: (value) {
+              calcularTotal(); // Llama a la función para calcular el total
+            },
           ),
         ),
       ],
     );
   }
 }
+
+class NewShopsController extends GetxController {
+  var serieFactura = ''.obs;
+  var numeroFactura = ''.obs;
+  var formaDePago = ''.obs;
+  var fechaVencimiento = ''.obs;
+
+  var banco = ''.obs;
+  var numeroCheque = ''.obs;
+  var montoCheque = ''.obs;
+
+  var documentoCupones = ''.obs;
+  var montoCupones = '0.00'.obs;
+
+  void updateFacturaDetails(String serie, String numero) {
+    serieFactura.value = serie;
+    numeroFactura.value = numero;
+  }
+
+  void updateFormaDePago(String formaDePagoValue) {
+    formaDePago.value = formaDePagoValue;
+  }
+
+  void updateFechaVencimiento(String fecha) {
+    fechaVencimiento.value = fecha;
+  }
+
+  void updateBancoDetails(
+      String bancoValue, String numeroChequeValue, String montoChequeValue) {
+    banco.value = bancoValue;
+    numeroCheque.value = numeroChequeValue;
+    montoCheque.value = montoChequeValue;
+  }
+
+  void updateCuponesDetails(String documento, String monto) {
+    documentoCupones.value = documento;
+    montoCupones.value = monto;
+  }
+
+  // Verifica si todos los campos de Detalle Factura están llenos
+  bool get isFacturaComplete {
+    return serieFactura.value.isNotEmpty &&
+        numeroFactura.value.isNotEmpty &&
+        formaDePago.value.isNotEmpty &&
+        fechaVencimiento.value.isNotEmpty;
+  }
+
+  // Verifica si todos los campos de Detalle Pago están llenos
+  bool get isPagoComplete {
+    return banco.value.isNotEmpty &&
+        numeroCheque.value.isNotEmpty &&
+        montoCheque.value.isNotEmpty;
+  }
+
+  // Verifica si todos los campos de Detalle Cupones están llenos
+  bool get isCuponesComplete {
+    return documentoCupones.value.isNotEmpty && montoCupones.value.isNotEmpty;
+  }
+}
+
+//2096582

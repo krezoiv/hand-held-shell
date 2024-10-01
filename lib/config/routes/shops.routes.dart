@@ -22,7 +22,7 @@ class ShopsRoutes {
     ),
     GetPage(
       name: RoutesPaths.newShopScreen,
-      page: () => const NewShopsScreen(),
+      page: () => NewShopsScreen(),
     ),
     GetPage(
       name: RoutesPaths.modifyShopScreen,
