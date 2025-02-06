@@ -144,15 +144,33 @@ class PurchaseOrderController extends GetxController {
       isLoading.value = true;
       final PurchaseOrder? order = await _purchaseOrderService
           .getPurchaseOrderByOrderNumber(orderNumber);
+
+      print('Order found: $order'); // Agrega este log
+
       if (order != null) {
+        // Verifica si el campo 'applied' es true, lo que indica que la orden ya ha sido operada
+        if (order.applied == true) {
+          Get.snackbar('Orden Operada',
+              'La orden de compra con el número de orden: $orderNumber ya ha sido operada.');
+          return; // Termina el proceso aquí si ya ha sido operada
+        }
+
+        // Verifica si la orden ya tiene un purchaseId asociado, asegurando que purchaseId no sea null
+        if (order.purchaseId != null && order.purchaseId!.isNotEmpty) {
+          Get.snackbar('Orden con Factura',
+              'La orden de compra con el número de orden: $orderNumber ya tiene una factura asociada.');
+          return; // Termina el proceso aquí si ya tiene un purchaseId
+        }
+
+        // Si no tiene 'applied' o 'purchaseId', asigna la orden y muestra el éxito
         purchaseOrder.value = order;
-        Get.snackbar('Success', 'PurchaseOrder found successfully');
+        Get.snackbar('Success', 'Orden de compra encontrada correctamente');
       } else {
         Get.snackbar('Error',
             'No se encontró ninguna orden de compra con el número de orden: $orderNumber');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to get PurchaseOrder: $e');
+      Get.snackbar('Error', 'Error al obtener la orden de compra: $e');
     } finally {
       isLoading.value = false;
     }

@@ -1,33 +1,30 @@
 // To parse this JSON data, do
 //
-//     final createUpdatePurchaseOrderResponse = createUpdatePurchaseOrderResponseFromJson(jsonString);
+//     final findPurchaseOrderResponse = findPurchaseOrderResponseFromJson(jsonString);
 
 import 'dart:convert';
 
 import 'package:hand_held_shell/models/models/purchases/purchase.order.dart';
 
-CreateUpdatePurchaseOrderResponse createUpdatePurchaseOrderResponseFromJson(
-        String str) =>
-    CreateUpdatePurchaseOrderResponse.fromJson(json.decode(str));
+FindPurchaseOrderResponse findPurchaseOrderResponseFromJson(String str) =>
+    FindPurchaseOrderResponse.fromJson(json.decode(str));
 
-String createUpdatePurchaseOrderResponseToJson(
-        CreateUpdatePurchaseOrderResponse data) =>
+String findPurchaseOrderResponseToJson(FindPurchaseOrderResponse data) =>
     json.encode(data.toJson());
 
-class CreateUpdatePurchaseOrderResponse {
+class FindPurchaseOrderResponse {
   bool ok;
   String message;
   PurchaseOrder purchaseOrder;
 
-  CreateUpdatePurchaseOrderResponse({
+  FindPurchaseOrderResponse({
     required this.ok,
     required this.message,
     required this.purchaseOrder,
   });
 
-  factory CreateUpdatePurchaseOrderResponse.fromJson(
-          Map<String, dynamic> json) =>
-      CreateUpdatePurchaseOrderResponse(
+  factory FindPurchaseOrderResponse.fromJson(Map<String, dynamic> json) =>
+      FindPurchaseOrderResponse(
         ok: json["ok"],
         message: json["message"],
         purchaseOrder: PurchaseOrder.fromJson(json["purchaseOrder"]),

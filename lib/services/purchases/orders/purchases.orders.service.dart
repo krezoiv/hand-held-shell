@@ -175,6 +175,9 @@ class PurchaseOrderService {
         },
       );
 
+      print('Response status code: ${response.statusCode}'); // Agrega este log
+      print('Response body: ${response.body}'); // Agrega este log
+
       if (response.statusCode == 200) {
         final responseData = json.decode(response.body);
         if (responseData['ok'] == true) {
@@ -182,7 +185,18 @@ class PurchaseOrderService {
         } else {
           throw Exception(responseData['message']);
         }
-      } else if (response.statusCode == 404) {
+      }
+      // Manejo del caso cuando la orden ya ha sido operada
+      else if (response.statusCode == 400) {
+        final responseData = json.decode(response.body);
+        if (responseData['message'] != null) {
+          throw Exception(responseData['message']);
+        } else {
+          throw Exception('La orden de compra ya ha sido operada.');
+        }
+      }
+      // Manejo del caso cuando no se encuentra la orden
+      else if (response.statusCode == 404) {
         throw Exception(
             'No se encontró ninguna orden de compra con el número de orden: $orderNumber');
       } else {

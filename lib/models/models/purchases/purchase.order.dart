@@ -13,6 +13,7 @@ class PurchaseOrder {
   String userName;
   String vehicleId;
   String purchaseOrderId;
+  String purchaseId;
 
   PurchaseOrder({
     required this.applied,
@@ -29,6 +30,7 @@ class PurchaseOrder {
     required this.userName,
     required this.vehicleId,
     required this.purchaseOrderId,
+    required this.purchaseId,
   });
 
   factory PurchaseOrder.fromJson(Map<String, dynamic> json) => PurchaseOrder(
@@ -46,6 +48,7 @@ class PurchaseOrder {
         userName: json["userName"],
         vehicleId: json["vehicleId"],
         purchaseOrderId: json["purchaseOrderId"],
+        purchaseId: json["purchaseId"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -63,5 +66,6 @@ class PurchaseOrder {
         "userName": userName,
         "vehicleId": vehicleId,
         "purchaseOrderId": purchaseOrderId,
+        "purchaseId": purchaseId,
       };
 }

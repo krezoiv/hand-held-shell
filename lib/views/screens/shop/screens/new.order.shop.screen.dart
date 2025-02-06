@@ -433,7 +433,7 @@ class _NewOrderShopsScreenState extends State<NewOrderShopsScreen> {
             totalIDPPurchaseOrder: double.tryParse(totalIDPValue) ?? 0.0,
             storeId: selectedStoreId,
             vehicleId: selectedVehicleId,
-            applied: true,
+            applied: false,
             turn: shiftTime,
             totalGallonRegular: int.tryParse(regularValue) ?? 0,
             totalGallonSuper: int.tryParse(superValue) ?? 0,

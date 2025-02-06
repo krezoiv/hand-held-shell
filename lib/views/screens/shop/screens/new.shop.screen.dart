@@ -74,24 +74,45 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
                           const SizedBox(width: 10.0),
                           ElevatedButton(
                             onPressed: () async {
-                              String orderNumber = orderNumberController.text;
+                              String orderNumber =
+                                  orderNumberController.text.trim();
                               if (orderNumber.isNotEmpty) {
                                 await _purchaseOrderController
                                     .getPurchaseOrderByOrderNumber(orderNumber);
 
-                                if (_purchaseOrderController
-                                        .purchaseOrder.value !=
-                                    null) {
-                                  setState(() {
-                                    isDeleteButtonEnabled = true;
-                                    isActionButtonEnabled = true;
-                                  });
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                          'Orden encontrada: ${_purchaseOrderController.purchaseOrder.value!.orderNumber}'),
-                                    ),
-                                  );
+                                final order = _purchaseOrderController
+                                    .purchaseOrder.value;
+                                print(
+                                    'Order after search: $order'); // Verifica el valor de la orden
+
+                                if (order != null) {
+                                  if (order.applied == true) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'La orden de compra con el número $orderNumber ya ha sido operada.'),
+                                      ),
+                                    );
+                                  } else if (order.purchaseOrderId != null &&
+                                      order.purchaseOrderId!.isNotEmpty) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'La orden de compra con el número $orderNumber ya tiene una factura asociada.'),
+                                      ),
+                                    );
+                                  } else {
+                                    setState(() {
+                                      isDeleteButtonEnabled = true;
+                                      isActionButtonEnabled = true;
+                                    });
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(
+                                            'Orden encontrada: ${order.orderNumber}'),
+                                      ),
+                                    );
+                                  }
                                 } else {
                                   setState(() {
                                     isDeleteButtonEnabled = false;
@@ -123,7 +144,7 @@ class _NewShopsScreenState extends State<NewShopsScreen> {
                               'Buscar',
                               style: TextStyle(fontSize: 16.0),
                             ),
-                          ),
+                          )
                         ],
                       ),
                     ],
